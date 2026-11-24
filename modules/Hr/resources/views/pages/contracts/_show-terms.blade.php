@@ -21,7 +21,7 @@
         <x-hr::employees.fact :label="__('hr_contracts.fields.schedule_mode')" :value="$fixedSchedule ? __('hr_contracts.schedule.fixed') : __('hr_contracts.schedule.flexible')" />
         <x-hr::employees.fact :label="__('hr_contracts.fields.weekly_hours')" :value="$contract->weekly_hours" />
         @if ($fixedSchedule)
-            <x-hr::employees.fact :label="__('hr_contracts.schedule.days')" :value="$contract->work_day_from === null ? null : $day($contract->work_day_from).' – '.$day($contract->work_day_to)" />
+            <x-hr::employees.fact :label="__('hr_contracts.schedule.days')" :value="$contract->workWeekdays() !== null ? collect($contract->workWeekdays())->map($day)->implode(', ') : ($contract->work_day_from === null ? null : $day($contract->work_day_from).' – '.$day($contract->work_day_to))" />
             <x-hr::employees.fact :label="__('hr_contracts.schedule.hours')" ltr>
                 {{ $time($contract->work_hours_from) }} – {{ $time($contract->work_hours_to) }}
                 @if ($contract->work_hours_2_from)

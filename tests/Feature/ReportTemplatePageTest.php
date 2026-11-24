@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Modules\Core\Models\User;
+use Modules\Tracking\Actions\ReportTemplates\CreateReportTemplateForProposal;
 use Modules\Tracking\Enums\AssignmentStatus;
 use Modules\Tracking\Enums\CollectionFrequency;
 use Modules\Tracking\Enums\DenominatorBasis;
@@ -31,6 +32,7 @@ use Modules\Tracking\Models\ReportTemplateLine;
 use Modules\Tracking\Models\ReportTemplateQuestion;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Support\Reporting\ReportPlace;
+use Modules\Tracking\Support\ReportTemplatePrefiller;
 
 /*
 | The "Report template" tab on projects/show (contracts.md §12.4, T33 slice 3):
@@ -413,6 +415,139 @@ test('the tab finds a template at the place of the project row and names its pro
 });
 
 /**
+ * An activity of the proposal with its calendar rows, the proposal carried by the template.
+ *
+ * @param  array<string, list<int>|null>  $months  first-of-month date => weeks
+ */
+function rtpCalendar(ReportTemplate $template, Proposal $proposal, string $statement, array $months, ?int $projectId = null): Result
+{
+    return Activity::withoutRecording(function () use ($template, $proposal, $statement, $months, $projectId): Result {
+        if (! $template->proposals()->whereKey($proposal->id)->exists()) {
+            $template->proposals()->attach($proposal->id, ['joined_at' => now()]);
+        }
+
+        $output = Result::factory()->type(ResultType::Output)->create(['proposal_id' => $proposal->id]);
+        $activity = Result::factory()->activity($output)->create(['statement' => $statement]);
+
+        foreach ($months as $month => $weeks) {
+            ActivitySchedule::query()->create(['result_id' => $activity->id, 'project_id' => $projectId, 'month' => $month, 'weeks' => $weeks]);
+        }
+
+        return $activity;
+    });
+}
+
+test('the activity calendar panel shows the scheduled months with an accessible mark and the weeks', function () {
+    ['project' => $project, 'template' => $template] = rtpProject();
+    // One proposal only: drop the one the factory carries a legacy template with (Y-03).
+    $template->proposals()->detach();
+    $activity = rtpCalendar($template, rtpProposal($project), 'Run parenting sessions', ['2026-11-01' => [1, 2], '2026-12-01' => null]);
+
+    $page = rtpPage(mealManager(), $project)
+        ->assertSeeHtml('data-activity-calendar')
+        ->assertSee(__('report_templates.calendar.title'))
+        ->assertSee('Run parenting sessions')
+        ->assertSeeHtml('data-calendar-cell="'.$activity->id.'-2026-11"')
+        ->assertSeeHtml('data-calendar-cell="'.$activity->id.'-2026-12"')
+        ->assertDontSeeHtml('data-calendar-cell="'.$activity->id.'-2027-01"')
+        ->assertSee(__('report_templates.calendar.scheduled_weeks', ['weeks' => '1–2']))
+        ->assertSee(__('report_templates.calendar.scheduled'))
+        ->assertDontSeeHtml('data-calendar-group');
+
+    expect($page->html())->toContain('scope="col"')->toContain('scope="row"');
+});
+
+test('the activity calendar groups the activities by proposal when the template has more than one', function () {
+    ['project' => $project, 'template' => $template] = rtpProject();
+    rtpCalendar($template, rtpProposal($project, 'Alpha'), 'Alpha activity', ['2026-11-01' => null]);
+    rtpCalendar($template, rtpProposal($project, 'Beta'), 'Beta activity', ['2026-12-01' => null]);
+
+    rtpPage(mealManager(), $project)
+        ->assertSeeHtml('data-calendar-group')
+        ->assertSeeInOrder(['Alpha activity', 'Beta activity']);
+});
+
+test('the activity calendar says where the calendar is set when nothing is scheduled', function () {
+    ['project' => $project, 'template' => $template] = rtpProject();
+    $template->proposals()->attach(rtpProposal($project)->id, ['joined_at' => now()]);
+
+    rtpPage(mealManager(), $project)
+        ->assertSeeHtml('data-activity-calendar')
+        ->assertSee(__('report_templates.calendar.empty'));
+});
+
+test('the activity calendar marks an activity adjusted by a center override and follows it', function () {
+    ['project' => $project, 'template' => $template] = rtpProject();
+    $activity = rtpCalendar($template, rtpProposal($project), 'Adjusted activity', ['2026-11-01' => null]);
+    Activity::withoutRecording(fn () => ActivitySchedule::query()->create(['result_id' => $activity->id, 'project_id' => $project->id, 'month' => '2027-01-01', 'weeks' => [3]]));
+
+    rtpPage(mealManager(), $project)
+        ->assertSee(__('report_templates.calendar.adjusted_center'))
+        ->assertSeeHtml('data-calendar-cell="'.$activity->id.'-2027-01"')
+        ->assertDontSeeHtml('data-calendar-cell="'.$activity->id.'-2026-11"');
+});
+
+test('the activity calendar links to the proposal calendar only for someone who may edit it', function () {
+    ['project' => $project, 'template' => $template] = rtpProject();
+    rtpCalendar($template, rtpProposal($project), 'Linked activity', ['2026-11-01' => null]);
+
+    $editor = mealManager();
+    $editor->givePermissionTo('proposals.view');
+    $owner = userWithRole('Team Member', $project->user_id);
+
+    rtpPage($editor, $project)->assertSeeHtml('data-calendar-edit-link');
+    rtpPage($owner, $project)->assertDontSeeHtml('data-calendar-edit-link')->assertSeeHtml('data-activity-calendar');
+});
+
+test('the activity calendar panel has no write action', function () {
+    ['project' => $project, 'template' => $template] = rtpProject();
+    rtpCalendar($template, rtpProposal($project), 'Read only activity', ['2026-11-01' => null]);
+
+    $html = rtpPage(mealManager(), $project)->html();
+    preg_match('/<section[^>]*data-activity-calendar.*?<\/section>/s', $html, $section);
+
+    expect($section)->not->toBeEmpty()
+        ->and($section[0])->not->toContain('wire:click')
+        ->and($section[0])->not->toContain('wire:model');
+});
+
+test('the activity calendar holds a flat query count whatever the number of activities', function () {
+    ['project' => $project, 'template' => $template] = rtpProject();
+    $proposal = rtpProposal($project);
+    $manager = mealManager();
+    rtpCalendar($template, $proposal, 'First', ['2026-11-01' => null]);
+
+    $countQueries = function () use ($manager, $project): int {
+        $page = rtpPage($manager, $project);
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $page->call('$refresh');
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        return $count;
+    };
+
+    $small = $countQueries();
+
+    foreach (range(1, 6) as $index) {
+        rtpCalendar($template, $proposal, 'More '.$index, ['2026-11-01' => [1], '2026-12-01' => null]);
+    }
+
+    expect($countQueries())->toBe($small);
+});
+
+test('the activity calendar renders in Arabic', function () {
+    app()->setLocale('ar');
+    ['project' => $project, 'template' => $template] = rtpProject();
+    rtpCalendar($template, rtpProposal($project), 'نشاط الدعم', ['2026-11-01' => [2]]);
+
+    rtpPage(mealManager(), $project)
+        ->assertSee(__('report_templates.calendar.title'))
+        ->assertSee('نشاط الدعم');
+});
+
+/**
  * A question on the template, in the order given.
  *
  * @param  array<string, mixed>  $attributes
@@ -630,6 +765,8 @@ test('a question of another template is not found from this tab', function () us
 
 test('a template covering two or more proposals says so once above the questions', function () {
     ['project' => $project, 'template' => $template] = rtpProject();
+    // The factory carries a legacy template with a proposal of its own (Y-03); this test names its proposals.
+    $template->proposals()->detach();
     rtpQuestion($template, 'What went well?');
     $first = rtpProposal($project, 'Winter WASH');
     $template->proposals()->attach($first->id, ['joined_at' => now()]);
@@ -644,133 +781,35 @@ test('a template covering two or more proposals says so once above the questions
         ->assertSee(__('report_templates.tab.questions_shared', ['proposals' => 'Spring WASH'.__('report_templates.tab.list_separator').'Winter WASH']));
 });
 
-/**
- * An activity of the proposal with its calendar rows, the proposal carried by the template.
- *
- * @param  array<string, list<int>|null>  $months  first-of-month date => weeks
- */
-function rtpCalendar(ReportTemplate $template, Proposal $proposal, string $statement, array $months, ?int $projectId = null): Result
-{
-    return Activity::withoutRecording(function () use ($template, $proposal, $statement, $months, $projectId): Result {
-        if (! $template->proposals()->whereKey($proposal->id)->exists()) {
-            $template->proposals()->attach($proposal->id, ['joined_at' => now()]);
-        }
-
-        $output = Result::factory()->type(ResultType::Output)->create(['proposal_id' => $proposal->id]);
-        $activity = Result::factory()->activity($output)->create(['statement' => $statement]);
-
-        foreach ($months as $month => $weeks) {
-            ActivitySchedule::query()->create(['result_id' => $activity->id, 'project_id' => $projectId, 'month' => $month, 'weeks' => $weeks]);
-        }
-
-        return $activity;
-    });
-}
-
-test('the activity calendar panel shows the scheduled months with an accessible mark and the weeks', function () {
-    ['project' => $project, 'template' => $template] = rtpProject();
-    $activity = rtpCalendar($template, rtpProposal($project), 'Run parenting sessions', ['2026-11-01' => [1, 2], '2026-12-01' => null]);
-
-    $page = rtpPage(mealManager(), $project)
-        ->assertSeeHtml('data-activity-calendar')
-        ->assertSee(__('report_templates.calendar.title'))
-        ->assertSee('Run parenting sessions')
-        ->assertSeeHtml('data-calendar-cell="'.$activity->id.'-2026-11"')
-        ->assertSeeHtml('data-calendar-cell="'.$activity->id.'-2026-12"')
-        ->assertDontSeeHtml('data-calendar-cell="'.$activity->id.'-2027-01"')
-        ->assertSee(__('report_templates.calendar.scheduled_weeks', ['weeks' => '1–2']))
-        ->assertSee(__('report_templates.calendar.scheduled'))
-        ->assertDontSeeHtml('data-calendar-group');
-
-    expect($page->html())->toContain('scope="col"')->toContain('scope="row"');
-});
-
-test('the activity calendar groups the activities by proposal when the template has more than one', function () {
-    ['project' => $project, 'template' => $template] = rtpProject();
-    rtpCalendar($template, rtpProposal($project, 'Alpha'), 'Alpha activity', ['2026-11-01' => null]);
-    rtpCalendar($template, rtpProposal($project, 'Beta'), 'Beta activity', ['2026-12-01' => null]);
-
-    rtpPage(mealManager(), $project)
-        ->assertSeeHtml('data-calendar-group')
-        ->assertSeeInOrder(['Alpha activity', 'Beta activity']);
-});
-
-test('the activity calendar says where the calendar is set when nothing is scheduled', function () {
-    ['project' => $project, 'template' => $template] = rtpProject();
-    $template->proposals()->attach(rtpProposal($project)->id, ['joined_at' => now()]);
-
-    rtpPage(mealManager(), $project)
-        ->assertSeeHtml('data-activity-calendar')
-        ->assertSee(__('report_templates.calendar.empty'));
-});
-
-test('the activity calendar marks an activity adjusted by a center override and follows it', function () {
-    ['project' => $project, 'template' => $template] = rtpProject();
-    $activity = rtpCalendar($template, rtpProposal($project), 'Adjusted activity', ['2026-11-01' => null]);
-    Activity::withoutRecording(fn () => ActivitySchedule::query()->create(['result_id' => $activity->id, 'project_id' => $project->id, 'month' => '2027-01-01', 'weeks' => [3]]));
-
-    rtpPage(mealManager(), $project)
-        ->assertSee(__('report_templates.calendar.adjusted_center'))
-        ->assertSeeHtml('data-calendar-cell="'.$activity->id.'-2027-01"')
-        ->assertDontSeeHtml('data-calendar-cell="'.$activity->id.'-2026-11"');
-});
-
-test('the activity calendar links to the proposal calendar only for someone who may edit it', function () {
-    ['project' => $project, 'template' => $template] = rtpProject();
-    rtpCalendar($template, rtpProposal($project), 'Linked activity', ['2026-11-01' => null]);
-
-    $editor = mealManager();
-    $editor->givePermissionTo('proposals.view');
-    $owner = userWithRole('Team Member', $project->user_id);
-
-    rtpPage($editor, $project)->assertSeeHtml('data-calendar-edit-link');
-    rtpPage($owner, $project)->assertDontSeeHtml('data-calendar-edit-link')->assertSeeHtml('data-activity-calendar');
-});
-
-test('the activity calendar panel has no write action', function () {
-    ['project' => $project, 'template' => $template] = rtpProject();
-    rtpCalendar($template, rtpProposal($project), 'Read only activity', ['2026-11-01' => null]);
-
-    $html = rtpPage(mealManager(), $project)->html();
-    preg_match('/<section[^>]*data-activity-calendar.*?<\/section>/s', $html, $section);
-
-    expect($section)->not->toBeEmpty()
-        ->and($section[0])->not->toContain('wire:click')
-        ->and($section[0])->not->toContain('wire:model');
-});
-
-test('the activity calendar holds a flat query count whatever the number of activities', function () {
-    ['project' => $project, 'template' => $template] = rtpProject();
-    $proposal = rtpProposal($project);
+test('the template tab opens the selected template and rejects templates from another project', function () {
+    $fixture = placementFixture();
     $manager = mealManager();
-    rtpCalendar($template, $proposal, 'First', ['2026-11-01' => null]);
+    $this->actingAs($manager);
+    $prefiller = app(ReportTemplatePrefiller::class);
+    $prefiller->prefillForProposal($fixture['proposals'][0]);
+    $prefiller->prefillForProposal($fixture['proposals'][1]);
+    $first = ReportTemplate::query()->sole();
+    $second = app(CreateReportTemplateForProposal::class)->handle($fixture['proposals'][1], $first->place());
+    $foreign = ReportTemplate::factory()->create();
 
-    $countQueries = function () use ($manager, $project): int {
-        $page = rtpPage($manager, $project);
-        DB::flushQueryLog();
-        DB::enableQueryLog();
-        $page->call('$refresh');
-        $count = count(DB::getQueryLog());
-        DB::disableQueryLog();
+    $page = rtpPage($manager, $fixture['project'])->assertSeeHtml('data-test="template-selector"')
+        ->set('selectedReportTemplate', (string) $second->id)
+        ->assertSeeHtml('data-template-line="'.$second->lines()->sole()->id.'"')
+        ->assertDontSeeHtml('data-template-line="'.$first->lines()->sole()->id.'"');
 
-        return $count;
-    };
+    expect($page->instance()->reportTemplate->id)->toBe($second->id);
+    $page->call('selectAllPendingTemplateLines')
+        ->assertSet('selectedTemplateLineIds', [$second->lines()->sole()->id])
+        ->call('askConfirmReportTemplate')
+        ->assertSet('showTemplateConfirmModal', true)
+        ->call('confirmReportTemplate')
+        ->assertHasNoErrors();
 
-    $small = $countQueries();
+    expect($second->fresh()->status)->toBe(ReportTemplateStatus::Confirmed)
+        ->and($second->lines()->sole()->status)->toBe(ReportTemplateLineStatus::Confirmed)
+        ->and($first->fresh()->status)->toBe(ReportTemplateStatus::Pending)
+        ->and($first->lines()->sole()->status)->toBe(ReportTemplateLineStatus::Pending);
 
-    foreach (range(1, 6) as $index) {
-        rtpCalendar($template, $proposal, 'More '.$index, ['2026-11-01' => [1], '2026-12-01' => null]);
-    }
-
-    expect($countQueries())->toBe($small);
-});
-
-test('the activity calendar renders in Arabic', function () {
-    app()->setLocale('ar');
-    ['project' => $project, 'template' => $template] = rtpProject();
-    rtpCalendar($template, rtpProposal($project), 'نشاط الدعم', ['2026-11-01' => [2]]);
-
-    rtpPage(mealManager(), $project)
-        ->assertSee(__('report_templates.calendar.title'))
-        ->assertSee('نشاط الدعم');
+    $page->set('selectedReportTemplate', (string) $foreign->id);
+    expect($page->instance()->reportTemplate->id)->toBe($first->id);
 });

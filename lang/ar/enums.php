@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'template_placement_status' => ['pending' => 'بانتظار الاختيار', 'joined' => 'منضم', 'created' => 'تم الإنشاء'],
     'ar_status' => [
         'pending' => 'قيد الانتظار',
         'received' => 'مستلم',
@@ -137,13 +138,6 @@ return [
         'ff' => 'من النهاية إلى النهاية',
         'sf' => 'من البداية إلى النهاية',
     ],
-    'milestone_status' => [
-        'planned' => 'مخطَّطة',
-        'ongoing' => 'قيد التنفيذ',
-        'reached' => 'تحققت',
-        'postponed' => 'مؤجَّلة',
-        'cancelled' => 'ملغاة',
-    ],
     'period' => [
         'monthly' => 'شهري',
         'quarterly' => 'ربع سنوي',
@@ -222,6 +216,11 @@ return [
         'reviewed' => 'تمت مراجعته',
         'approved' => 'معتمد',
     ],
+    'assumption_status' => [
+        'holds' => 'قائم',
+        'at_risk' => 'مهدد',
+        'broken' => 'منهار',
+    ],
     'activity_kind' => [
         'continuous' => 'مستمر',
         'event' => 'حدث',
@@ -265,6 +264,7 @@ return [
         'media_deliverable' => 'تسليم إعلامي',
         'financial' => 'مالية',
         'report' => 'تقرير',
+        'logframe' => 'الإطار المنطقي',
     ],
     'deliverable_kind' => [
         'video' => 'فيديو',

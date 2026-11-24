@@ -80,6 +80,35 @@ trait ManagesPositionForm
         Flux::toast(variant: 'success', text: __('hr_positions.toasts.saved'));
     }
 
+    /**
+     * Whether the position being edited is critical; null when the viewer may
+     * not set the tag (HR and the administrators only) or none is open.
+     */
+    #[Computed]
+    public function criticalMark(): ?bool
+    {
+        if ($this->editingPositionId === null) {
+            return null;
+        }
+
+        $position = Position::query()->select(['id', 'city_id', 'center_id', 'is_critical'])->find($this->editingPositionId);
+
+        return $position !== null && Gate::allows('markCritical', $position) ? $position->is_critical : null;
+    }
+
+    /** Set or clear the critical tag (PositionPolicy::markCritical). */
+    public function toggleCritical(): void
+    {
+        $position = Position::query()->findOrFail((int) $this->editingPositionId);
+
+        Gate::authorize('markCritical', $position);
+
+        $position->update(['is_critical' => ! $position->is_critical]);
+
+        unset($this->criticalMark, $this->positions);
+        Flux::toast(variant: 'success', text: __($position->is_critical ? 'hr_positions.critical.marked' : 'hr_positions.critical.unmarked'));
+    }
+
     public function updatedFormCityId(): void
     {
         $this->form['center_id'] = '';

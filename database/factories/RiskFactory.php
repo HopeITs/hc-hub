@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Risk;
 
 /**
@@ -25,6 +26,19 @@ class RiskFactory extends Factory
             'project_id' => Project::factory(),
             'impact' => fake()->sentence(),
         ];
+    }
+
+    /**
+     * Put the risk on a location row (Y-13, D-93): the row owns it, and the
+     * risk carries the row's proposal and — until Y-18 — the row's project.
+     */
+    public function onRow(ProposalLocation $row): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'proposal_location_id' => $row->id,
+            'proposal_id' => $row->proposal_id,
+            'project_id' => $row->project_id,
+        ]);
     }
 
     /**

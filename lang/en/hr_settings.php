@@ -28,6 +28,7 @@ return [
         'name_en' => 'Name in English',
         'title_ar' => 'Title in Arabic',
         'title_en' => 'Title in English',
+        'category' => 'How it counts in the leaving report',
         'base_days' => 'Base days',
         'allowed_gender' => 'Allowed gender',
         'marital_status' => 'Marital status',
@@ -49,6 +50,12 @@ return [
         'allowed_gender' => [0 => 'Anyone', 1 => 'Men', 2 => 'Women'],
         'marital_status' => [0 => 'Any', 1 => 'Single', 2 => 'Married'],
         'order' => [1 => 'Probation contract', 2 => 'Annual contract', 3 => 'Resignation or end of service'],
+        'category' => [
+            'voluntary' => 'Voluntary (by their own choice)',
+            'involuntary' => 'Involuntary (decided by the organisation)',
+            'natural_end' => 'Contract ran its course',
+            'other' => 'Other',
+        ],
     ],
 
     'city_not_authorized' => 'You cannot change this city with your role',

@@ -6,7 +6,6 @@ namespace App\Support\Desk;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalStatus;
@@ -21,8 +20,7 @@ use Modules\Tracking\Models\TransfersTracking;
  * The stage comes from the project's leading proposal and its own status
  * (the artifact's stageOf()); 7 means closed or archived. Health is derived
  * (user decision, .ai/rules/desk.md): off track when something is late (a
- * past month's monthly report still open, an overdue milestone, a late
- * transfer, or an active project already past its end date, the projects
+ * past month's monthly report still open, a late transfer, or an active project already past its end date, the projects
  * register's "Overdue"), needs a look when something falls due within seven days or a
  * report waits for MEAL, otherwise on track. Closed projects are on track.
  */
@@ -97,7 +95,7 @@ final class ProjectStage
 
     /**
      * What is late and what falls due soon. Reads the project's status and
-     * end_date, its loaded milestones (open ones), monthlyReports and, when
+     * end_date, its loaded monthlyReports and, when
      * loaded, proposals.donorProposals.transfers.
      *
      * @return array{late: int, soon: int}
@@ -106,17 +104,13 @@ final class ProjectStage
     {
         $today = CarbonImmutable::today();
         $monthStart = $today->startOfMonth();
-        $weekEnd = $today->addDays(7);
 
-        $open = $project->milestones->filter(fn ($milestone): bool => in_array($milestone->status, [MilestoneStatus::Planned, MilestoneStatus::Ongoing], true) && $milestone->planned_end_date !== null);
         $lateReports = $project->monthlyReports->filter(fn ($report): bool => $report->status === MonthlyReportStatus::Draft && $report->period->lt($monthStart))->count();
         $waitingReports = $project->monthlyReports->where('status', MonthlyReportStatus::Submitted)->count();
-        $overdueMilestones = $open->filter(fn ($milestone): bool => $milestone->planned_end_date->lt($today))->count();
-        $soonMilestones = $open->filter(fn ($milestone): bool => $milestone->planned_end_date->betweenIncluded($today, $weekEnd))->count();
         $lateTransfers = self::transfers($project)->filter(fn (TransfersTracking $transfer): bool => $transfer->state() === 'late')->count();
         $pastEnd = $project->status === ProjectStatus::Active && $project->end_date !== null && $project->end_date->lt($today) ? 1 : 0;
 
-        return ['late' => $lateReports + $overdueMilestones + $lateTransfers + $pastEnd, 'soon' => $soonMilestones + $waitingReports];
+        return ['late' => $lateReports + $lateTransfers + $pastEnd, 'soon' => $waitingReports];
     }
 
     /**

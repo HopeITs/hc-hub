@@ -8,8 +8,8 @@ use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\ViewException;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\Currency;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\RagStatus;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Enums\TaskStatus;
@@ -34,9 +34,9 @@ test('the enum badge labels a case and tones it as active', function () {
 });
 
 test('the enum badge tones a stalled state as warn, not brand red', function () {
-    $html = Blade::render('<x-ui.enum-badge :case="$case" />', ['case' => MilestoneStatus::Postponed]);
+    $html = Blade::render('<x-ui.enum-badge :case="$case" />', ['case' => ProposalStatus::OnHold]);
 
-    expect($html)->toContain('Postponed')
+    expect($html)->toContain(ProposalStatus::OnHold->label())
         ->and($html)->toContain('data-tone="warn"')
         ->and($html)->toContain('bg-status-warn-soft')
         ->and($html)->not->toContain('bg-primary');

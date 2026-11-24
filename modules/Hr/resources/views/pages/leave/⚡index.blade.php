@@ -153,14 +153,33 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.mine')] class extends Comp
             @if ($contract === null || $contract->leaveBalances->isEmpty())
                 <p class="text-sm {{ $muted }}">{{ __('hr_leave.ui.no_balances') }}</p>
             @else
-                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    @foreach ($contract->leaveBalances->sortBy('type_id') as $balance)
-                        <div class="rounded-xl border border-secondary-soft bg-white p-4 dark:border-line dark:bg-surface-1" wire:key="balance-{{ $balance->id }}" data-balance="{{ $balance->id }}">
-                            <p class="type-label {{ $muted }}">{{ $balance->leaveType?->name }}</p>
-                            <p class="mt-1 text-lg font-semibold">{{ \Modules\Hr\Support\Leave\LeaveFormat::hours($eligibility->remainingHours($balance), $perDay) }}</p>
-                            <p class="mt-0.5 text-xs {{ $muted }}">{{ __('hr_leave.ui.used_of', ['used' => \Modules\Hr\Support\Leave\LeaveFormat::hours((float) $balance->used, $perDay), 'total' => \Modules\Hr\Support\Leave\LeaveFormat::hours((float) $balance->deserved, $perDay)]) }}</p>
-                        </div>
-                    @endforeach
+                @php
+                    // Annual leave, and any other type already in use (taken or waiting), stay in view;
+                    // the types nobody has touched (sick, bereavement...) fold behind "Show the other balances".
+                    [$shownBalances, $otherBalances] = $contract->leaveBalances->sortBy('type_id')->partition(
+                        fn ($balance): bool => (int) $balance->type_id === \Modules\Hr\Enums\LeaveTypeCases::Annual
+                            || (float) $balance->used > 0
+                            || $eligibility->remainingHours($balance) < (float) $balance->deserved - 0.001
+                    );
+                @endphp
+                <div x-data="{ more: false }">
+                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        @foreach ($shownBalances as $balance)
+                            @include('hr::pages.leave._balance-card', ['balance' => $balance])
+                        @endforeach
+                        @foreach ($otherBalances as $balance)
+                            <div x-show="more" x-cloak wire:key="other-balance-{{ $balance->id }}" data-other-balance>
+                                @include('hr::pages.leave._balance-card', ['balance' => $balance])
+                            </div>
+                        @endforeach
+                    </div>
+
+                    @if ($otherBalances->isNotEmpty())
+                        <x-ui.button tone="ghost" size="sm" class="mt-3" type="button" x-on:click="more = ! more" x-bind:aria-expanded="more.toString()" data-test="toggle-other-balances">
+                            <span x-show="! more">{{ trans_choice('hr_leave.ui.show_other_balances', $otherBalances->count(), ['count' => $otherBalances->count()]) }}</span>
+                            <span x-show="more" x-cloak>{{ __('hr_leave.ui.hide_other_balances') }}</span>
+                        </x-ui.button>
+                    @endif
                 </div>
             @endif
         </section>

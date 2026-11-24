@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Hr\Models;
 
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\User;
@@ -24,6 +25,11 @@ use Modules\Core\Models\User;
  * @property int|null $orientation_completed_by
  * @property mixed|null $card_handed_over_at
  * @property int|null $card_handed_over_by
+ * @property CarbonImmutable|null $manager_orientation_scheduled_for
+ * @property int|null $manager_orientation_scheduled_by
+ * @property mixed|null $manager_orientation_completed_at
+ * @property int|null $manager_orientation_completed_by
+ * @property int|null $electronics_deliverer_id
  * @property mixed|null $completed_at
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
@@ -41,6 +47,8 @@ class OnboardingJourney extends Model
             'orientation_scheduled_for' => 'date',
             'orientation_completed_at' => 'datetime',
             'card_handed_over_at' => 'datetime',
+            'manager_orientation_scheduled_for' => 'date',
+            'manager_orientation_completed_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
     }
@@ -85,6 +93,50 @@ class OnboardingJourney extends Model
     public function cardHandedOverBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'card_handed_over_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function managerOrientationScheduledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_orientation_scheduled_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function managerOrientationCompletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_orientation_completed_by');
+    }
+
+    /**
+     * The IT person HR picked to hand the electronics over (only needed when the city has several).
+     *
+     * @return BelongsTo<Employee, $this>
+     */
+    public function electronicsDeliverer(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'electronics_deliverer_id');
+    }
+
+    /**
+     * The date a short-deadline step (account, electronics, card) is due:
+     * $days after the contract's start. Computed, never stored.
+     */
+    public function dueAfterStart(int $days): ?CarbonInterface
+    {
+        $start = $this->contract?->start_date ?? $this->started_at;
+
+        return $start?->copy()->startOfDay()->addDays($days);
+    }
+
+    public function managerOrientationIsLate(): bool
+    {
+        return $this->manager_orientation_completed_at === null
+            && $this->orientation_due_on !== null
+            && $this->orientation_due_on->lt(now(config('app.timezone'))->startOfDay());
     }
 
     public function orientationIsLate(): bool

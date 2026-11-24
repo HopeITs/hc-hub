@@ -1,4 +1,4 @@
-{{-- Step 3 of the plan: per activity, how it runs, what it counts, its batches and places. --}}
+{{-- Section 3 of the plan: per activity, how it runs, what it counts, its batches and places. --}}
 @php
     $items = $plan->items;
     $readyCount = $items->where('is_ready', true)->count();
@@ -11,12 +11,19 @@
     </div>
 
     @if ($plan->sent_back_reason)
-        <div class="ap-info is-bad" data-sent-back>↩︎ <b>{{ __('annual_plans.wf.sent_back_by', ['name' => $plan->sentBackBy?->name ?? __('annual_plans.wf.meal')]) }}</b> “<span dir="auto">{{ $plan->sent_back_reason }}</span>” {{ __('annual_plans.wf.fix_and_send') }}</div>
+        <div class="ap-info is-bad" data-sent-back>↩︎ <b>{{ __('annual_plans.wf.sent_back_by', ['name' => $plan->sentBackBy?->name ?? __('annual_plans.wf.meal')]) }}</b> “<span class="ap-lines" dir="auto">{{ $plan->sent_back_reason }}</span>” {{ __('annual_plans.wf.fix_and_send') }}</div>
     @endif
 
-    <div class="ap-pin" data-dates-calendar>
-        <h3>{{ __('annual_plans.wf.whole_plan') }}</h3>
-        @include('tracking::pages.annual-plans._plan-gantt')
+    {{-- The whole-plan calendar scrolls with the page: pinned (sticky) it stayed
+         over the activity being filled (AP-1 UAT). --}}
+    <div class="ap-cal" data-dates-calendar>
+        <div class="ap-row">
+            <h3 class="ap-sp">{{ __('annual_plans.wf.whole_plan') }}</h3>
+            <button type="button" class="dk-btn dk-sm" wire:click="$toggle('showPlanCalendar')" aria-expanded="{{ $showPlanCalendar ? 'true' : 'false' }}" data-test="toggle-plan-calendar">{{ $showPlanCalendar ? __('annual_plans.wf.hide_calendar') : __('annual_plans.wf.show_calendar') }}</button>
+        </div>
+        @if ($showPlanCalendar)
+            @include('tracking::pages.annual-plans._plan-gantt')
+        @endif
     </div>
 
     <div class="ap-row"><b data-ready-count>{{ __('annual_plans.wf.ready_count', ['ready' => $readyCount, 'total' => $items->count()]) }}</b></div>
@@ -33,9 +40,3 @@
         @endforeach
     </div>
 </section>
-
-<div class="ap-foot">
-    <button type="button" class="dk-btn" wire:click="goToStep(1)">‹ {{ __('annual_plans.wf.back') }}</button>
-    <span class="ap-sp"></span>
-    <button type="button" class="dk-btn dk-primary" wire:click="goToStep(3)" @disabled($readyCount < $items->count()) data-test="plan-next">{{ __('annual_plans.wf.next_send') }} ›</button>
-</div>

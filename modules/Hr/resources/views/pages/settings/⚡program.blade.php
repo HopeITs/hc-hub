@@ -154,6 +154,12 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.program')] class extend
             @endif
             <span>{{ __('hr_settings.programs.manager') }}: <bdi>{{ $program->manager?->name ?? __('common.not_assigned') }}</bdi></span>
         </x-slot:meta>
+        {{-- The mailing list that stands for this project, when there is one. --}}
+        @if ($groupList = \Modules\Hr\Models\MailList::emailFor(null, (int) $program->id, null))
+            <x-slot:actions>
+                <x-ui.button tone="action" icon="envelope" :href="$groupList->mailto()" data-test="email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
+            </x-slot:actions>
+        @endif
     </x-ui.detail-header>
 
     <p class="type-meta {{ $muted }}">{{ __('hr_settings.programs.read_only_note') }}</p>

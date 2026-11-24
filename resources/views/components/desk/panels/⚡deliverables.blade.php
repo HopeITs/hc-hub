@@ -5,7 +5,6 @@ use Modules\Tracking\Enums\TaskKind;
 use Modules\Tracking\Enums\TaskStatus;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Task;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
@@ -44,7 +43,7 @@ new class extends Component {
 
         return $this->visible(Task::query(), 'tasks')
             ->select(['id', 'slug', 'source_type', 'source_id', 'kind', 'delivery_state', 'title', 'status', 'due_date'])
-            ->with(['source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id,name', 'proposal:id,name']])])
+            ->with('source')
             ->whereNotNull('department_id')
             ->whereNull('parent_task_id')
             ->whereIn('kind', $kinds)

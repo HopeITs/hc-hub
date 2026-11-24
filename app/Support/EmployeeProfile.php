@@ -85,6 +85,26 @@ final class EmployeeProfile
     }
 
     /**
+     * The display names of the given employees, keyed by employee id. Only the
+     * name columns are read; an unknown id is left out.
+     *
+     * @param  list<int>  $employeeIds
+     * @return array<int, string>
+     */
+    public static function namesByIds(array $employeeIds): array
+    {
+        if ($employeeIds === []) {
+            return [];
+        }
+
+        return Employee::query()
+            ->whereKey($employeeIds)
+            ->get(Employee::NameColumns)
+            ->mapWithKeys(fn (Employee $employee): array => [(int) $employee->id => (string) $employee->name])
+            ->all();
+    }
+
+    /**
      * The HR direct manager: the holder of the employee's position's
      * direct-manager position, null when there is none or it is vacant.
      */

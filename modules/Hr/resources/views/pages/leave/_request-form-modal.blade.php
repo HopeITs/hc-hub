@@ -74,7 +74,7 @@
 
                 <x-ui.form-textarea wire:model="reason" :label="__('hr_leave.fields.reason')" required maxlength="2000" />
 
-                <x-ui.form-select wire:model="alternativeEmployee" :label="__('hr_leave.fields.alternative_employee')" :placeholder="__('hr_leave.ui.no_alternative')" searchable>
+                <x-ui.form-select wire:model="alternativeEmployee" :label="__('hr_leave.fields.alternative_employee')" :placeholder="__('hr_leave.ui.no_alternative')" :help="__('hr_leave.alternative.available_hint')" searchable wire:key="alternative-{{ md5(json_encode([$requestType, $startAt, $endAt, $leaveDate, $startHour, $endHour])) }}">
                     <option value="">{{ __('hr_leave.ui.no_alternative') }}</option>
                     @foreach ($this->alternativeOptions as $optionId => $optionName)
                         <option value="{{ $optionId }}">{{ $optionName }}</option>

@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Projects;
 
-use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Indicator;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -20,122 +19,86 @@ use Modules\Tracking\Models\Risk;
 use Modules\Tracking\Models\Task;
 
 /**
- * The delivery reads on projects/show: milestone progress and timeline, the
- * project's tasks, risks and indicator targets.
+ * The delivery reads on projects/show: the project's tasks, the next ones
+ * due, risks and indicator targets.
  *
  * Used by projects/show only. The page provides projectId and the #[Computed]
  * project().
  *
  * @property int $projectId
  * @property-read Project $project  #[Computed] project()
- * @property-read Collection<int, Milestone> $milestonesFlat  #[Computed] milestonesFlat()
+ * @property-read Collection<int, Task> $tasks  #[Computed] tasks()
  * @property-read Collection<int, PlanIndicator> $targets  #[Computed] targets()
  */
 trait ReadsProjectDelivery
 {
     /**
-     * Weighted milestone completion, the same formula used on the project
-     * directory and program detail pages: reached weight over every weight
-     * that still counts (cancelled milestones are excluded from both sides).
-     */
-    #[Computed]
-    public function milestoneProgressPercent(): ?float
-    {
-        $planned = (float) ($this->project->milestones_planned_weight ?? 0);
-
-        if ($planned <= 0) {
-            return null;
-        }
-
-        $reached = (float) ($this->project->milestones_reached_weight ?? 0);
-
-        return round(min(100, ($reached / $planned) * 100), 1);
-    }
-
-    /**
-     * Every milestone in the project, flattened and ordered by sequence, for
-     * the delivery timeline: the same reading as the program detail page's
-     * project timeline, one row per milestone instead of per project.
-     *
-     * @return Collection<int, Milestone>
-     */
-    #[Computed]
-    public function milestonesFlat(): Collection
-    {
-        return Milestone::query()
-            ->select(['id', 'project_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'weight_percentage', 'responsible_employee_id'])
-            ->where('project_id', $this->projectId)
-            ->with('responsibleUser:id,first_name_en,last_name_en,first_name_ar,last_name_ar')
-            ->orderBy('sequence')
-            ->orderBy('id')
-            ->get();
-    }
-
-    /**
-     * The shared time axis for the milestone timeline: the project's own
-     * schedule, widened to fit every milestone's planned and actual date plus
-     * today, so nothing renders off-window.
-     *
-     * @return array{start: CarbonImmutable, end: CarbonImmutable}
-     */
-    #[Computed]
-    public function milestoneWindow(): array
-    {
-        $dates = collect([$this->project->start_date, $this->project->end_date])->filter();
-
-        foreach ($this->milestonesFlat as $milestone) {
-            $dates->push($milestone->planned_start_date);
-            $dates->push($milestone->planned_end_date);
-            $dates->push($milestone->actual_start_date);
-            $dates->push($milestone->actual_end_date);
-        }
-
-        $dates = $dates->filter()->push(CarbonImmutable::today());
-
-        return ['start' => $dates->min(), 'end' => $dates->max()];
-    }
-
-    /**
-     * Tasks raised straight against this project or against one of its
-     * milestones — a task has no project column, so a milestone-sourced task
-     * is reached through the milestone ids belonging to this project.
+     * Tasks raised straight against this project.
      *
      * @return Collection<int, Task>
      */
     #[Computed]
     public function tasks(): Collection
     {
-        $milestoneIds = Milestone::query()->where('project_id', $this->projectId)->pluck('id');
-
         return Task::query()
             ->select(['id', 'source_type', 'source_id', 'title', 'status', 'priority', 'due_date', 'progress_percentage'])
             ->with(['taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar', 'source'])
-            ->where(fn (Builder $query) => $query
-                ->where(fn (Builder $query) => $query->where('source_type', 'project')->where('source_id', $this->projectId))
-                ->orWhere(fn (Builder $query) => $query->where('source_type', 'milestone')->whereIn('source_id', $milestoneIds)))
+            ->where('source_type', 'project')
+            ->where('source_id', $this->projectId)
             ->orderByRaw('due_date is null, due_date')
             ->orderBy('id')
             ->get();
     }
 
     /**
-     * The risks the project's manager should be aware of (W-09, D-61): those
+     * The next three open tasks with a due date, soonest first, for the
+     * Overview's Coming up card.
+     *
+     * @return \Illuminate\Support\Collection<int, Task>
+     */
+    #[Computed]
+    public function upcomingTasks(): \Illuminate\Support\Collection
+    {
+        return $this->tasks
+            ->toBase()
+            ->filter(fn (Task $task): bool => $task->due_date !== null && $task->status !== TaskStatus::Done)
+            ->sortBy(fn (Task $task): string => $task->due_date->toDateString())
+            ->take(3)
+            ->values();
+    }
+
+    /**
+     * The risks the place's manager should be aware of (W-09, D-61): those
      * picked onto the logframes of the proposals linked to this project, plus
-     * the register rows logged against the project before the library
-     * existed. Read-only; one query. Newest framework risks sit with their
-     * proposal, the earlier register rows in a group of their own.
+     * the place's own register. Read-only; one query. Framework risks sit with
+     * their proposal, the register rows in a group of their own.
+     *
+     * Since Y-13 (D-93) a register risk belongs to a location row and carries
+     * that row's proposal, so the two groups are told apart by the row (see
+     * `Risk::isOnLogframe()`): the register group is read through the rows
+     * carrying this project, not through `proposal_id`. A register risk the
+     * backfill could not map (D-80) is still shown by its project, so nothing
+     * drops out of the panel.
      *
      * @return Collection<int, Risk>
      */
     #[Computed]
     public function riskAwareness(): Collection
     {
+        $rowIds = DB::table('proposal_locations')->select('id')->where('project_id', $this->projectId);
+
         return Risk::query()
-            ->select(['id', 'name', 'name_en', 'impact', 'solution', 'happened', 'likelihood', 'severity', 'project_id', 'proposal_id'])
-            ->with('proposal:id,name')
+            ->select(['id', 'name', 'name_en', 'impact', 'solution', 'happened', 'likelihood', 'severity', 'project_id', 'proposal_location_id', 'proposal_id', 'result_id'])
+            ->with(['proposal:id,name', 'location:id,program_id,city_id', 'location.program:id'])
             ->where(fn (Builder $query) => $query
-                ->where('project_id', $this->projectId)
-                ->orWhereIn('proposal_id', DB::table('project_proposal')->select('proposal_id')->where('project_id', $this->projectId)))
+                ->where(fn (Builder $logframe) => $logframe
+                    ->whereNull('proposal_location_id')
+                    ->whereIn('proposal_id', DB::table('project_proposal')->select('proposal_id')->where('project_id', $this->projectId)))
+                ->orWhereIn('proposal_location_id', $rowIds)
+                ->orWhere(fn (Builder $unmapped) => $unmapped
+                    ->whereNull('proposal_location_id')
+                    ->whereNull('proposal_id')
+                    ->where('project_id', $this->projectId)))
             ->orderByDesc('happened')
             ->orderBy('id')
             ->get();

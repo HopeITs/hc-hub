@@ -3,17 +3,17 @@
 use App\Models\Activity;
 use App\Models\UserNotification;
 use App\Notifications\EventCatalog;
-use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Lang;
-use Modules\Tracking\Events\ProjectActivated;
+use Modules\Tracking\Events\ReportTemplateConfirmed;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\LibraryIndicator;
 use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
 
@@ -143,7 +143,15 @@ test('a grouped monthly report activation sends exactly one notification', funct
         'end_date' => '2027-10-31',
     ]));
 
-    ProjectActivated::dispatch($project->id, null, CarbonImmutable::parse('2026-11-01'), CarbonImmutable::parse('2027-10-31'), 'template_confirmation');
+    $template = Activity::withoutRecording(function () use ($project): ReportTemplate {
+        $template = ReportTemplate::factory()->confirmed()->create(['project_id' => $project->id]);
+        $proposal = Proposal::factory()->create(['actual_date_begin' => '2026-11-01', 'actual_date_end' => '2027-10-31']);
+        $template->proposals()->attach($proposal->id, ['joined_at' => now()]);
+
+        return $template;
+    });
+
+    ReportTemplateConfirmed::dispatch($template->id);
 
     expect(UserNotification::query()->forUser($owner)->get()
         ->filter(fn (UserNotification $row): bool => $row->data['key'] === 'notifications.events.monthly_reports.generated')

@@ -11,14 +11,13 @@ use Modules\Core\Models\User;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\Donor;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Spatie\Permission\Models\Permission;
 
 /*
 | Notes on every record page (4.14): the one Notes panel sits on the project,
-| proposal, program, donor, milestone and contract pages as it does on the
+| proposal, program, donor and contract pages as it does on the
 | employee page. NotePolicy decides the same way everywhere: whoever may view
 | the record adds notes and reads the shared ones, a private note stays its
 | author's, and someone who may not view the record gets no panel.
@@ -49,7 +48,6 @@ dataset('record contexts', [
     'a proposal' => ['proposal', 'proposals', fn (): Model => Proposal::factory()->create()],
     'a program' => ['program', 'programs', fn (): Model => Program::factory()->create()],
     'a donor' => ['donor', 'donors', fn (): Model => Donor::factory()->create()],
-    'a milestone' => ['milestone', 'milestones', fn (): Model => Milestone::factory()->create()],
     'a contract' => ['contract', 'contracts', fn (): Model => Contract::factory()->for(Employee::factory())->create(['is_active' => true])],
 ]);
 
@@ -129,7 +127,6 @@ test('the record page carries the Notes panel of its own record', function (stri
     'a proposal' => ['proposal', 'proposals.show', fn (): Model => Proposal::factory()->create()],
     'a program' => ['program', 'programs.show', fn (): Model => Program::factory()->create()],
     'a donor' => ['donor', 'donors.show', fn (): Model => Donor::factory()->create()],
-    'a milestone' => ['milestone', 'milestones.show', fn (): Model => Milestone::factory()->create()],
     'a contract' => ['contract', 'hr.contracts.show', fn (): Model => Contract::factory()->for(Employee::factory())->create(['is_active' => true])],
     'an employee' => ['employee', 'hr.employees.show', fn (): Model => Employee::factory()->create(['username' => 'lina.saleh'])],
 ]);

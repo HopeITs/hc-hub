@@ -6,7 +6,6 @@ use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\DonorProposal;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Report;
@@ -79,12 +78,26 @@ test('each record page carries its activity', function (string $route, Closure $
         ->get(route($route, Activity::withoutRecording($record)))
         ->assertSeeLivewire('activity.timeline');
 })->with([
-    'milestone' => ['milestones.show', fn () => Milestone::factory()->create()],
     'report' => ['reports.show', fn () => Report::factory()->create()],
-    'proposal' => ['proposals.show', fn () => Proposal::factory()->create()],
     'program' => ['programs.show', fn () => Program::factory()->create()],
     'funding agreement' => ['funding-agreements.show', fn () => DonorProposal::factory()->create()],
 ]);
+
+test('the proposal page keeps its activity log closed until it is asked for', function () {
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create());
+
+    $this->actingAs(userWithRole('Super Admin'))
+        // The toggle sits in the folded "History & approvals" section; ?ptab=status opens it.
+        ->get(route('proposals.show', ['proposal' => $proposal, 'ptab' => 'status']))
+        ->assertSee('data-test="toggle-activity-log"', false)
+        ->assertDontSeeLivewire('activity.timeline');
+
+    Livewire::actingAs(userWithRole('Super Admin'))
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->call('openSection', 'history')
+        ->set('showActivity', true)
+        ->assertSeeLivewire('activity.timeline');
+});
 
 test('the task page folds its activity and builds the timeline only when opened', function () {
     $task = Activity::withoutRecording(fn () => Task::factory()->create());

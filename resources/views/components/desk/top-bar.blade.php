@@ -62,6 +62,10 @@
 
         <div class="dk-top-end">
             <div class="dk-tools" role="group" aria-label="{{ __('navigation.tools') }}" data-desk-tools>
+                @if ($showsInbox && config('chat.enabled'))
+                    <livewire:hr.chat.header-button />
+                @endif
+
                 @if ($showsInbox)
                     <livewire:notifications.bell />
                 @endif
@@ -141,7 +145,7 @@
                         @endif
                         {{-- Below 560px the language and theme pair leaves the bar and sits here. --}}
                         <div class="dk-narrow-tools">
-                            <form method="POST" action="{{ route('locale.update') }}" class="contents">
+                            <form method="POST" action="{{ route('locale.update') }}" class="contents" data-locale-form>
                                 @csrf
                                 <button type="submit" role="menuitem" name="locale" value="{{ $other->value }}" lang="{{ $other->value }}">
                                     <flux:icon.language variant="outline" class="dk-menu-ic" />

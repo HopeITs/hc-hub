@@ -13,7 +13,6 @@ use Modules\Tracking\Enums\DonorType;
 use Modules\Tracking\Enums\Gender;
 use Modules\Tracking\Enums\IndicatorCollector;
 use Modules\Tracking\Enums\IndicatorMeasure;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\Period;
 use Modules\Tracking\Enums\ProjectStatus;
@@ -30,7 +29,6 @@ use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\LibraryIndicator;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\MonthlyReportActivityEntry;
 use Modules\Tracking\Models\MonthlyReportFile;
@@ -63,16 +61,6 @@ use Modules\Tracking\Models\TransfersTracking;
 function enumColumns(): array
 {
     return [
-        'milestones.status' => [[
-            'model' => Milestone::class,
-            'table' => 'milestones',
-            'column' => 'status',
-            'width' => 50,
-            'assign' => MilestoneStatus::Cancelled,
-            'stored' => 'cancelled',
-            'default' => MilestoneStatus::Planned,
-            'badCasing' => 'Planned',
-        ]],
         'tasks.status' => [[
             'model' => Task::class,
             'table' => 'tasks',

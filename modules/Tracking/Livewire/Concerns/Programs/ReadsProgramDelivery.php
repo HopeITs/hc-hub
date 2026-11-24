@@ -7,19 +7,16 @@ namespace Modules\Tracking\Livewire\Concerns\Programs;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Modules\Core\Models\Program;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Models\AnnualPlan;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
-use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Support\ResultsChain;
 
 /**
  * The read-only figures on programs/show: annual plans and their year
- * slots, the logframe roots and summary, and milestone progress.
+ * slots and the logframe roots and summary.
  *
  * Used by programs/show only. The page provides the locked $programId and the
  * program() computed (planYears() reads $this->program->strategy).
@@ -148,37 +145,5 @@ trait ReadsProgramDelivery
     public function resultSummary(): array
     {
         return $this->chain['summary'];
-    }
-
-    /**
-     * The program's weighted milestone progress, and how many of its projects
-     * it is drawn from, so a figure built on one project never reads as the
-     * whole program's.
-     *
-     * @return array{percentage: float|null, reached: float, total: float, measuredProjects: int, projects: int}
-     */
-    #[Computed]
-    public function milestoneProgress(): array
-    {
-        $weights = Milestone::query()
-            ->whereIn('project_id', Project::query()->select('id')->where('program_id', $this->programId))
-            ->where('status', '!=', MilestoneStatus::Cancelled->value)
-            ->selectRaw(
-                'coalesce(sum(case when status = ? then weight_percentage else 0 end), 0) as reached_weight, coalesce(sum(weight_percentage), 0) as total_weight, count(distinct case when weight_percentage > 0 then project_id end) as measured_projects',
-                [MilestoneStatus::Reached->value],
-            )
-            ->toBase()
-            ->first();
-
-        $reached = (float) ($weights->reached_weight ?? 0);
-        $total = (float) ($weights->total_weight ?? 0);
-
-        return [
-            'percentage' => $total > 0 ? round(($reached / $total) * 100, 1) : null,
-            'reached' => $reached,
-            'total' => $total,
-            'measuredProjects' => (int) ($weights->measured_projects ?? 0),
-            'projects' => Project::query()->where('program_id', $this->programId)->count(),
-        ];
     }
 }

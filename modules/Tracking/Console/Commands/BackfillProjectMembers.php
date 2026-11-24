@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Tracking\Enums\ProjectMemberRole;
 use Modules\Tracking\Enums\ProjectMemberSource;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\ProjectMember;
 use Modules\Tracking\Models\TaskAssignee;
@@ -20,8 +19,8 @@ use Modules\Tracking\Models\TaskAssignee;
 /**
  * The first fill of project teams (roadmap 2.3, D4), read from what each
  * project already records: its owner (projects.owner_employee_id) as Owner,
- * and every other employee responsible for one of its milestones or assigned
- * a task on it or on its milestones as Member. Every row is marked
+ * and every other employee assigned
+ * a task on it as Member. Every row is marked
  * `source = inferred` with no dates: when someone joined or left is not on
  * record, so none is made up. A person who already has an open row in that
  * role is left alone, so the command can run again safely.
@@ -42,7 +41,7 @@ class BackfillProjectMembers extends Command
     /**
      * @var string
      */
-    protected $description = 'Fill project teams from project owners, milestones and task assignees (inferred, undated)';
+    protected $description = 'Fill project teams from project owners and task assignees (inferred, undated)';
 
     public function handle(): int
     {
@@ -145,8 +144,8 @@ class BackfillProjectMembers extends Command
     }
 
     /**
-     * Employees seen working on each project, with why: responsible for a
-     * milestone, or assigned a task raised on the project or its milestones.
+     * Employees seen working on each project, with why: assigned a task
+     * raised on the project.
      *
      * @param  list<int>  $projectIds
      * @return array<int, array<int, list<string>>> project id => employee id => reasons
@@ -155,22 +154,12 @@ class BackfillProjectMembers extends Command
     {
         $evidence = [];
 
-        Milestone::query()->whereIn('project_id', $projectIds)->whereNotNull('responsible_employee_id')
-            ->get(['project_id', 'responsible_employee_id'])
-            ->groupBy(fn (Milestone $milestone): string => $milestone->project_id.':'.$milestone->responsible_employee_id)
-            ->each(function ($group) use (&$evidence): void {
-                $first = $group->first();
-                $evidence[(int) $first->project_id][(int) $first->responsible_employee_id][] = 'responsible for '.$group->count().' milestone(s)';
-            });
-
         $assignees = TaskAssignee::query()
             ->join('tasks', 'tasks.id', '=', 'task_assignees.task_id')
-            ->leftJoin('milestones', fn ($join) => $join->on('milestones.id', '=', 'tasks.source_id')->where('tasks.source_type', 'milestone'))
-            ->where(fn ($query) => $query
-                ->where(fn ($inner) => $inner->where('tasks.source_type', 'project')->whereIn('tasks.source_id', $projectIds))
-                ->orWhereIn('milestones.project_id', $projectIds))
-            ->selectRaw("IF(tasks.source_type = 'project', tasks.source_id, milestones.project_id) as project_id, task_assignees.employee_id, COUNT(DISTINCT tasks.id) as task_count")
-            ->groupByRaw("IF(tasks.source_type = 'project', tasks.source_id, milestones.project_id), task_assignees.employee_id")
+            ->where('tasks.source_type', 'project')
+            ->whereIn('tasks.source_id', $projectIds)
+            ->selectRaw('tasks.source_id as project_id, task_assignees.employee_id, COUNT(DISTINCT tasks.id) as task_count')
+            ->groupBy('tasks.source_id', 'task_assignees.employee_id')
             ->toBase()
             ->get();
 

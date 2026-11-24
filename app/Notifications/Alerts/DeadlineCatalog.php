@@ -13,28 +13,28 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
-use Modules\Core\Models\Center;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Department;
 use Modules\Tracking\Enums\ArStatus;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
 use Modules\Tracking\Support\AgreementMoney;
 use Modules\Tracking\Support\DonorReportResponsibles;
+use Modules\Tracking\Support\MonthlyReportNames;
 use Modules\Tracking\Support\MonthlyReportPeriods;
-use stdClass;
+use Modules\Tracking\Support\MonthlyReportPreparers;
+use Modules\Tracking\Support\Reporting\PlaceBridge;
 
 /**
  * Every open item that carries a date the deadline scanners watch. Closed
@@ -68,7 +68,6 @@ final class DeadlineCatalog
         return collect([
             ...$this->tasks($limit),
             ...$this->departmentTasks($limit),
-            ...$this->milestones($limit),
             ...$this->reports($limit),
             ...$this->monthlyReports($dueOnOrBefore),
             ...$this->donorReports($limit),
@@ -158,28 +157,19 @@ final class DeadlineCatalog
     }
 
     /**
-     * The proposal each plan task belongs to: its own source, or the
-     * proposal of its source milestone.
+     * The proposal each plan task belongs to: its own source.
      *
      * @param  Collection<int, Task>  $tasks
      * @return array<int, int|null> task id => proposal id
      */
     private function planProposalIds(Collection $tasks): array
     {
-        $milestoneProposals = Milestone::query()
-            ->whereIn('id', $tasks->where('source_type', 'milestone')->pluck('source_id')->all())
-            ->pluck('proposal_id', 'id');
-
-        return $tasks->mapWithKeys(fn (Task $task): array => [$task->id => match ($task->source_type) {
-            'proposal' => (int) $task->source_id,
-            'milestone' => ($id = $milestoneProposals->get($task->source_id)) === null ? null : (int) $id,
-            default => null,
-        }])->all();
+        return $tasks->mapWithKeys(fn (Task $task): array => [$task->id => $task->source_type === 'proposal' ? (int) $task->source_id : null])->all();
     }
 
     /**
-     * Keeps a task query to work whose proposal (its source, or its source
-     * milestone's proposal) is not rejected: a rejected plan stops alerting.
+     * Keeps a task query to work whose proposal (its source) is not
+     * rejected: a rejected plan stops alerting.
      *
      * @param  Builder<Task>  $query
      */
@@ -187,41 +177,7 @@ final class DeadlineCatalog
     {
         $rejected = Proposal::query()->select('id')->where('status', ProposalStatus::Rejected->value);
 
-        $query->where(fn (Builder $query) => $query->where('source_type', '!=', 'proposal')->orWhereNotIn('source_id', $rejected))
-            ->where(fn (Builder $query) => $query->where('source_type', '!=', 'milestone')
-                ->orWhereNotIn('source_id', Milestone::query()->select('id')->whereIn('proposal_id', $rejected)));
-    }
-
-    /**
-     * Project milestones tell their responsible person and the project owner;
-     * a proposal plan's shared milestone tells its responsible person and the
-     * proposal's owners, and is quiet once the proposal is rejected.
-     *
-     * @return list<DeadlineItem>
-     */
-    private function milestones(string $limit): array
-    {
-        $milestones = Milestone::query()
-            ->leftJoin('projects', 'projects.id', '=', 'milestones.project_id')
-            ->where(fn ($query) => $query->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', Center::inactiveIds()))
-            ->whereNotNull('milestones.planned_end_date')
-            ->whereDate('milestones.planned_end_date', '<=', $limit)
-            ->whereNotIn('milestones.status', [MilestoneStatus::Reached->value, MilestoneStatus::Cancelled->value])
-            ->where(fn ($query) => $query->whereNotNull('milestones.project_id')->orWhereNotNull('milestones.proposal_id'))
-            ->where(fn ($query) => $query->whereNull('milestones.proposal_id')
-                ->orWhereNotIn('milestones.proposal_id', Proposal::query()->select('id')->where('status', ProposalStatus::Rejected->value)))
-            ->toBase()
-            ->get(['milestones.id', 'milestones.name', 'milestones.planned_end_date', 'milestones.responsible_employee_id', 'milestones.proposal_id', 'projects.owner_employee_id as owner_id']);
-
-        $planOwners = Proposal::ownerEmployeeIdsFor($milestones->whereNull('owner_id')->pluck('proposal_id')->filter()->map(fn ($id): int => (int) $id)->unique()->values()->all());
-        $ownersOf = fn (stdClass $row): array => $row->owner_id !== null ? [(int) $row->owner_id] : ($planOwners[(int) $row->proposal_id] ?? []);
-
-        $users = $this->employees->usersFor($milestones->flatMap(fn (object $row): array => [(int) $row->responsible_employee_id, ...$ownersOf($row)])->unique()->values()->all());
-
-        return array_values($milestones->map(fn (object $row): DeadlineItem => new DeadlineItem(
-            'milestone', (int) $row->id, 'milestones', (string) $row->name, CarbonImmutable::parse($row->planned_end_date),
-            $this->unique([$users[(int) $row->responsible_employee_id] ?? null, ...array_map(fn (int $owner): ?int => $users[$owner] ?? null, $ownersOf($row))]),
-        ))->all());
+        $query->where(fn (Builder $query) => $query->where('source_type', '!=', 'proposal')->orWhereNotIn('source_id', $rejected));
     }
 
     /**
@@ -246,9 +202,16 @@ final class DeadlineCatalog
      * One item per started, required (at least one line), unsubmitted
      * monthly report (contracts §13, §13.1 item 2), due on
      * MonthlyReportPeriods::dueDate(): the configured working days after the
-     * month's end on the project's calendar. Months not started raise
+     * month's end on the template's calendar. Months not started raise
      * nothing; the report's mirrors in `reports` are left out of reports().
-     * Three queries.
+     *
+     * The report's unit is its template (D-76): it tells the template's
+     * preparers, the responsibles of its rows at its place (D-84, read once
+     * through MonthlyReportPreparers), and whoever prepared it; its label
+     * names the proposals and the place, so two reports of one place and
+     * month are told apart. The legacy project id only scopes oversight,
+     * through PlaceBridge until coverage moves to places. A fixed number of
+     * queries.
      *
      * @return list<DeadlineItem>
      */
@@ -260,24 +223,29 @@ final class DeadlineCatalog
             ->has('lines')
             ->withCount('lines')
             ->orderBy('period')
-            ->get(['id', 'project_id', 'period', 'status', 'prepared_by', 'revised_due_on']);
+            ->get(['id', 'report_template_id', 'period', 'status', 'prepared_by', 'revised_due_on']);
 
         if ($reports->isEmpty()) {
             return [];
         }
 
-        $projects = Project::query()->whereKey($reports->pluck('project_id')->unique()->values())->get(['id', 'name', 'owner_employee_id', 'program_id', 'center_id', 'city_id', 'working_days'])->keyBy('id');
-        $owners = $this->employees->usersFor($projects->pluck('owner_employee_id')->filter()->map(fn ($id): int => (int) $id)->unique()->values()->all());
+        $templates = ReportTemplate::query()->whereKey($reports->pluck('report_template_id')->unique()->values())->get()->keyBy('id');
+        $workingDays = MonthlyReportPeriods::workingDaysOf($templates);
+        $responsibles = app(MonthlyReportPreparers::class)->responsiblesByTemplate($templates);
+        $users = $this->employees->usersFor(array_values(array_unique(array_merge([], ...array_values($responsibles)))));
+        $legacyProjectIds = app(PlaceBridge::class)->legacyProjectIdsFor($templates);
+        $names = $this->englishNames($templates);
         $items = [];
 
-        foreach ($reports->groupBy('project_id') as $projectId => $projectReports) {
-            $project = $projects->get($projectId);
+        foreach ($reports->groupBy('report_template_id') as $templateId => $templateReports) {
+            $template = $templates->get($templateId);
 
-            if ($project === null) {
+            if ($template === null) {
                 continue;
             }
 
-            $periods = MonthlyReportPeriods::fromLoaded($project, $projectReports);
+            $periods = MonthlyReportPeriods::fromLoaded($template, $templateReports, $workingDays[$templateId] ?? null);
+            $preparers = array_map(fn (int $employeeId): ?int => $users[$employeeId] ?? null, $responsibles[$templateId] ?? []);
 
             foreach ($periods->openRequiredReports() as $report) {
                 $due = $periods->effectiveDueDate($report);
@@ -286,14 +254,34 @@ final class DeadlineCatalog
                     continue;
                 }
 
+                $label = implode(' · ', array_filter([$names[$templateId]['proposalsText'] ?? '', $names[$templateId]['place'] ?? '', $report->period->format('Y-m')], fn (string $part): bool => $part !== ''));
+
                 $items[] = new DeadlineItem(
-                    'monthly_report', $report->id, 'monthly-reports', $project->name.' · '.$report->period->format('Y-m'), $due,
-                    $this->unique([$owners[(int) $project->owner_employee_id] ?? null, $report->prepared_by]), ['MEAL'], 'monthly_report', projectId: $project->id,
+                    'monthly_report', $report->id, 'monthly-reports', $label, $due,
+                    $this->unique([...$preparers, $report->prepared_by]), ['MEAL'], 'monthly_report', projectId: $legacyProjectIds[$templateId] ?? null,
                 );
             }
         }
 
         return $items;
+    }
+
+    /**
+     * Template names in English, like every stored label.
+     *
+     * @param  iterable<ReportTemplate>  $templates
+     * @return array<int, array{place: string, proposals: list<array{id: int, slug: string, name: string, number: string|null}>, proposalsText: string}>
+     */
+    private function englishNames(iterable $templates): array
+    {
+        $locale = app()->getLocale();
+        app()->setLocale('en');
+
+        try {
+            return app(MonthlyReportNames::class)->forTemplates($templates);
+        } finally {
+            app()->setLocale($locale);
+        }
     }
 
     /**

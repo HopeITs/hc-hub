@@ -377,6 +377,62 @@
             "module": null
         },
         {
+            "route": "hr.reports.index",
+            "label": "HR reports",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.reports.leaving-reasons",
+            "label": "Why people leave",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.reports.recruitment-funnel",
+            "label": "Recruitment funnel",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.reports.leave",
+            "label": "Leave balances and usage",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.reports.vacancies",
+            "label": "Position vacancies",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.reports.training",
+            "label": "Training",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.reports.profile-completeness",
+            "label": "Profile completeness",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
+            "module": null
+        },
+        {
             "route": "hr.recruitment.requests.index",
             "label": "Recruitment requests",
             "icon": "file",
@@ -1316,6 +1372,48 @@
             "icon": "grid"
         },
         "g-hr-statistics-salaries": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-reports": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-reports-leaving-reasons": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-reports-recruitment-funnel": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-reports-leave": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-reports-vacancies": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-reports-training": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-reports-profile-completeness": {
             "kind": "buttons",
             "rows": 1,
             "min_rows": 1,
@@ -19240,6 +19338,14 @@
                             "hero": "nav-chart-line",
                             "group": "people",
                             "module": null
+                        },
+                        {
+                            "route": "hr.reports.index",
+                            "label": "HR reports",
+                            "icon": "chart",
+                            "hero": "nav-chart-line",
+                            "group": "people",
+                            "module": null
                         }
                     ]
                 },
@@ -19763,6 +19869,62 @@
                     "module": null
                 },
                 {
+                    "route": "hr.reports.index",
+                    "label": "HR reports",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.leaving-reasons",
+                    "label": "Why people leave",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.recruitment-funnel",
+                    "label": "Recruitment funnel",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.leave",
+                    "label": "Leave balances and usage",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.vacancies",
+                    "label": "Position vacancies",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.training",
+                    "label": "Training",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.profile-completeness",
+                    "label": "Profile completeness",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
                     "route": "hr.recruitment.requests.index",
                     "label": "Recruitment requests",
                     "icon": "file",
@@ -19970,6 +20132,13 @@
                 "hr.statistics.general",
                 "hr.statistics.contracts",
                 "hr.statistics.salaries",
+                "hr.reports.index",
+                "hr.reports.leaving-reasons",
+                "hr.reports.recruitment-funnel",
+                "hr.reports.leave",
+                "hr.reports.vacancies",
+                "hr.reports.training",
+                "hr.reports.profile-completeness",
                 "hr.recruitment.requests.index",
                 "hr.recruitment.campaigns.index",
                 "hr.recruitment.applicants.index",
@@ -21127,6 +21296,69 @@
                         "register": "hr.statistics.salaries",
                         "kind": "page"
                     },
+                    "g-hr-reports": {
+                        "id": "g-hr-reports",
+                        "title": "HR reports",
+                        "description": "A button that opens HR reports.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.index",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-leaving-reasons": {
+                        "id": "g-hr-reports-leaving-reasons",
+                        "title": "Why people leave",
+                        "description": "A button that opens Why people leave.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.leaving-reasons",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-recruitment-funnel": {
+                        "id": "g-hr-reports-recruitment-funnel",
+                        "title": "Recruitment funnel",
+                        "description": "A button that opens Recruitment funnel.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.recruitment-funnel",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-leave": {
+                        "id": "g-hr-reports-leave",
+                        "title": "Leave balances and usage",
+                        "description": "A button that opens Leave balances and usage.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.leave",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-vacancies": {
+                        "id": "g-hr-reports-vacancies",
+                        "title": "Position vacancies",
+                        "description": "A button that opens Position vacancies.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.vacancies",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-training": {
+                        "id": "g-hr-reports-training",
+                        "title": "Training",
+                        "description": "A button that opens Training.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.training",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-profile-completeness": {
+                        "id": "g-hr-reports-profile-completeness",
+                        "title": "Profile completeness",
+                        "description": "A button that opens Profile completeness.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.profile-completeness",
+                        "kind": "page"
+                    },
                     "g-hr-recruitment-requests": {
                         "id": "g-hr-recruitment-requests",
                         "title": "Recruitment requests",
@@ -21553,6 +21785,13 @@
                     "hr.statistics.general": "g-hr-statistics-general",
                     "hr.statistics.contracts": "g-hr-statistics-contracts",
                     "hr.statistics.salaries": "g-hr-statistics-salaries",
+                    "hr.reports.index": "g-hr-reports",
+                    "hr.reports.leaving-reasons": "g-hr-reports-leaving-reasons",
+                    "hr.reports.recruitment-funnel": "g-hr-reports-recruitment-funnel",
+                    "hr.reports.leave": "g-hr-reports-leave",
+                    "hr.reports.vacancies": "g-hr-reports-vacancies",
+                    "hr.reports.training": "g-hr-reports-training",
+                    "hr.reports.profile-completeness": "g-hr-reports-profile-completeness",
                     "hr.recruitment.requests.index": "g-hr-recruitment-requests",
                     "hr.recruitment.campaigns.index": "g-hr-recruitment-campaigns",
                     "hr.recruitment.applicants.index": "g-hr-recruitment-applicants",
@@ -22697,6 +22936,69 @@
                     "route": "hr.statistics.salaries",
                     "href": "http://hc-hub.test/hr/statistics/salaries"
                 },
+                "g-hr-reports": {
+                    "id": "g-hr-reports",
+                    "key": "hr-reports",
+                    "kind": "page",
+                    "label": "HR reports",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.index",
+                    "href": "http://hc-hub.test/hr/reports"
+                },
+                "g-hr-reports-leaving-reasons": {
+                    "id": "g-hr-reports-leaving-reasons",
+                    "key": "hr-reports-leaving-reasons",
+                    "kind": "page",
+                    "label": "Why people leave",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.leaving-reasons",
+                    "href": "http://hc-hub.test/hr/reports/leaving-reasons"
+                },
+                "g-hr-reports-recruitment-funnel": {
+                    "id": "g-hr-reports-recruitment-funnel",
+                    "key": "hr-reports-recruitment-funnel",
+                    "kind": "page",
+                    "label": "Recruitment funnel",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.recruitment-funnel",
+                    "href": "http://hc-hub.test/hr/reports/recruitment-funnel"
+                },
+                "g-hr-reports-leave": {
+                    "id": "g-hr-reports-leave",
+                    "key": "hr-reports-leave",
+                    "kind": "page",
+                    "label": "Leave balances and usage",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.leave",
+                    "href": "http://hc-hub.test/hr/reports/leave"
+                },
+                "g-hr-reports-vacancies": {
+                    "id": "g-hr-reports-vacancies",
+                    "key": "hr-reports-vacancies",
+                    "kind": "page",
+                    "label": "Position vacancies",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.vacancies",
+                    "href": "http://hc-hub.test/hr/reports/vacancies"
+                },
+                "g-hr-reports-training": {
+                    "id": "g-hr-reports-training",
+                    "key": "hr-reports-training",
+                    "kind": "page",
+                    "label": "Training",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.training",
+                    "href": "http://hc-hub.test/hr/reports/training"
+                },
+                "g-hr-reports-profile-completeness": {
+                    "id": "g-hr-reports-profile-completeness",
+                    "key": "hr-reports-profile-completeness",
+                    "kind": "page",
+                    "label": "Profile completeness",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.profile-completeness",
+                    "href": "http://hc-hub.test/hr/reports/profile-completeness"
+                },
                 "g-hr-recruitment-requests": {
                     "id": "g-hr-recruitment-requests",
                     "key": "hr-recruitment-requests",
@@ -23043,6 +23345,14 @@
                             "hero": "nav-chart-line",
                             "group": "people",
                             "module": null
+                        },
+                        {
+                            "route": "hr.reports.index",
+                            "label": "HR reports",
+                            "icon": "chart",
+                            "hero": "nav-chart-line",
+                            "group": "people",
+                            "module": null
                         }
                     ]
                 },
@@ -23286,6 +23596,62 @@
                     "module": null
                 },
                 {
+                    "route": "hr.reports.index",
+                    "label": "HR reports",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.leaving-reasons",
+                    "label": "Why people leave",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.recruitment-funnel",
+                    "label": "Recruitment funnel",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.leave",
+                    "label": "Leave balances and usage",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.vacancies",
+                    "label": "Position vacancies",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.training",
+                    "label": "Training",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.reports.profile-completeness",
+                    "label": "Profile completeness",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
                     "route": "hr.recruitment.requests.index",
                     "label": "Recruitment requests",
                     "icon": "file",
@@ -23447,6 +23813,13 @@
                 "hr.statistics.general",
                 "hr.statistics.contracts",
                 "hr.statistics.salaries",
+                "hr.reports.index",
+                "hr.reports.leaving-reasons",
+                "hr.reports.recruitment-funnel",
+                "hr.reports.leave",
+                "hr.reports.vacancies",
+                "hr.reports.training",
+                "hr.reports.profile-completeness",
                 "hr.recruitment.requests.index",
                 "hr.recruitment.approvals.pending",
                 "hr.recruitment.campaigns.index",
@@ -23853,6 +24226,69 @@
                         "icon": "nav-chart-line",
                         "size": "S",
                         "register": "hr.statistics.salaries",
+                        "kind": "page"
+                    },
+                    "g-hr-reports": {
+                        "id": "g-hr-reports",
+                        "title": "HR reports",
+                        "description": "A button that opens HR reports.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.index",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-leaving-reasons": {
+                        "id": "g-hr-reports-leaving-reasons",
+                        "title": "Why people leave",
+                        "description": "A button that opens Why people leave.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.leaving-reasons",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-recruitment-funnel": {
+                        "id": "g-hr-reports-recruitment-funnel",
+                        "title": "Recruitment funnel",
+                        "description": "A button that opens Recruitment funnel.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.recruitment-funnel",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-leave": {
+                        "id": "g-hr-reports-leave",
+                        "title": "Leave balances and usage",
+                        "description": "A button that opens Leave balances and usage.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.leave",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-vacancies": {
+                        "id": "g-hr-reports-vacancies",
+                        "title": "Position vacancies",
+                        "description": "A button that opens Position vacancies.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.vacancies",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-training": {
+                        "id": "g-hr-reports-training",
+                        "title": "Training",
+                        "description": "A button that opens Training.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.training",
+                        "kind": "page"
+                    },
+                    "g-hr-reports-profile-completeness": {
+                        "id": "g-hr-reports-profile-completeness",
+                        "title": "Profile completeness",
+                        "description": "A button that opens Profile completeness.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.reports.profile-completeness",
                         "kind": "page"
                     },
                     "g-hr-recruitment-requests": {
@@ -24264,6 +24700,13 @@
                     "hr.statistics.general": "g-hr-statistics-general",
                     "hr.statistics.contracts": "g-hr-statistics-contracts",
                     "hr.statistics.salaries": "g-hr-statistics-salaries",
+                    "hr.reports.index": "g-hr-reports",
+                    "hr.reports.leaving-reasons": "g-hr-reports-leaving-reasons",
+                    "hr.reports.recruitment-funnel": "g-hr-reports-recruitment-funnel",
+                    "hr.reports.leave": "g-hr-reports-leave",
+                    "hr.reports.vacancies": "g-hr-reports-vacancies",
+                    "hr.reports.training": "g-hr-reports-training",
+                    "hr.reports.profile-completeness": "g-hr-reports-profile-completeness",
                     "hr.recruitment.requests.index": "g-hr-recruitment-requests",
                     "hr.recruitment.approvals.pending": "g-hr-recruitment-approvals-pending",
                     "hr.recruitment.campaigns.index": "g-hr-recruitment-campaigns",
@@ -24613,6 +25056,69 @@
                     "icon": "nav-chart-line",
                     "route": "hr.statistics.salaries",
                     "href": "http://hc-hub.test/hr/statistics/salaries"
+                },
+                "g-hr-reports": {
+                    "id": "g-hr-reports",
+                    "key": "hr-reports",
+                    "kind": "page",
+                    "label": "HR reports",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.index",
+                    "href": "http://hc-hub.test/hr/reports"
+                },
+                "g-hr-reports-leaving-reasons": {
+                    "id": "g-hr-reports-leaving-reasons",
+                    "key": "hr-reports-leaving-reasons",
+                    "kind": "page",
+                    "label": "Why people leave",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.leaving-reasons",
+                    "href": "http://hc-hub.test/hr/reports/leaving-reasons"
+                },
+                "g-hr-reports-recruitment-funnel": {
+                    "id": "g-hr-reports-recruitment-funnel",
+                    "key": "hr-reports-recruitment-funnel",
+                    "kind": "page",
+                    "label": "Recruitment funnel",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.recruitment-funnel",
+                    "href": "http://hc-hub.test/hr/reports/recruitment-funnel"
+                },
+                "g-hr-reports-leave": {
+                    "id": "g-hr-reports-leave",
+                    "key": "hr-reports-leave",
+                    "kind": "page",
+                    "label": "Leave balances and usage",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.leave",
+                    "href": "http://hc-hub.test/hr/reports/leave"
+                },
+                "g-hr-reports-vacancies": {
+                    "id": "g-hr-reports-vacancies",
+                    "key": "hr-reports-vacancies",
+                    "kind": "page",
+                    "label": "Position vacancies",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.vacancies",
+                    "href": "http://hc-hub.test/hr/reports/vacancies"
+                },
+                "g-hr-reports-training": {
+                    "id": "g-hr-reports-training",
+                    "key": "hr-reports-training",
+                    "kind": "page",
+                    "label": "Training",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.training",
+                    "href": "http://hc-hub.test/hr/reports/training"
+                },
+                "g-hr-reports-profile-completeness": {
+                    "id": "g-hr-reports-profile-completeness",
+                    "key": "hr-reports-profile-completeness",
+                    "kind": "page",
+                    "label": "Profile completeness",
+                    "icon": "nav-chart-line",
+                    "route": "hr.reports.profile-completeness",
+                    "href": "http://hc-hub.test/hr/reports/profile-completeness"
                 },
                 "g-hr-recruitment-requests": {
                     "id": "g-hr-recruitment-requests",

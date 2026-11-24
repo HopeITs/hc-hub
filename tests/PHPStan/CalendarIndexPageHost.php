@@ -8,7 +8,6 @@ use Livewire\Component;
 use Modules\Tracking\Livewire\Concerns\Calendar\BuildsCalendarGrid;
 use Modules\Tracking\Livewire\Concerns\Calendar\FiltersCalendarTypes;
 use Modules\Tracking\Livewire\Concerns\Calendar\FindsFocusedTypeDates;
-use Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarMilestones;
 use Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarTasks;
 use Modules\Tracking\Livewire\Concerns\Calendar\PresentsCalendarItems;
 use Modules\Tracking\Livewire\Concerns\Calendar\ScopesCalendarPeople;
@@ -31,7 +30,6 @@ abstract class CalendarIndexPageHost extends Component
     use ChecksFinanceVisibility;
     use FiltersCalendarTypes;
     use FindsFocusedTypeDates;
-    use ManagesCalendarMilestones;
     use ManagesCalendarTasks;
     use NavigatesCalendarPeriods;
     use PresentsCalendarItems;

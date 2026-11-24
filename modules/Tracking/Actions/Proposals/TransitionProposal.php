@@ -12,14 +12,12 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator as ValidatorInstance;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\ReviewStage;
 use Modules\Tracking\Enums\StatusNoteKind;
 use Modules\Tracking\Events\ProposalStatusChanged;
 use Modules\Tracking\Models\Donor;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalStatusNote;
 use Modules\Tracking\Support\ProposalLocationRows;
@@ -96,6 +94,12 @@ final class TransitionProposal
         });
 
         $proposal->refresh();
+
+        // The framework task opens when the proposal reaches Proposal draft
+        // (user decision 2026-11-19); ensure() skips payroll and duplicates.
+        if ($to === ProposalStatus::ProposalDraft) {
+            app(SyncLogframeTask::class)->ensure($proposal);
+        }
 
         return $result;
     }
@@ -193,20 +197,13 @@ final class TransitionProposal
     }
 
     /**
-     * D-02c: the final-report milestone is reached, the final report file is
-     * filed, and (unless the proposal is self-funded) the donor's acceptance
-     * is recorded. The acceptance email is optional. A payroll proposal has
-     * no milestone (W-32): the file and the acceptance close it.
+     * D-02c: the final report file is filed and (unless the proposal is
+     * self-funded) the donor's acceptance is recorded. The acceptance email
+     * is optional.
      */
     private function hasFinalReport(Proposal $proposal): bool
     {
-        $milestoneReached = $proposal->isPayroll() || Milestone::query()
-            ->where('proposal_id', $proposal->id)
-            ->where('is_final_report', true)
-            ->where('status', MilestoneStatus::Reached)
-            ->exists();
-
-        if (! $milestoneReached || ! $proposal->media()->where('collection', MediaCollection::FinalReport)->exists()) {
+        if (! $proposal->media()->where('collection', MediaCollection::FinalReport)->exists()) {
             return false;
         }
 

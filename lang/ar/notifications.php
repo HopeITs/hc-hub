@@ -203,7 +203,6 @@ return [
 
     'modules' => [
         'tasks' => 'المهام',
-        'milestones' => 'المراحل',
         'projects' => 'المشاريع',
         'programs' => 'البرامج',
         'annual-plans' => 'الخطط السنوية',
@@ -263,7 +262,6 @@ return [
             'project' => 'المشروع «:subject» ما زال باسم :person وقد غادر — أعد تعيينه',
         ],
         'data_gap' => [
-            'no_milestones' => 'المشروع النشط «:subject» بلا مراحل',
             'no_indicators' => 'المشروع النشط «:subject» بلا مؤشرات',
             'past_end' => 'تجاوز المشروع «:subject» تاريخ انتهائه وما زال نشطًا',
             'report_without_files' => 'التقرير المعتمد عن «:subject» بلا ملفات مرفقة',
@@ -272,6 +270,7 @@ return [
         'project_ended' => 'انتهى المشروع «:subject» في :date',
         'on_hold_reminder' => 'المقترح «:subject» معلّق وقد حلّ موعد مراجعته (:date)',
         'ending_with_funds' => 'المقترح «:subject» ينتهي في :date ولا يزال في اتفاقيته مبالغ',
+        'logframe_confirmed' => 'اكتمل الإطار المنطقي للمقترح «:subject» — يمكنك المتابعة بالمؤشرات المستهدفة والخطة',
         'logframe_missing' => [
             'single' => 'البرنامج «:subject» ليس له إطار برنامج بعد — إنشاء إطار البرنامج',
             'grouped' => 'برامج ليس لها إطار برنامج بعد: :count — إنشاء إطار البرنامج',
@@ -332,7 +331,7 @@ return [
         'manager_after' => 'إبلاغ مدير البرنامج بعد',
         'manager_after_hint' => 'تُحتسب من تاريخ الموعد.',
         'top_after' => 'إبلاغ الإدارة بعد',
-        'top_after_hint' => 'يجب أن تكون بعد مدير البرنامج.',
+        'top_after_hint' => 'دائمًا بعد مدير البرنامج، ويتحرّك الاثنان معًا.',
         'escalation_window' => 'نافذة التصعيد',
         'escalation_window_hint' => 'العناصر المتأخرة منذ مدة أطول تصلها التذكيرات لكنها لا تُصعَّد.',
 
@@ -430,16 +429,6 @@ return [
             'subtask_completed' => 'أنجز :actor المهمة الفرعية «:subtask» ضمن «:subject»',
             'deleted' => 'حذف :actor المهمة «:subject»',
         ],
-        'milestone' => [
-            'created' => 'أنشأ :actor المرحلة «:subject»',
-            'created_you' => 'جعلك :actor مسؤولًا عن المرحلة الجديدة «:subject»',
-            'responsible_changed' => 'جعل :actor :to مسؤولًا عن المرحلة «:subject»',
-            'responsible_changed_you' => 'جعلك :actor مسؤولًا عن المرحلة «:subject»',
-            'status_changed' => 'نقل :actor المرحلة «:subject» من :from إلى :to',
-            'dates_changed' => 'غيّر :actor تواريخ المرحلة «:subject»',
-            'updated' => 'حدّث :actor المرحلة «:subject»',
-            'deleted' => 'حذف :actor المرحلة «:subject»',
-        ],
         'project' => [
             'created' => [
                 'title' => 'إنشاء مشروع',
@@ -528,6 +517,9 @@ return [
             ],
         ],
         'annual_plan' => [
+            'milestone_week' => ['title' => 'مرحلة رئيسية مستحقة بعد أسبوع', 'body' => 'موعد استحقاق :milestone هو :date.'],
+            'milestone_three_days' => ['title' => 'مرحلة رئيسية مستحقة بعد ثلاثة أيام', 'body' => 'موعد استحقاق :milestone هو :date.'],
+            'milestone_missed' => ['title' => 'مرحلة رئيسية فائتة', 'body' => 'كان موعد استحقاق :milestone في :date.'],
             'plan_submitted' => [
                 'title' => 'خطة سنوية جديدة للمراجعة',
                 'body' => 'أرسل :actor خطة :plan إلى الميل للمراجعة.',
@@ -731,6 +723,18 @@ return [
                 'title' => 'قبول التقرير الختامي',
                 'body' => 'سجّل :actor موافقة الممول على التقرير الختامي لـ«:subject»',
             ],
+            'framework_done' => [
+                'title' => 'إنجاز الإطار المنطقي',
+                'body' => ':actor أنجز الإطار المنطقي لـ«:subject»',
+            ],
+            'framework_reopened' => [
+                'title' => 'إعادة فتح الإطار المنطقي',
+                'body' => ':actor أعاد فتح الإطار المنطقي لـ«:subject»',
+            ],
+            'status_date_changed' => [
+                'title' => 'تصحيح تاريخ في المقترح',
+                'body' => ':actor صحّح تاريخ حالة في «:subject»',
+            ],
             'beneficiaries_changed' => [
                 'title' => 'تغيير عدد المستفيدين',
                 'body' => 'غيّر :actor عدد المستفيدين في «:subject»',
@@ -843,7 +847,7 @@ return [
             ],
             'plan_rebased' => [
                 'title' => 'نقل الخطة إلى مدة المنحة',
-                'body' => 'نُقلت خطة المقترح «:subject» إلى مدة المنحة، وعدد المراحل الرئيسية والمهام التي قُصّرت إلى نهاية المنحة: :value',
+                'body' => 'نُقلت خطة المقترح «:subject» إلى مدة المنحة، وعدد المهام التي قُصّرت إلى نهاية المنحة: :value',
             ],
         ],
         'donor_proposal' => [
@@ -1037,6 +1041,7 @@ return [
             ],
         ],
         'report_template' => [
+            'placement_pending' => 'يحتاج :subject إلى اختيار طريقة إعداد التقرير.',
             'created' => 'أُنشئ قالب تقرير المشروع «:subject»',
             'updated' => 'عدّل :actor قالب تقرير المشروع «:subject»',
             'pending' => [

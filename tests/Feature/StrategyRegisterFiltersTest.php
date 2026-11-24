@@ -5,10 +5,8 @@ use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\Indicator;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -62,18 +60,6 @@ test('the indicators register keeps only indicators under the strategy\'s progra
     openedFromStrategy('tracking::indicators.index')
         ->assertSeeText('Ours indicator')
         ->assertDontSeeText('Theirs indicator');
-});
-
-test('the milestones register keeps only the strategy\'s missed milestones', function () {
-    Milestone::factory()->create(['name' => 'Ours missed', 'project_id' => $this->ours->id, 'status' => MilestoneStatus::Planned, 'planned_start_date' => '2026-05-01', 'planned_end_date' => '2026-06-01']);
-    Milestone::factory()->create(['name' => 'Ours upcoming', 'project_id' => $this->ours->id, 'status' => MilestoneStatus::Planned, 'planned_start_date' => '2026-07-01', 'planned_end_date' => '2026-08-01']);
-    Milestone::factory()->create(['name' => 'Theirs missed', 'project_id' => $this->theirs->id, 'status' => MilestoneStatus::Planned, 'planned_start_date' => '2026-05-01', 'planned_end_date' => '2026-06-01']);
-
-    openedFromStrategy('tracking::milestones.index', ['status' => 'missed', 'view' => 'list'])
-        ->assertSet('status', 'missed')
-        ->assertSeeText('Ours missed')
-        ->assertDontSeeText('Ours upcoming')
-        ->assertDontSeeText('Theirs missed');
 });
 
 test('the reports register keeps only the strategy\'s overdue reports', function () {

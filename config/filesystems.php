@@ -40,6 +40,16 @@ return [
             'report' => false,
         ],
 
+        // Chat attachments: encrypted at rest (Modules\Hr\Support\Chat\ChatFileVault)
+        // and only ever streamed back to members of the conversation.
+        'chat-files' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/chat-files'),
+            'serve' => false,
+            'throw' => true,
+            'report' => true,
+        ],
+
         // There is deliberately no usable 'public' disk. Every upload is a
         // record's document (agreements, reports, evidence), so none may ever
         // sit at a URL that skips the record's policy. Anything genuinely

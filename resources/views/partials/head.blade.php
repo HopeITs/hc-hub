@@ -11,6 +11,11 @@
     @endif
     <meta name="hc-push-routes" content="{{ json_encode(['store' => route('push.store'), 'sync' => route('push.sync'), 'destroy' => route('push.destroy')]) }}" />
     <meta name="hc-notif-sound" content="{{ $headNotificationPreference->enabled && $headNotificationPreference->sound ? '1' : '0' }}" />
+    @if (config('chat.enabled') && ! \App\Support\Desk\DeskTab::current() && ! \App\Http\Middleware\EnsureTwoFactorIsEnabled::mustEnrol(auth()->user()))
+        {{-- resources/js/chat.js subscribes to the chat channels only when these are here. --}}
+        <meta name="user-id" content="{{ auth()->id() }}" />
+        <meta name="chat-enabled" content="1" />
+    @endif
 @endauth
 
 <title>

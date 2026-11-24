@@ -18,6 +18,21 @@ it('names the Project model only in the place bridge', function (): void {
         ...(glob($root.'/modules/Tracking/Actions/Proposals/*ProposalChange.php') ?: []),
         $root.'/modules/Tracking/Support/ReportTemplateQueue.php',
         ...(glob($root.'/modules/Tracking/Actions/ReportTemplates/*.php') ?: []),
+        // Y-03: monthly reports follow the template.
+        $root.'/modules/Tracking/Support/MonthlyReportGenerator.php',
+        $root.'/modules/Tracking/Console/Commands/TemplateBackfillMonthlyReports.php',
+        // Y-03 slice 2: every monthly-report action and support class, and the two commands.
+        ...(glob($root.'/modules/Tracking/Actions/MonthlyReports/*.php') ?: []),
+        ...(glob($root.'/modules/Tracking/Support/MonthlyReport*.php') ?: []),
+        $root.'/modules/Tracking/Console/Commands/PrepareMonthlyReports.php',
+        $root.'/modules/Tracking/Console/Commands/BackfillMonthlyReports.php',
+        // Y-03 slice 3: monthly-report notification recipients follow the template.
+        $root.'/modules/Tracking/Notifications/Recipients/MonthlyReportRecipients.php',
+        // Y-05: the Monthly Matrix reads through ReportExtraction (its Activities tab through PlaceBridge).
+        $root.'/modules/Tracking/Livewire/Concerns/Reports/BuildsMonthlyMatrix.php',
+        $root.'/modules/Tracking/Livewire/Concerns/Reports/GroupsMonthlyMatrix.php',
+        $root.'/modules/Tracking/Livewire/Concerns/Reports/BuildsMatrixBreakdowns.php',
+        $root.'/modules/Tracking/Livewire/Concerns/Reports/BuildsMatrixActivities.php',
     ];
 
     $offenders = [];

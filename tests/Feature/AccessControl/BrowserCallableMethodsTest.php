@@ -17,6 +17,7 @@ test('the browser cannot call a page helper that returns data', function (string
     'annual plan row' => ['tracking::annual-plans.index', 'planFor', [1, 2026]],
     'agreement money' => ['tracking::proposals.index', 'agreementMoney', [1]],
     'donor money' => ['tracking::donors.index', 'donorMoney', [1]],
-    'delete check' => ['tracking::milestones.index', 'canDelete', [1]],
     'matrix figure' => ['tracking::reports.monthly-matrix', 'matrixNumber', [1.0]],
+    'matrix cell link' => ['tracking::reports.monthly-matrix', 'cellListUrl', [[], '2026-10']],
+    'list row matrix link' => ['tracking::monthly-reports.index', 'matrixUrlFor', [1]],
 ]);

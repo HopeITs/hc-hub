@@ -33,6 +33,11 @@ Route::prefix('hr')->name('hr.')->group(function (): void {
         ->middleware('throttle:30,1')
         ->name('contracts.print');
 
+    // The last-third review of a trial: the policy (direct manager, city HR) is the gate, not a permission.
+    Route::livewire('probation/{review}', 'hr::probation.review')
+        ->whereNumber('review')
+        ->name('probation.show');
+
     Route::livewire('contracts/{contract}', 'hr::contracts.show')
         ->whereNumber('contract')
         ->can('contracts.view')

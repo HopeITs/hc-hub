@@ -28,7 +28,7 @@ final class LeaveContext
     public const REQUEST_RELATIONS = [
         'leaveBalance:id,contract_id,type_id,deserved,used,amendment_offset',
         'leaveBalance.leaveType:id,name_en,name_ar,base_days',
-        'leaveBalance.contract:id,employee_id,position_id,contract_type_id,type,weekly_hours,schedule_mode,start_date,end_date',
+        'leaveBalance.contract:id,employee_id,position_id,contract_type_id,type,weekly_hours,schedule_mode,work_weekdays,start_date,end_date',
         'leaveBalance.contract.employee:id,first_name_en,first_name_ar,last_name_en,last_name_ar,gender,marital_status,city_id,is_active,dob,actual_dob',
         'leaveBalance.contract.position:id,center_id,city_id,program_id,department_id,job_level_id,direct_manager_id,tech_manager_id',
         'leaveBalance.contract.position.center:id,city_id,weekends,open_at,close_at',

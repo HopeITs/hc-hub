@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'template_placement_status' => ['pending' => 'Pending', 'joined' => 'Joined', 'created' => 'Created'],
     'ar_status' => [
         'pending' => 'Pending',
         'received' => 'Received',
@@ -137,13 +138,6 @@ return [
         'ff' => 'Finish to finish',
         'sf' => 'Start to finish',
     ],
-    'milestone_status' => [
-        'planned' => 'Planned',
-        'ongoing' => 'Ongoing',
-        'reached' => 'Reached',
-        'postponed' => 'Postponed',
-        'cancelled' => 'Cancelled',
-    ],
     'period' => [
         'monthly' => 'Monthly',
         'quarterly' => 'Quarterly',
@@ -222,6 +216,11 @@ return [
         'reviewed' => 'Reviewed',
         'approved' => 'Approved',
     ],
+    'assumption_status' => [
+        'holds' => 'Holds',
+        'at_risk' => 'At risk',
+        'broken' => 'Broken',
+    ],
     'activity_kind' => [
         'continuous' => 'Continuous',
         'event' => 'Event',
@@ -265,6 +264,7 @@ return [
         'media_deliverable' => 'Media deliverable',
         'financial' => 'Financial',
         'report' => 'Report',
+        'logframe' => 'Logical framework',
     ],
     'deliverable_kind' => [
         'video' => 'Video',

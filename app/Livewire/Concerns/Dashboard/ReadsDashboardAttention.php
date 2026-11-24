@@ -6,14 +6,12 @@ namespace App\Livewire\Concerns\Dashboard;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Computed;
 use Modules\Tracking\Enums\ArStatus;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\TaskStatus;
-use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\Risk;
 use Modules\Tracking\Models\Task;
@@ -22,7 +20,7 @@ use Modules\Tracking\Support\ProposalStoryLink;
 
 /**
  * The dashboard's "Needs attention" queue: the proposal reviews waiting on
- * the viewer, every late task, milestone and pending transfer plus every
+ * the viewer, every late task and pending transfer plus every
  * materialised risk, and the row shaping and links the "Coming up" list shares.
  *
  * Used by the Desk page (its greeting), the Desk panels and the Ask bar. The
@@ -53,7 +51,7 @@ trait ReadsDashboardAttention
     /**
      * Everything that is late or has gone wrong, most overdue first.
      *
-     * Dated items (tasks, milestones, transfers) sort by days late; materialised
+     * Dated items (tasks, transfers) sort by days late; materialised
      * risks carry no due date and follow them, newest first. Every row is
      * rendered once and the queue's filter only hides rows in the browser, so
      * `allRank` and `groupRank` say where a row sits in each view. The "All" view
@@ -70,7 +68,7 @@ trait ReadsDashboardAttention
 
         $tasks = $this->visible(Task::query(), 'tasks')
             ->select(['id', 'source_type', 'source_id', 'title', 'due_date', 'status'])
-            ->with(['source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id,name', 'proposal:id,name']])])
+            ->with('source')
             ->where('status', '!=', TaskStatus::Done)
             ->whereDate('due_date', '<', $today)
             ->oldest('due_date')
@@ -84,24 +82,6 @@ trait ReadsDashboardAttention
                 context: __('dashboard.task_in', ['parent' => $this->taskParentName($task)]),
                 daysLate: (int) $task->due_date->diffInDays($today),
                 href: route('tasks.show', $task),
-            ));
-
-        $milestones = $this->visible(Milestone::query(), 'milestones')
-            ->select(['id', 'project_id', 'proposal_id', 'name', 'planned_end_date', 'status'])
-            ->with(['project:id,name', 'proposal:id,name'])
-            ->where('status', MilestoneStatus::Planned)
-            ->whereDate('planned_end_date', '<', $today)
-            ->oldest('planned_end_date')
-            ->limit(self::AttentionLimit)
-            ->get()
-            ->map(fn (Milestone $milestone): array => $this->attentionEntry(
-                key: 'milestone-'.$milestone->id,
-                group: 'delivery',
-                icon: 'flag',
-                title: $milestone->name,
-                context: __('dashboard.milestone_in', ['project' => $milestone->ownerName()]),
-                daysLate: (int) $milestone->planned_end_date->diffInDays($today),
-                href: route('milestones.index', ['project' => $milestone->project_id, 'status' => MilestoneStatus::Planned->value]),
             ));
 
         $transfers = ! $this->canView('transfers') ? new Collection : TransfersTracking::query()
@@ -126,21 +106,27 @@ trait ReadsDashboardAttention
                 href: $this->transferHref($transfer),
             ));
 
-        $risks = $this->visible(Risk::query(), 'risks')
-            ->select(['id', 'project_id', 'name', 'updated_at'])
-            ->with('project:id,name')
+        // Y-13 (D-93): a risk names the place it belongs to, which is one
+        // location row of a proposal, and the register opens on that row.
+        $happenedRisks = $this->visible(Risk::query(), 'risks')
+            ->select(['id', 'project_id', 'proposal_location_id', 'name', 'updated_at'])
+            ->with(['project:id,name', 'location:id,program_id,city_id', 'location.program:id'])
             ->where('happened', true)
             ->latest('updated_at')
             ->limit(self::AttentionLimit)
-            ->get()
+            ->get();
+
+        $places = ProposalLocation::placeLabels($happenedRisks->pluck('location')->filter()->unique('id')->values());
+
+        $risks = $happenedRisks
             ->map(fn (Risk $risk): array => $this->attentionEntry(
                 key: 'risk-'.$risk->id,
                 group: 'risks',
                 icon: 'exclamation-triangle',
                 title: $risk->name,
-                context: __('dashboard.risk_in', ['project' => $risk->project?->name ?? '—']),
+                context: __('dashboard.risk_in', ['project' => $places[$risk->proposal_location_id] ?? $risk->project?->name ?? '—']),
                 daysLate: null,
-                href: route('risks.index', ['project' => $risk->project_id, 'status' => 'happened']),
+                href: route('risks.index', ['location' => $risk->proposal_location_id, 'materialisedOnly' => 1]),
             ));
 
         $viewer = auth()->user();
@@ -162,7 +148,7 @@ trait ReadsDashboardAttention
                 );
             });
 
-        $dated = $tasks->concat($milestones)->concat($transfers)->sortByDesc('daysLate')->values();
+        $dated = $tasks->concat($transfers)->sortByDesc('daysLate')->values();
         $reviewsShownInAll = min($reviews->count(), self::ReviewSlots);
         $openInAll = self::AttentionLimit - $reviewsShownInAll;
         $datedShownInAll = min($dated->count(), $openInAll - min($risks->count(), self::RiskSlots));
@@ -243,14 +229,10 @@ trait ReadsDashboardAttention
     }
 
     /**
-     * The parent context shown for a task row: its milestone's project name
-     * when sourced from a milestone (matching what the old milestone_id path
-     * showed), otherwise the task's own source name (a proposal).
+     * The parent context shown for a task row: the task's own source name.
      */
     private function taskParentName(Task $task): string
     {
-        return $task->source instanceof Milestone
-            ? $task->source->ownerName()
-            : $task->sourceLabel();
+        return $task->sourceLabel();
     }
 }

@@ -13,17 +13,21 @@ use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Task;
 
 /**
- * Raise a task straight against one record (a program, project, proposal,
- * milestone, department or employee) and assign it, in one transaction.
+ * Raise a task straight against one record (a program, proposal, a
+ * proposal's location row, department or employee) and assign it, in one
+ * transaction.
+ *
+ * Y-12: `proposal_location` is the source new code writes; `project` is kept
+ * readable until Y-18 but is no longer raised against.
  */
 class CreateTask
 {
     /** The morph map keys a task can be raised against. */
-    public const SOURCE_TYPES = ['program', 'project', 'proposal', 'milestone', 'department', 'employee'];
+    public const SOURCE_TYPES = ['program', 'project', 'proposal', 'proposal_location', 'department', 'employee'];
 
     /**
-     * @param  string  $sourceType  the morph map key: 'program', 'project', 'proposal', 'milestone', 'department' or 'employee'
-     * @param  array{newTaskTitle: string, newTaskDescription?: string|null, newTaskStatus: string, newTaskPriority: string, newTaskDueDate: string, newTaskAssignedTo: array<int, int|string>}  $validated  keyed by the add-task form's property names
+     * @param  string  $sourceType  the morph map key: 'program', 'proposal', 'proposal_location', 'department' or 'employee' (and legacy 'project')
+     * @param  array{newTaskTitle: string, newTaskDescription?: string|null, newTaskStatus: string, newTaskPriority: string, newTaskDueDate: string, newTaskAssignedTo: array<int, int|string>, newTaskEvidenceRequired?: bool}  $validated  keyed by the add-task form's property names
      */
     public function handle(string $sourceType, int $sourceId, array $validated, int $createdBy): Task
     {
@@ -47,6 +51,7 @@ class CreateTask
                 'status' => $statusCase,
                 'priority' => $validated['newTaskPriority'],
                 'due_date' => $validated['newTaskDueDate'] === '' ? null : $validated['newTaskDueDate'],
+                'evidence_required' => (bool) ($validated['newTaskEvidenceRequired'] ?? false),
                 'progress_percentage' => $statusCase === TaskStatus::Done ? 100 : 0,
                 'completed_date' => $statusCase === TaskStatus::Done ? CarbonImmutable::today() : null,
                 'created_by' => $createdBy,

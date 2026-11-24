@@ -4,11 +4,13 @@
     step but the interview is read from its own record. Included by
     ⚡journeys.blade.php.
 --}}
+@use('Modules\Hr\Support\Journeys\OffboardingJourneys')
+
 @php
     $journey = $this->offboardingJourney;
     $exitSteps = $offboarding['steps'];
     $calledOff = $offboarding['calledOff'];
-    $required = collect($exitSteps)->whereIn('key', ['equipment', 'contract', 'deactivated', 'access']);
+    $required = collect($exitSteps)->whereIn('key', OffboardingJourneys::requiredKeys($exitSteps));
 @endphp
 
 <x-ui.panel :title="__('hr_journeys.offboarding.title')" data-journey="offboarding">
@@ -54,6 +56,8 @@
                             @elseif (! $isDone && $step['data']['deactivate_on'])
                                 <p class="mt-1 text-xs {{ $muted }}">{{ __('hr_journeys.offboarding.deactivation_help', ['date' => $date($step['data']['deactivate_on'])]) }}</p>
                             @endif
+                        @elseif ($key === 'entitlements' && ! $isDone)
+                            <p class="mt-1 text-xs {{ $muted }}">{{ trans_choice('hr_journeys.offboarding.entitlements_outstanding', $step['data']['outstanding'], ['count' => $step['data']['outstanding'], 'names' => implode(app()->getLocale() === 'ar' ? '، ' : ', ', $step['data']['names'])]) }}</p>
                         @elseif ($key === 'access' && $step['note'])
                             <p class="mt-1 text-xs text-status-critical">{{ __('hr_journeys.offboarding.'.$step['note']) }}</p>
                         @elseif ($key === 'interview')
@@ -68,6 +72,8 @@
                     <div class="flex flex-wrap items-start gap-2 sm:justify-end">
                         @if ($key === 'contract' && $step['data']['contract_id'] && $canViewContracts)
                             <x-ui.button tone="ghost" size="sm" icon="eye" :href="route('hr.contracts.show', $step['data']['contract_id'])" wire:navigate>{{ __('hr_journeys.offboarding.open_contract') }}</x-ui.button>
+                        @elseif ($key === 'entitlements' && ! $isDone && filled($step['data']['username']))
+                            <x-ui.button tone="ghost" size="sm" icon="eye" :href="route('hr.employees.show', ['employee' => $step['data']['username'], 'tab' => 'entitlements'])" wire:navigate>{{ __('hr_journeys.offboarding.entitlements_open') }}</x-ui.button>
                         @elseif ($key === 'interview')
                             @if ($isDone)
                                 <x-ui.button tone="ghost" size="sm" wire:click="askConfirm('reopen-offboarding', 'interview')">{{ __('hr_journeys.undo') }}</x-ui.button>

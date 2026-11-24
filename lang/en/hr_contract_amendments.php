@@ -36,9 +36,13 @@ return [
         'hint' => 'This amendment starts from the terms as that one left them. Check it is not the same change entered twice.',
     ],
     'terms' => [
+        'days_per_week' => '{1} :count day a week|[2,*] :count days a week',
         'hours' => 'Working hours',
         'days' => 'Work days',
         'flexible' => 'Flexible schedule',
+        'weekend_clause' => 'Day-off clause',
+        'weekend_clause_on' => 'Stated in the contract',
+        'weekend_clause_off' => 'Not stated',
         'weekly_hours' => '{1} :count hour a week|[2,*] :count hours a week',
         'days_per_week' => '{1} :count day a week|[2,*] :count days a week',
         'monthly_hours' => '{1} :count hour a month|[2,*] :count hours a month',

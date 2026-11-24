@@ -10,6 +10,7 @@ use Closure;
 use Modules\Hr\Models\Holiday;
 use Modules\Hr\Models\HolidayProject;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 /**
  * The holidays HR records (`holidays`) that apply to a project, as a "is
@@ -32,7 +33,25 @@ final class HrHolidays
      */
     public static function forProject(Project $project): Closure
     {
-        $pair = $project->program_id.':'.$project->city_id;
+        return self::forPair($project->program_id, $project->city_id);
+    }
+
+    /**
+     * The test for the holidays of a place (Y-03): its program and city.
+     *
+     * @return Closure(CarbonInterface): bool
+     */
+    public static function forPlace(ReportPlace $place): Closure
+    {
+        return self::forPair($place->programId, $place->cityId);
+    }
+
+    /**
+     * @return Closure(CarbonInterface): bool
+     */
+    private static function forPair(?int $programId, ?int $cityId): Closure
+    {
+        $pair = $programId.':'.$cityId;
 
         $holidays = array_values(array_filter(
             self::all(),

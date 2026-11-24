@@ -16,9 +16,14 @@ use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
+use Modules\Tracking\Console\Commands\BackfillLocationsFromProjects;
 use Modules\Tracking\Console\Commands\BackfillMonthlyReports;
+use Modules\Tracking\Console\Commands\BackfillPlanIndicatorRows;
 use Modules\Tracking\Console\Commands\BackfillProjectMembers;
 use Modules\Tracking\Console\Commands\BackfillProposalLocations;
+use Modules\Tracking\Console\Commands\BackfillRiskRows;
+use Modules\Tracking\Console\Commands\BackfillScheduleRows;
+use Modules\Tracking\Console\Commands\BackfillTaskRows;
 use Modules\Tracking\Console\Commands\EnsureAnnualPlans2026;
 use Modules\Tracking\Console\Commands\ImportProgramFramework;
 use Modules\Tracking\Console\Commands\ImportStrategyPillars;
@@ -29,14 +34,17 @@ use Modules\Tracking\Console\Commands\PrefillActiveReportTemplates;
 use Modules\Tracking\Console\Commands\PrepareMonthlyReports;
 use Modules\Tracking\Console\Commands\RemindAnnualPlanUpdates;
 use Modules\Tracking\Console\Commands\RemindProposalOwners;
+use Modules\Tracking\Console\Commands\ScanPlanMilestones;
 use Modules\Tracking\Console\Commands\SeedIndicatorLibrary;
 use Modules\Tracking\Console\Commands\SendMonthlyDigest;
+use Modules\Tracking\Console\Commands\TemplateBackfillMonthlyReports;
+use Modules\Tracking\Console\Commands\VerifyLocationMirror;
 use Modules\Tracking\Console\TrackingSchedule;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Events\FundingAgreementRecorded;
-use Modules\Tracking\Events\ProjectActivated;
 use Modules\Tracking\Events\ProjectPeriodChanged;
 use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Events\ReportTemplateConfirmed;
 use Modules\Tracking\Listeners\GenerateExpectedTransfersOnAgreementRecorded;
 use Modules\Tracking\Listeners\GenerateMonthlyReportsForProject;
 use Modules\Tracking\Listeners\PrefillReportTemplates;
@@ -44,7 +52,6 @@ use Modules\Tracking\Listeners\RebaseProposalPlanOnApproval;
 use Modules\Tracking\Listeners\ShiftActivitySchedulesOnApproval;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\IndicatorProgress;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\ProjectMember;
 use Modules\Tracking\Models\Report;
@@ -102,9 +109,14 @@ class TrackingServiceProvider extends ServiceProvider
         $this->app->make(ModuleRegistry::class)->addWorkItems(ReviewWorkItems::class);
 
         $this->commands([
+            BackfillLocationsFromProjects::class,
             BackfillMonthlyReports::class,
             BackfillProjectMembers::class,
+            BackfillPlanIndicatorRows::class,
             BackfillProposalLocations::class,
+            BackfillRiskRows::class,
+            BackfillScheduleRows::class,
+            BackfillTaskRows::class,
             EnsureAnnualPlans2026::class,
             ImportProgramFramework::class,
             ImportStrategyPillars::class,
@@ -115,8 +127,11 @@ class TrackingServiceProvider extends ServiceProvider
             PrepareMonthlyReports::class,
             RemindAnnualPlanUpdates::class,
             RemindProposalOwners::class,
+            ScanPlanMilestones::class,
             SeedIndicatorLibrary::class,
             SendMonthlyDigest::class,
+            TemplateBackfillMonthlyReports::class,
+            VerifyLocationMirror::class,
         ]);
 
         if (! $this->app->routesAreCached()) {
@@ -131,7 +146,7 @@ class TrackingServiceProvider extends ServiceProvider
     protected function registerListeners(): void
     {
         Event::listen(FundingAgreementRecorded::class, GenerateExpectedTransfersOnAgreementRecorded::class.'@handle');
-        Event::listen(ProjectActivated::class, GenerateMonthlyReportsForProject::class.'@handleProjectActivated');
+        Event::listen(ReportTemplateConfirmed::class, GenerateMonthlyReportsForProject::class.'@handleReportTemplateConfirmed');
         Event::listen(ProjectPeriodChanged::class, GenerateMonthlyReportsForProject::class.'@handleProjectPeriodChanged');
         Event::listen(ProposalStatusChanged::class, PrefillReportTemplates::class.'@handle');
         Event::listen(ProposalStatusChanged::class, RebaseProposalPlanOnApproval::class.'@handle');
@@ -149,7 +164,6 @@ class TrackingServiceProvider extends ServiceProvider
         Employee::resolveRelationUsing('projects', fn (Employee $employee): HasMany => $employee->hasMany(Project::class, 'owner_employee_id'));
         ProjectMember::resolveRelationUsing('employee', fn (ProjectMember $member): BelongsTo => $member->belongsTo(Employee::class, 'employee_id', 'id', 'employee'));
         Employee::resolveRelationUsing('projectMemberships', fn (Employee $employee): HasMany => $employee->hasMany(ProjectMember::class));
-        Employee::resolveRelationUsing('responsibleMilestones', fn (Employee $employee): HasMany => $employee->hasMany(Milestone::class, 'responsible_employee_id'));
         Employee::resolveRelationUsing('assignedTasks', fn (Employee $employee): HasManyThrough => $employee->hasManyThrough(Task::class, TaskAssignee::class, 'employee_id', 'id', 'id', 'task_id'));
     }
 

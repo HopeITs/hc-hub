@@ -173,6 +173,7 @@ new #[Layout('layouts::desk'), Title('hr_messages.title')] class extends Compone
 
 <x-desk.register class="@container" heading-id="hr-message-templates-heading" :title="__('hr_messages.title')" :count="$templates->count()" data-hr-message-templates>
     <x-slot:actions>
+        <x-ui.button icon="envelope" x-on:click="Livewire.dispatch('announcement-compose')" data-test="open-announcements">{{ __('hr_messages.announcements.title') }}</x-ui.button>
         <x-ui.button tone="primary" icon="plus" wire:click="openCreateModal" data-test="create-message-template" data-quick-create>{{ __('hr_messages.new') }}</x-ui.button>
     </x-slot:actions>
 
@@ -245,6 +246,8 @@ new #[Layout('layouts::desk'), Title('hr_messages.title')] class extends Compone
             <x-ui.button type="submit" tone="primary" data-test="save-message-template">{{ __('common.save_changes') }}</x-ui.button>
         </x-slot:actions>
     </x-ui.modal>
+
+    <livewire:hr::message-templates.announcements />
 
     <x-ui.confirm-modal
         wire:model="showDeleteModal"

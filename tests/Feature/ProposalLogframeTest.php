@@ -6,10 +6,16 @@ use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\SyncLogframeTask;
+use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
 use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -52,12 +58,11 @@ function logframeNode(Proposal $proposal, ResultType $type, ?Result $parent = nu
     ]);
 }
 
-test('the proposal page renders the logframe tab', function () {
+test('the proposal page shows the logical framework inside the proposal card', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
         ->test('tracking::proposals.show', ['proposal' => $this->proposal])
-        ->set('tab', 'logframe')
         ->assertSeeLivewire('proposals.logframe');
 });
 
@@ -96,6 +101,8 @@ test('MEAL builds the four levels and links the root to the program framework', 
         ->set('statement', 'Run four training sessions.')
         ->call('saveResult')
         ->assertHasNoErrors()
+        // Results start folded (proposal page redesign): open them to see the activity.
+        ->call('openAll')
         ->assertSee('Run four training sessions.');
 
     $activity = $this->proposal->results()->where('type', 'activity')->sole();
@@ -223,14 +230,14 @@ test('after submission only results.update holders change the structure', functi
     expect($this->proposal->results()->count())->toBe(2);
 });
 
-test('cross-cutting results render as their own group below the tree', function () {
+test('cross-cutting results render as their own roots after the chain', function () {
     $viewer = User::factory()->role('Team Member')->create();
-    logframeNode($this->proposal, ResultType::Impact, programId: $this->program->id);
+    $impact = logframeNode($this->proposal, ResultType::Impact, programId: $this->program->id);
     $crossCutting = logframeNode($this->proposal, ResultType::CrossCutting, programId: $this->program->id);
 
     logframeTab($viewer, $this->proposal)
-        ->assertSeeHtml('data-test="logframe-cross-cutting"')
-        ->assertSeeInOrder(['data-test="logframe-tree"', 'data-test="logframe-cross-cutting"', $crossCutting->statement], false);
+        ->assertSeeHtml('data-result-type="cross-cutting"')
+        ->assertSeeInOrder([$impact->statement, $crossCutting->statement]);
 });
 
 test('a proposal spanning programs shows the multi-program badge', function () {
@@ -281,4 +288,77 @@ test('the tab holds a flat query count whatever the framework size', function ()
 
     expect(count($large))->toBe(count($small))
         ->and(collect($large)->filter(fn (string $sql): bool => str_contains($sql, 'amount'))->all())->toBe([]);
+});
+
+test('a project proposal gets one logframe task for the MEAL Manager', function () {
+    $employeeId = holdMealManagerSlot();
+    $actor = User::factory()->role('Financial')->create();
+    $this->actingAs($actor);
+
+    $task = app(SyncLogframeTask::class)->ensure($this->proposal);
+    app(SyncLogframeTask::class)->ensure($this->proposal);
+
+    expect($task->kind)->toBe(TaskKind::Logframe)
+        ->and($task->taskAssignees()->pluck('employee_id')->all())->toBe([$employeeId])
+        ->and(Task::query()->withoutGlobalScopes()->where('kind', 'logframe')->count())->toBe(1);
+});
+
+test('confirming the framework needs a result, then closes the task', function () {
+    $meal = mealManager();
+    $this->actingAs($meal);
+    $task = app(SyncLogframeTask::class)->ensure($this->proposal);
+
+    logframeTab($meal, $this->proposal)
+        ->call('markDone')
+        ->assertHasErrors('doneNote')
+        ->assertDontSeeHtml('data-test="framework-task-done"');
+
+    logframeNode($this->proposal, ResultType::Impact, programId: $this->program->id);
+
+    // Checks are still open, so the redesign asks for a reason.
+    logframeTab($meal, $this->proposal)
+        ->set('doneNote', 'Targets follow the donor call next week')
+        ->call('markDone')
+        ->assertHasNoErrors()
+        ->assertSeeHtml('data-test="framework-task-done"');
+
+    expect($task->fresh()->status)->toBe(TaskStatus::Done);
+});
+
+test('marking the framework as done tells the program manager (user decision 2026-11-19)', function () {
+    $meal = mealManager();
+    $managerEmployeeId = insertHrEmployee(firstNameEn: 'Pia', lastNameEn: 'Manager');
+    $manager = userWithRole('Managers', $managerEmployeeId);
+    $this->program->forceFill(['manager_id' => $managerEmployeeId])->save();
+    $creator = User::factory()->role('Financial')->create();
+    ProposalStatusNote::query()->create([
+        'proposal_id' => $this->proposal->id,
+        'status' => ProposalStatus::ConceptNote,
+        'context' => 'Recorded',
+        'date' => today()->toDateString(),
+        'changed_by' => $creator->id,
+        'is_correction' => false,
+    ]);
+    logframeNode($this->proposal, ResultType::Impact, programId: $this->program->id);
+
+    logframeTab($meal, $this->proposal)->set('doneNote', 'Targets follow later')->call('markDone');
+
+    $confirmed = fn (User $user): int => $user->fresh()->notifications->filter(fn ($note): bool => str_contains(json_encode($note->data), 'logframe_confirmed'))->count();
+
+    expect($confirmed($manager))->toBe(1)
+        ->and($confirmed($creator))->toBe(0)
+        ->and($confirmed($meal))->toBe(0);
+});
+
+test('the logframe opens on the first outcome with its outputs collapsed', function () {
+    $meal = mealManager();
+    $impact = logframeNode($this->proposal, ResultType::Impact, programId: $this->program->id);
+    $outcome = logframeNode($this->proposal, ResultType::Outcome, $impact);
+    $output = logframeNode($this->proposal, ResultType::Output, $outcome);
+
+    logframeTab($meal, $this->proposal)
+        ->assertSeeHtml('data-test="outcome-panel-'.$outcome->id.'"')
+        ->assertSeeHtml('data-test="node-toggle-'.$output->id.'"')
+        ->assertSeeHtmlInOrder(['data-test="node-body-'.$output->id.'"', 'data-open="false"'])
+        ->assertDontSeeHtml('data-test="node-toggle-'.$impact->id.'"');
 });

@@ -27,6 +27,12 @@ class PrintSelection
      */
     public function fromRequest(Request $request): array
     {
+        // A print, PDF or Excel link with no month opens the month the Timesheets page opens on,
+        // instead of failing validation: on a GET that meant a silent redirect "back".
+        if (blank($request->query('month'))) {
+            $request->merge(['month' => now()->subDays(10)->format('Y-m')]);
+        }
+
         $data = $request->validate([
             'month' => ['required', 'date_format:Y-m'],
             'city_id' => ['nullable', 'integer'],
@@ -48,9 +54,12 @@ class PrintSelection
 
         abort_if($employees->isEmpty(), 404);
 
+        // One batch of reads for the whole selection, not a set per person.
+        $all = $this->timesheet->forEmployees($employees, $month);
+
         $sheets = $employees->map(fn (Employee $employee): array => [
             'employee' => $employee,
-            'sheet' => $this->timesheet->forEmployee($employee, $month),
+            'sheet' => $all[$employee->id],
         ])->values();
 
         $by = Grouping::normalize($data['group_by'] ?? null);

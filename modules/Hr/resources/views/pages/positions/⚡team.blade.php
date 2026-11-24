@@ -11,6 +11,7 @@ use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\MailList;
 use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Employees\HrAccess;
 
@@ -148,6 +149,39 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.team')] class extends 
     }
 
     /**
+     * The work emails of the people in a manager's own team, to write to them directly.
+     *
+     * @return list<string>
+     */
+    #[Computed]
+    public function teamEmails(): array
+    {
+        if ($this->scope !== 'mine') {
+            return [];
+        }
+
+        $mine = $this->myPositionIds();
+        $positionIds = array_values(array_diff($this->chart['positions']->keys()->all(), $mine));
+
+        if ($positionIds === []) {
+            return [];
+        }
+
+        return Contract::query()
+            ->activeNow()
+            ->where('type', '!=', ContractTypeEnum::Draft->value)
+            ->whereIn('position_id', $positionIds)
+            ->select(['id', 'employee_id', 'position_id'])
+            ->with('employee.account:id,employee_id,email')
+            ->get()
+            ->map(fn (Contract $contract): ?string => $contract->employee?->work_email)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
      * @return array<int, string>
      */
     #[Computed]
@@ -167,7 +201,8 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.team')] class extends 
     // An open seat links straight to a hiring request for it, position pre-filled.
     $canRequestHire = \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.view')
         && \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.manage');
-    $teamEmail = config('app.team_email');
+    // Lists for the place or project being viewed come first; a manager's own team can also be written to directly.
+    $suggestedLists = $scope === 'mine' ? collect() : MailList::suggestionsFor($city !== '' ? (int) $city : null, $program !== '' ? (int) $program : null, null);
 @endphp
 
 <x-desk.register class="@container/directory" heading-id="hr-team-heading" :title="__('hr_positions.titles.team')" :count="$positions->count()">
@@ -203,10 +238,7 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.team')] class extends 
 
     <x-slot:actions>
         <flux:checkbox wire:model.live="openOnly" :label="__('hr_positions.team.open_only')" />
-        @if (filled($teamEmail))
-            {{-- A new message to the team's shared mailbox, not to each address. --}}
-            <x-ui.button icon="envelope" :href="'mailto:'.$teamEmail" data-test="email-team">{{ __('hr_positions.team.email_team') }}</x-ui.button>
-        @endif
+        <x-hr::mail-lists.menu :suggested="$suggestedLists" :people="$this->teamEmails" :people-label="__('hr_positions.team.email_team_directly')" :label="__('hr_positions.team.email_team')" />
         @can('viewAny', \Modules\Hr\Models\Position::class)
             <x-ui.button icon="briefcase" :href="route('hr.positions.index')" wire:navigate>{{ __('hr_positions.titles.index') }}</x-ui.button>
         @endcan

@@ -25,7 +25,6 @@ use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\LibraryIndicator;
 use Modules\Tracking\Models\MealCoverageAssignment;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
@@ -50,7 +49,6 @@ test('the morph map registers exactly the target sources, task sources, media ow
         'proposal' => Proposal::class,
         'proposal_status_note' => ProposalStatusNote::class,
         'project' => Project::class,
-        'milestone' => Milestone::class,
         'program' => Program::class,
         'department' => HrDepartment::class,
         'user' => User::class,
@@ -94,7 +92,6 @@ test('the morph map is enforced so an unmapped model has no morph class', functi
         ->and((new AnnualPlan)->getMorphClass())->toBe('annual_plan')
         ->and((new Proposal)->getMorphClass())->toBe('proposal')
         ->and((new Project)->getMorphClass())->toBe('project')
-        ->and((new Milestone)->getMorphClass())->toBe('milestone')
         ->and((new Program)->getMorphClass())->toBe('program')
         ->and((new HrDepartment)->getMorphClass())->toBe('department')
         ->and((new User)->getMorphClass())->toBe('user')
@@ -104,6 +101,16 @@ test('the morph map is enforced so an unmapped model has no morph class', functi
 
     (new ReportFile)->getMorphClass();
 })->throws(ClassMorphViolationException::class);
+
+test('a location row owns its files and its owner assignment under the proposal_location key', function () {
+    $row = ProposalLocation::factory()->create();
+
+    expect($row->getMorphClass())->toBe('proposal_location')
+        ->and($row->media()->getMorphType())->toBe('mediable_type')
+        ->and($row->media()->getMorphClass())->toBe('proposal_location')
+        ->and($row->assignments()->getMorphClass())->toBe('proposal_location')
+        ->and($row->ownerAssignment()->getMorphClass())->toBe('proposal_location');
+});
 
 test('each mapped key fits the fifty character source_type column', function () {
     foreach (array_keys(Relation::morphMap()) as $key) {

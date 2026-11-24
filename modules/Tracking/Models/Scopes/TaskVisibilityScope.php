@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\TaskKind;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Support\TrackingDuties;
 
@@ -79,6 +78,7 @@ class TaskVisibilityScope implements Scope
         $departmentId = $user->departmentId();
         $departmentEmployeeIds = $user->departmentEmployeeIds();
         $ownedProjectIds = TrackingDuties::for($user)->ownedProjectIds();
+        $ownedLocationIds = TrackingDuties::for($user)->ownedLocationIds();
         $managedProgramIds = $user->managedProgramIds();
         $isProposalEditor = $user->can('proposals.update');
         $seesFinancialTasks = $isProposalEditor || $user->hasRole(self::FinanceRole);
@@ -87,7 +87,7 @@ class TaskVisibilityScope implements Scope
         $sourceId = $query->qualifyColumn('source_id');
         $taskDepartmentId = $query->qualifyColumn('department_id');
 
-        $query->where(function (Builder $query) use ($user, $departmentId, $departmentEmployeeIds, $ownedProjectIds, $managedProgramIds, $isProposalEditor, $createdBy, $sourceType, $sourceId, $taskDepartmentId): void {
+        $query->where(function (Builder $query) use ($user, $departmentId, $departmentEmployeeIds, $ownedProjectIds, $ownedLocationIds, $managedProgramIds, $isProposalEditor, $createdBy, $sourceType, $sourceId, $taskDepartmentId): void {
             $query->where($createdBy, $user->id);
 
             if ($departmentId !== null) {
@@ -114,8 +114,13 @@ class TaskVisibilityScope implements Scope
             }
 
             if ($ownedProjectIds !== []) {
-                $query->orWhere(fn (Builder $query) => $query->where($sourceType, 'project')->whereIn($sourceId, $ownedProjectIds))
-                    ->orWhere(fn (Builder $query) => $query->where($sourceType, 'milestone')->whereIn($sourceId, Milestone::query()->select('id')->whereIn('project_id', $ownedProjectIds)));
+                $query->orWhere(fn (Builder $query) => $query->where($sourceType, 'project')->whereIn($sourceId, $ownedProjectIds));
+            }
+
+            // Y-12: the row is where a task lives now. The `project` arm
+            // above stays until Y-18 for tasks the backfill could not map.
+            if ($ownedLocationIds !== []) {
+                $query->orWhere(fn (Builder $query) => $query->where($sourceType, 'proposal_location')->whereIn($sourceId, $ownedLocationIds));
             }
 
             if ($managedProgramIds !== []) {

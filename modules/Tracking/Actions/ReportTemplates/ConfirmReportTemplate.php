@@ -17,6 +17,7 @@ use Modules\Tracking\Enums\LineSchedule;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ReportTemplateLineStatus;
 use Modules\Tracking\Enums\ReportTemplateStatus;
+use Modules\Tracking\Events\ReportTemplateConfirmed;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\ReportTemplateLine;
@@ -35,8 +36,9 @@ use Modules\Tracking\Support\Reporting\PlaceBridge;
  * ActivateProject in the same transaction (this action never writes a
  * project or proposal status); on an `active` project the newly confirmed
  * lines record `report_template.lines_added` (proposals and month range) for
- * the owner instead. Nothing is retroactive. Notifications and
- * ProjectActivated fire after the commit.
+ * the owner instead. Nothing is retroactive. Notifications,
+ * ProjectActivated and, on the first confirmation, ReportTemplateConfirmed
+ * (which generates the monthly reports) fire after the commit.
  */
 final class ConfirmReportTemplate
 {
@@ -64,7 +66,7 @@ final class ConfirmReportTemplate
 
         $confirmed = DB::transaction(function () use ($template, $lineIds): ReportTemplate {
             $locked = ReportTemplate::query()->whereKey($template->getKey())->lockForUpdate()->firstOrFail();
-            $project = $this->places->legacyProjectFor($locked, lock: true);
+            $project = $this->places->legacyProjectFor($locked);
 
             Gate::authorize('manage', $locked);
 
@@ -74,6 +76,14 @@ final class ConfirmReportTemplate
 
             $lines = $this->lockLines($locked, $lineIds);
             $this->ensureConfirmable($lines);
+            $proposalIds = array_values($lines->pluck('planIndicator')->filter(fn ($target): bool => $target->source_type === 'proposal')
+                ->pluck('source_id')->map(fn ($id): int => (int) $id)->unique()->values()->all());
+            $projects = $this->places->projectsForConfirmation($locked, $proposalIds);
+            foreach ($projects as $confirmationProject) {
+                if (! in_array($confirmationProject->status, [ProjectStatus::Approved, ProjectStatus::Active], true)) {
+                    throw ValidationException::withMessages(['template' => __('projects.activate_not_approved')]);
+                }
+            }
 
             if ($lines->isEmpty() && ! $locked->lines()->where('status', ReportTemplateLineStatus::Confirmed)->exists()) {
                 throw ValidationException::withMessages(['lines' => __('report_templates.confirm_at_least_one')]);
@@ -90,17 +100,30 @@ final class ConfirmReportTemplate
                 ])->save();
             }
 
-            if (! $locked->isConfirmed()) {
+            $wasConfirmed = $locked->isConfirmed();
+            if (! $wasConfirmed) {
                 $locked->forceFill([
                     'status' => ReportTemplateStatus::Confirmed,
                     'confirmed_at' => $now,
                     'confirmed_by' => $actorId,
                 ])->save();
+
+                ReportTemplateConfirmed::dispatch($locked->id);
             }
 
-            if ($project?->status === ProjectStatus::Approved) {
-                $this->activateProject->handle($project, 'template_confirmation');
-            } elseif ($lines->isNotEmpty()) {
+            if ($wasConfirmed && $lines->isNotEmpty()) {
+                ReportTemplateConfirmed::dispatch($locked->id);
+            }
+
+            $activated = false;
+            foreach ($projects as $confirmationProject) {
+                if ($confirmationProject->status === ProjectStatus::Approved) {
+                    $this->activateProject->handle($confirmationProject, 'template_confirmation');
+                    $activated = true;
+                }
+            }
+
+            if (! $activated && $lines->isNotEmpty()) {
                 $this->recordLinesAdded($locked, $lines, $project?->id, $project?->end_date);
             }
 

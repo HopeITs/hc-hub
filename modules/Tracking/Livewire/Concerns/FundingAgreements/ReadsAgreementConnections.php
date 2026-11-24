@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ArStatus;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\Project;
@@ -45,10 +44,6 @@ trait ReadsAgreementConnections
         return $this->agreement->proposal->projects()
             ->select(['projects.id', 'projects.name', 'projects.city_id', 'projects.program_id', 'projects.status', 'projects.start_date', 'projects.end_date'])
             ->with(['city:id,name_en,name_ar', 'program:id'])
-            ->withCount([
-                'milestones',
-                'milestones as reached_milestones_count' => fn (Builder $query) => $query->where('status', MilestoneStatus::Reached),
-            ])
             ->orderBy('projects.name')
             ->get();
     }

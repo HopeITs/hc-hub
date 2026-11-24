@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -26,8 +25,8 @@ use Modules\Tracking\Models\TransfersTracking;
  * BuildsCalendarGrid, canViewAgreements() from ChecksFinanceVisibility,
  * layerItemsByDay() from ShowsCalendarLayers.
  *
- * @property-read array{month: CarbonImmutable, weeks: ?array<int, array<int, CarbonImmutable>>, days: ?array<int, CarbonImmutable>, milestonesByDay: \Illuminate\Support\Collection<string, Collection<int, Milestone>>, tasksByDay: \Illuminate\Support\Collection<string, Collection<int, Task>>, reportsByDay: \Illuminate\Support\Collection<string, Collection<int, Report>>, monthlyReportsByDay: \Illuminate\Support\Collection<string, Collection<int, MonthlyReport>>, proposalsByDay: \Illuminate\Support\Collection<string, Collection<int, Proposal>>, transfersByDay: \Illuminate\Support\Collection<string, Collection<int, TransfersTracking>>, donorFollowUpsByDay: \Illuminate\Support\Collection<string, Collection<int, Donor>>, donorReportsByDay: \Illuminate\Support\Collection<string, Collection<int, DonorReport>>, projectStartsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, projectEndsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, reviewMeetingsByDay: \Illuminate\Support\Collection<string, Collection<int, ProposalStatusNote>>, unscheduledTasks: Collection<int, Task>, nowOffsetPercent: float} $calendar  #[Computed] calendar()
  * @property-read array<string, list<array{layer: string, icon: string, leads: bool, id: string, title: string, context: string|null, href: string|null}>> $layerItemsByDay  #[Computed] layerItemsByDay()
+ * @property-read array{month: CarbonImmutable, weeks: ?array<int, array<int, CarbonImmutable>>, days: ?array<int, CarbonImmutable>, tasksByDay: \Illuminate\Support\Collection<string, Collection<int, Task>>, reportsByDay: \Illuminate\Support\Collection<string, Collection<int, Report>>, monthlyReportsByDay: \Illuminate\Support\Collection<string, Collection<int, MonthlyReport>>, proposalsByDay: \Illuminate\Support\Collection<string, Collection<int, Proposal>>, transfersByDay: \Illuminate\Support\Collection<string, Collection<int, TransfersTracking>>, donorFollowUpsByDay: \Illuminate\Support\Collection<string, Collection<int, Donor>>, donorReportsByDay: \Illuminate\Support\Collection<string, Collection<int, DonorReport>>, projectStartsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, projectEndsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, reviewMeetingsByDay: \Illuminate\Support\Collection<string, Collection<int, ProposalStatusNote>>, unscheduledTasks: Collection<int, Task>, nowOffsetPercent: float} $calendar  #[Computed] calendar()
  */
 trait ShowsCalendarDay
 {
@@ -79,10 +78,6 @@ trait ShowsCalendarDay
             if ($item['leads']) {
                 $rows->push(['type' => 'layer', 'kind' => 'link', 'id' => $item['id'], 'url' => $item['href'], 'title' => $item['title'], 'subLabel' => $item['context']]);
             }
-        }
-
-        foreach ($calendar['milestonesByDay']->get($date, new Collection) as $milestone) {
-            $rows->push(['type' => 'milestone', 'kind' => 'modal-milestone', 'id' => $milestone->id, 'url' => null, 'title' => $milestone->name, 'subLabel' => $milestone->ownerName()]);
         }
 
         foreach ($calendar['tasksByDay']->get($date, new Collection) as $task) {

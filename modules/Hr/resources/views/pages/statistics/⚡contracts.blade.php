@@ -131,7 +131,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.contracts')] class ex
                                     @endif
                                 </p>
                             </div>
-                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="$byProgram ? __('hr_statistics.contracts.program') : __('hr_statistics.contracts.center')" />
+                            <x-ui.tone-badge>{{ $byProgram ? __('hr_statistics.contracts.program') : __('hr_statistics.contracts.center') }}</x-ui.tone-badge>
                         </div>
 
                         <div class="grid grid-cols-3 gap-2 p-4 pt-2">

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Activity;
 use Carbon\CarbonImmutable;
+use Database\Seeders\Concerns\SeedsReportTemplates;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -13,7 +14,6 @@ use Modules\Hr\Models\Department;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\DeliveryState;
 use Modules\Tracking\Enums\MealCoverageScope;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ReviewerSlot;
 use Modules\Tracking\Enums\ReviewStage;
@@ -25,12 +25,10 @@ use Modules\Tracking\Models\FundingAgreementInstallment;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\MealCoverageAssignment;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalReviewer;
-use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\StrategicPillar;
 use Modules\Tracking\Models\Strategy;
 use Modules\Tracking\Models\Supervision;
@@ -40,7 +38,7 @@ use Modules\Tracking\Models\TransfersTracking;
 /**
  * Fills the parts of the Desk the demo data leaves empty, so every page and
  * panel has something to show: reviews waiting on each administrator, tasks
- * of theirs due today / this week / late, milestones due this week, monthly
+ * of theirs due today / this week / late, monthly
  * reports waiting for validation, report templates, strategic pillars,
  * supervisions and agreement installments. It reuses existing projects,
  * proposals and HR employees (never creates HR people) and is safe to run
@@ -50,6 +48,8 @@ use Modules\Tracking\Models\TransfersTracking;
  */
 class DeskShowcaseSeeder extends Seeder
 {
+    use SeedsReportTemplates;
+
     public function run(): void
     {
         Model::unguarded(fn () => Activity::withoutRecording(function (): void {
@@ -111,24 +111,17 @@ class DeskShowcaseSeeder extends Seeder
                 }
             }
 
-            // Open milestones (the demo data has none): late, due this week, later.
-            foreach ($projects->take(6) as $i => $project) {
-                Milestone::query()->where('project_id', $project->id)->orderBy('id')->limit(1)
-                    ->update([
-                        'planned_end_date' => $today->addDays([-5, 1, 3, 6, 15, 30][$i])->toDateString(),
-                        'status' => $i % 2 === 0 ? MilestoneStatus::Ongoing : MilestoneStatus::Planned,
-                    ]);
-            }
-
             // Monthly reports waiting for validation, by people other than the administrators.
             $preparer = User::query()->whereNotIn('id', $admins->pluck('id'))->value('id');
 
             foreach ($projects->take(5) as $i => $project) {
                 $period = $today->startOfMonth()->subMonths($i + 1)->toDateString();
 
+                $template = $this->reportTemplateFor($project, $admins->first()->id ?? $preparer);
+
                 MonthlyReport::query()->firstOrCreate(
-                    ['project_id' => $project->id, 'period' => $period],
-                    ['status' => MonthlyReportStatus::Submitted, 'prepared_by' => $preparer, 'submitted_by' => $preparer, 'submitted_at' => now()->subDays($i + 1)],
+                    ['report_template_id' => $template->id, 'period' => $period],
+                    ['project_id' => $project->id, 'status' => MonthlyReportStatus::Submitted, 'prepared_by' => $preparer, 'submitted_by' => $preparer, 'submitted_at' => now()->subDays($i + 1)],
                 );
 
                 // Each administrator is the MEAL officer of some of these projects, so To validate has rows.
@@ -144,11 +137,7 @@ class DeskShowcaseSeeder extends Seeder
 
             // Report templates for MEAL to confirm.
             foreach ($projects->take(3) as $project) {
-                $template = ReportTemplate::query()->firstOrCreate(
-                    ['project_id' => $project->id],
-                    ['city_id' => $project->city_id, 'program_id' => $project->program_id, 'center_id' => $project->center_id],
-                );
-                $template->proposals()->syncWithoutDetaching(array_fill_keys($project->proposals()->pluck('proposals.id')->all(), ['joined_at' => $today]));
+                $this->reportTemplateFor($project);
             }
 
             // Strategic pillars on every strategy.
@@ -235,7 +224,6 @@ class DeskShowcaseSeeder extends Seeder
                 }
 
                 $project = $owned->values()->get($i % max(1, $owned->count())) ?? $projects->first();
-                $milestone = Milestone::query()->where('project_id', $project->id)->value('id');
                 $department = $kind === null ? null : Department::query()->where('name', $kind === TaskKind::Financial ? 'Finance' : 'Communication')->value('id');
 
                 $task = Task::query()->create([
@@ -243,8 +231,8 @@ class DeskShowcaseSeeder extends Seeder
                     'description' => 'Seeded so Needs you, Waiting on others and Department deliverables have rows.',
                     'status' => $status,
                     'due_date' => $today->addDays($offset)->toDateString(),
-                    'source_type' => $milestone === null || $kind === null ? 'project' : 'milestone',
-                    'source_id' => $milestone === null || $kind === null ? $project->id : $milestone,
+                    'source_type' => 'project',
+                    'source_id' => $project->id,
                     'kind' => $kind ?? TaskKind::General,
                     'department_id' => $department,
                     'delivery_state' => $state,

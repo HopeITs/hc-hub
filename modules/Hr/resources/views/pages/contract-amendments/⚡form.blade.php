@@ -73,7 +73,7 @@ new #[Layout('layouts::desk'), Title('hr_contract_amendments.titles.form')] clas
     public function contract(): Contract
     {
         $columns = ['id', 'employee_id', 'position_id', 'contract_type_id', 'type', 'start_date', 'end_date', 'weekly_hours', 'schedule_mode',
-            'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_day_from', 'work_day_to',
+            'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_day_from', 'work_day_to', 'work_weekdays',
             'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_month', 'flex_varies_by_requirements',
             'flex_coordinated_with_manager', 'flex_custom_en', 'flex_custom_ar'];
 

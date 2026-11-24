@@ -29,9 +29,11 @@ use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\JobLevel;
 use Modules\Hr\Models\Position;
 use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Enums\AssignmentStatus;
 use Modules\Tracking\Enums\Currency;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Models\Account;
 use Modules\Tracking\Models\Donor;
@@ -39,7 +41,6 @@ use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\LibraryIndicator;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\MonthlyReportLine;
 use Modules\Tracking\Models\MonthlyReportLineShare;
@@ -246,34 +247,18 @@ function insertDonorProposal(int $donorId, int $proposalId, string $budget = '50
 }
 
 /**
- * Insert a milestone, optionally nested under a parent milestone.
- */
-function insertMilestone(int $projectId, int $responsibleUserId, ?int $parentId = null, string $name = 'Baseline assessment'): int
-{
-    return Milestone::factory()->create([
-        'project_id' => $projectId,
-        'name' => $name,
-        'description' => null,
-        'planned_start_date' => '2026-03-31',
-        'responsible_employee_id' => $responsibleUserId,
-        'parent_milestone_id' => $parentId,
-    ])->id;
-}
-
-/**
- * Insert a task against a proposal, or against a milestone under it when
- * $milestoneId is given.
+ * Insert a task against a proposal.
  *
  * `source_type`/`source_id` are polymorphic and carry no foreign key. This
- * wrapper keeps the proposal/milestone-shaped call sites that predate the
- * morph working unchanged; use Task::factory()->create(['source_type' =>
+ * wrapper keeps the proposal-shaped call sites that predate the morph working
+ * unchanged; use Task::factory()->create(['source_type' =>
  * ..., 'source_id' => ...]) directly for the other source types.
  */
-function insertTask(int $proposalId, int $assignedTo, int $createdBy, ?int $milestoneId = null, string $title = 'Draft the distribution plan'): int
+function insertTask(int $proposalId, int $assignedTo, int $createdBy, string $title = 'Draft the distribution plan'): int
 {
     $taskId = Task::factory()->create([
-        'source_type' => $milestoneId !== null ? 'milestone' : 'proposal',
-        'source_id' => $milestoneId ?? $proposalId,
+        'source_type' => 'proposal',
+        'source_id' => $proposalId,
         'title' => $title,
         'description' => null,
         'created_by' => $createdBy,
@@ -355,7 +340,7 @@ function insertAccount(string $name = 'Operations USD'): int
 }
 
 /**
- * Insert a file against a project or a milestone, and return its id.
+ * Insert a file against a project, and return its id.
  *
  * `collection`, `disk` and `uploaded_at` are omitted so the column defaults
  * stay under test. `mediableType` takes the morph map KEY, matching what the
@@ -907,8 +892,7 @@ function overdueTaskFor(User $assignee, string $due, ?int $programId = null): Ta
 {
     return Activity::withoutRecording(function () use ($assignee, $due, $programId): Task {
         $project = Project::factory()->create(['end_date' => '2027-12-31', ...($programId === null ? [] : ['program_id' => $programId])]);
-        $milestone = Milestone::factory()->create(['project_id' => $project->id, 'planned_end_date' => '2027-12-31']);
-        $task = Task::factory()->create(['due_date' => $due, 'title' => 'Plan', 'source_type' => 'milestone', 'source_id' => $milestone->id]);
+        $task = Task::factory()->create(['due_date' => $due, 'title' => 'Plan', 'source_type' => 'project', 'source_id' => $project->id]);
         $task->taskAssignees()->delete();
         $task->taskAssignees()->create(['employee_id' => $assignee->employee_id]);
 
@@ -1063,6 +1047,42 @@ function donorReportFigures(Project $center, string $month, LibraryIndicator $li
 
         return $shares;
     });
+}
+
+/**
+ * Two approved proposals with targets at one explicit reporting place.
+ *
+ * @return array<string, mixed>
+ */
+function placementFixture(bool $cityWide = false): array
+{
+    return (function () use ($cityWide): array {
+        $program = Program::factory()->create();
+        $cityId = insertHrCity();
+        $centerId = $cityWide ? null : insertHrCenter($cityId);
+        $project = Project::factory()->approved()->create([
+            'program_id' => $program->id, 'city_id' => $cityId, 'center_id' => $centerId,
+            'start_date' => '2026-01-01', 'end_date' => '2026-12-31',
+        ]);
+        $project->currentAssignment('user_id')?->forceFill(['status' => AssignmentStatus::Acknowledged])->save();
+        $proposals = [];
+        $targets = [];
+        $library = LibraryIndicator::factory()->create(['frequency' => 'monthly', 'collected_by' => 'project_team', 'measure' => 'numeric', 'denominator_basis' => null]);
+        foreach (['First grant', 'Second grant'] as $name) {
+            $proposal = Proposal::factory()->create([
+                'name' => $name, 'status' => ProposalStatus::Approved,
+                'actual_date_begin' => '2026-01-01', 'actual_date_end' => '2026-12-31',
+                'planned_date_begin' => '2026-01-01', 'planned_date_end' => '2026-12-31',
+            ]);
+            $proposal->projects()->attach($project->id, ['target_beneficiaries' => 100]);
+            $row = proposalRowForProject($proposal, $project, $cityWide ? false : $centerId);
+            $row->forceFill(['responsible_employee_id' => $project->user_id])->save();
+            $targets[] = donorReportTarget($proposal, $project, $library);
+            $proposals[] = $proposal;
+        }
+
+        return compact('program', 'project', 'proposals', 'targets', 'library');
+    })();
 }
 
 /**

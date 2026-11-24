@@ -17,8 +17,7 @@ use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Report;
 
 /**
- * Weekly nudges about missing data: active projects with no milestones or
- * indicators, projects past their end still active, approved reports with no
+ * Weekly nudges about missing data: active projects with no indicators, projects past their end still active, approved reports with no
  * files, and (T14) programs with open projects but no program framework,
  * through LogframeGapAlert. Runs on working days only, so each week's nudge
  * lands on its first working day.
@@ -46,7 +45,7 @@ final class DataGapScanner implements Scanner
         $active = Project::query()
             ->notPaused()
             ->where('status', ProjectStatus::Active->value)
-            ->withCount(['milestones', 'indicators'])
+            ->withCount('indicators')
             ->get(['id', 'name', 'owner_employee_id', 'end_date']);
 
         $owners = $this->employees->usersFor($active->pluck('owner_employee_id')->map(fn ($id): int => (int) $id)->unique()->values()->all());
@@ -54,7 +53,6 @@ final class DataGapScanner implements Scanner
         foreach ($active as $project) {
             $owner = array_filter([$owners[(int) $project->owner_employee_id] ?? null]);
             $gaps = array_filter([
-                'no_milestones' => $project->milestones_count === 0 ? [] : null,
                 'no_indicators' => $project->indicators_count === 0 ? $meal : null,
                 'past_end' => $project->end_date !== null && $project->end_date->lt($now->startOfDay()) ? [] : null,
             ], fn (?array $others): bool => $others !== null);

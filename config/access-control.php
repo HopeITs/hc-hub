@@ -17,7 +17,6 @@ $groups = [
     'access-management' => ['manage-users', 'manage-roles', 'manage-permissions'],
     'programs' => ['view', 'create', 'update'],
     'projects' => ['view', 'create', 'update', 'delete'],
-    'milestones' => ['view', 'create', 'update', 'delete'],
     'indicators' => ['view', 'create', 'update', 'delete', 'record'],
     'indicator-library' => ['view', 'create', 'update', 'delete'],
     'results' => ['view', 'create', 'update', 'delete'],
@@ -68,13 +67,18 @@ $hrGroups = [
     'contracts' => ['view', 'create', 'update', 'delete', 'export', 'amend'],
     'programs' => ['delete'],
     'centers' => ['view', 'update', 'delete', 'export'],
-    'positions' => ['view', 'create', 'update', 'delete', 'export'],
+    'positions' => ['view', 'create', 'update', 'delete', 'export', 'mark-critical', 'view-replacements'],
     'leaves' => ['view-own', 'view-all', 'create', 'update', 'delete', 'decide', 'review', 'manage-balances', 'export'],
     'project-basics' => ['view', 'create', 'update', 'delete', 'export'],
     'news' => ['view', 'create', 'update', 'delete'],
     'badges' => ['view', 'create', 'update', 'delete'],
     'archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
     'checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
+    // Permissions Library (meeting 19/11, track 5): professional access tracked outside the system,
+    // never a Spatie permission of its own. `manage-library` edits the items and their position
+    // defaults (HR, administrators); `assign` adds, marks done and revokes a person's items (HR in
+    // their city, a manager for direct reports only: Modules\Hr\Support\Entitlements\Entitlements).
+    'entitlements' => ['manage-library', 'assign'],
     'recruitment-requests' => ['view', 'manage', 'submit', 'cancel', 'approve', 'reject', 'request-changes', 'direct-open', 'export', 'approve-finance', 'submit-without-manager'],
     'recruitment-vacancies' => ['view', 'manage'],
     'recruitment-campaigns' => ['view', 'manage'],
@@ -403,12 +407,13 @@ return [
             'programs.create', 'programs.update', 'centers.create',
             'annual-plans.create', 'annual-plans.update', 'annual-plans.delete',
             'projects.update', 'projects.delete',
-            'milestones.create', 'milestones.update', 'milestones.delete',
             'risks.create', 'risks.update', 'risks.delete',
             // Building the logframe is the MEAL manager's alone (2026-11-13); managers still log readings.
             'indicators.record',
             // Their direct reports' timesheets (Modules\Hr\Support\Attendance\Roster).
             'attendance.view',
+            // Their direct reports' Permissions Library items (Entitlements::canAssign).
+            'entitlements.assign',
             ...$aiDrafter,
         ],
         'General Manager' => array_values(array_diff($allPermissions, [

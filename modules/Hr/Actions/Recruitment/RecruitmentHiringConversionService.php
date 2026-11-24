@@ -230,19 +230,30 @@ class RecruitmentHiringConversionService
     public function prefill(Conversion $conversion): array
     {
         $payload = $conversion->employee_payload_json ?? [];
-        $name = trim((string) ($payload['full_name'] ?? ''));
-        [$first, $last] = array_pad(preg_split('/\s+/u', $name, 2) ?: [], 2, '');
-        $arabic = preg_match('/\p{Arabic}/u', $name) === 1;
+
+        // The application form asks for the eight names (RecruitmentApplicationFormService::NAME_FIELDS), so HR
+        // retypes none. An application made before it did has only the full name, split as it always was:
+        // first word, then the rest, in its script.
+        $names = $this->namesFromApplication($conversion);
+
+        if ($names === []) {
+            $name = trim((string) ($payload['full_name'] ?? ''));
+            [$first, $last] = array_pad(preg_split('/\s+/u', $name, 2) ?: [], 2, '');
+            $suffix = preg_match('/\p{Arabic}/u', $name) === 1 ? 'ar' : 'en';
+            $names = ["first_name_{$suffix}" => $first, "last_name_{$suffix}" => $last];
+        }
+
+        $name = fn (string $key): string => (string) ($names[$key] ?? '');
 
         return [
-            'firstNameEn' => $arabic ? '' : $first,
-            'lastNameEn' => $arabic ? '' : $last,
-            'firstNameAr' => $arabic ? $first : '',
-            'lastNameAr' => $arabic ? $last : '',
-            'fatherNameEn' => '',
-            'fatherNameAr' => '',
-            'motherNameEn' => '',
-            'motherNameAr' => '',
+            'firstNameEn' => $name('first_name_en'),
+            'lastNameEn' => $name('last_name_en'),
+            'firstNameAr' => $name('first_name_ar'),
+            'lastNameAr' => $name('last_name_ar'),
+            'fatherNameEn' => $name('father_name_en'),
+            'fatherNameAr' => $name('father_name_ar'),
+            'motherNameEn' => $name('mother_name_en'),
+            'motherNameAr' => $name('mother_name_ar'),
             'nationality' => (string) Nationality::Syrian->value,
             'nationalNumber' => '',
             'gender' => '',
@@ -250,8 +261,30 @@ class RecruitmentHiringConversionService
             'dob' => '',
             'personalPhone' => $this->localPhone($payload['phone'] ?? null) ?? '',
             'personalEmail' => (string) ($payload['email'] ?? ''),
-            'username' => $arabic ? '' : $this->suggestUsername($first, $last),
+            'username' => $name('first_name_en') !== '' ? $this->suggestUsername($name('first_name_en'), $name('last_name_en')) : '',
         ];
+    }
+
+    /**
+     * The names the applicant gave on the application this offer came from, keyed like the form fields;
+     * empty when the form did not ask for them.
+     *
+     * @return array<string, string>
+     */
+    private function namesFromApplication(Conversion $conversion): array
+    {
+        $application = $conversion->jobOffer?->application;
+
+        if (! $application) {
+            return [];
+        }
+
+        return $application->answers()
+            ->whereIn('field_key', RecruitmentApplicationFormService::NAME_FIELDS)
+            ->get()
+            ->mapWithKeys(fn ($answer): array => [$answer->field_key => trim((string) ($answer->answer_json['value'] ?? ''))])
+            ->filter(fn (string $value): bool => $value !== '')
+            ->all();
     }
 
     /** The city the employee belongs to: the position's center's, else its own (as Position::inCity()). */

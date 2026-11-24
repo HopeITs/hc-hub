@@ -8,14 +8,12 @@ use Modules\Core\Models\User;
 use Modules\Tracking\Actions\Proposals\TransitionProposal;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Models\Donor;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
 
 beforeEach(fn () => $this->travelTo('2026-10-13 10:00:00'));
 
 /**
- * An active, donor-funded proposal whose final-report milestone is reached
- * and whose final report is filed: everything D-02c needs but the acceptance.
+ * An active, donor-funded proposal whose final report is filed: everything D-02c needs but the acceptance.
  */
 function proposalAwaitingFinalReportAcceptance(User $uploader): Proposal
 {
@@ -23,7 +21,6 @@ function proposalAwaitingFinalReportAcceptance(User $uploader): Proposal
         'status' => ProposalStatus::Active,
         'donor_id' => Donor::factory()->create(['is_internal' => false])->id,
     ]);
-    Milestone::factory()->reached()->create(['proposal_id' => $proposal->id, 'is_final_report' => true]);
     Media::query()->findOrFail(insertMedia('proposal', $proposal->id, $uploader->id))->update(['collection' => MediaCollection::FinalReport]);
 
     return $proposal;
@@ -33,8 +30,10 @@ test('a proposal editor records the acceptance from the page and then sees it in
     $actor = userWithRole('Financial');
     $proposal = proposalAwaitingFinalReportAcceptance($actor);
 
+    // Stage 3b: the acceptance line sits in the "History & approvals" section, opened here.
     $component = Livewire::actingAs($actor)
         ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->call('openSection', 'history')
         ->assertSeeHtml('data-test="open-final-report-modal"')
         ->assertDontSeeHtml('data-test="final-report-accepted"')
         ->call('openAcceptanceModal')
@@ -117,7 +116,7 @@ test('once recorded from the page the proposal can close', function () {
     expect($proposal->fresh()->status)->toBe(ProposalStatus::Completed);
 });
 
-test('a payroll proposal offers the acceptance with the final report filed and no milestone', function () {
+test('a payroll proposal offers the acceptance once the final report is filed', function () {
     $actor = userWithRole('Financial');
     $proposal = Proposal::factory()->payroll()->create([
         'status' => ProposalStatus::Active,

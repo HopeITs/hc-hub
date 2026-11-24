@@ -1392,6 +1392,11 @@
         white-space: nowrap;
     }
 
+    /* `fit`: a segment takes its label's width plus a share of the rest, so a long label is not cut. */
+    .form-segmented-fit > .form-segment {
+        flex: 1 1 auto;
+    }
+
     .form-segment[aria-checked='true'] {
         background-color: var(--color-white);
         color: var(--color-secondary-dark);
@@ -1717,6 +1722,12 @@
         color: var(--color-secondary-medium);
     }
 
+    /* An on/off chip (a hidden checkbox inside the label): red while on. */
+    :is(.task-composer, .filter-picker) .form-chip-toggle:has(input:checked) {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+    }
+
     .form-chip-dot {
         flex-shrink: 0;
         width: 8px;
@@ -1821,6 +1832,11 @@
 
     .dark .form-chip[data-invalid] {
         border-color: var(--color-brand-text);
+    }
+
+    .dark :is(.task-composer, .filter-picker) .form-chip-toggle:has(input:checked) {
+        border-color: var(--color-brand-text);
+        color: var(--color-brand-text);
     }
 
     .dark :is(.task-composer, .filter-picker) .form-chip-ghost {

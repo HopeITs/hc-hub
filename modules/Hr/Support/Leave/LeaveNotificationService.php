@@ -151,6 +151,35 @@ class LeaveNotificationService
         $this->dispatch($this->unique($managers, [$actor?->id, $requester?->id]), $key, $params, $actor, ['route' => 'hr.leave.team']);
     }
 
+    /**
+     * The decider named another alternative when accepting: the requester is
+     * told who was replaced and by whom. Nothing when nothing changed.
+     */
+    public function sendAlternativeChanged(LeaveRequest $leaveRequest, ?int $fromId, ?int $toId, ?User $actor = null): void
+    {
+        if ($fromId === $toId) {
+            return;
+        }
+
+        $leaveRequest = $this->loadContext($leaveRequest);
+        $names = Employee::query()->whereKey(array_filter([$fromId, $toId]))->get()->keyBy('id');
+        $requester = $this->unique(collect([$this->requesterAccount($leaveRequest)]), [$actor?->id]);
+
+        $nameOf = fn (?int $id): array => ['localized' => [
+            'en' => $id === null ? __('hr_leave.alternative.none', [], 'en') : (string) $names->get($id)?->nameForLocale('en'),
+            'ar' => $id === null ? __('hr_leave.alternative.none', [], 'ar') : (string) $names->get($id)?->nameForLocale('ar'),
+        ]];
+
+        $type = $leaveRequest->leaveBalance?->leaveType;
+        $params = [
+            'type' => ['localized' => ['en' => (string) $type?->name_en, 'ar' => (string) $type?->name_ar]],
+            'previous' => $nameOf($fromId),
+            'current' => $nameOf($toId),
+        ];
+
+        $this->dispatch($requester, 'alternative_changed', $params, $actor, ['route' => 'hr.leave.show', 'parameters' => ['leaveRequest' => $leaveRequest->id]], NotificationPriority::Info, $this->ids($requester));
+    }
+
     private function loadContext(LeaveRequest $leaveRequest): LeaveRequest
     {
         return $leaveRequest->loadMissing([

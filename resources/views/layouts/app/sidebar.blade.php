@@ -29,7 +29,10 @@
                     <x-desk.top-bar :shows-inbox="$showsInbox" />
                 @endunless
 
-                {{ $slot }}
+                {{-- The page scrolls here, under the top bar, so its scrollbar never runs beside the bar. --}}
+                <div class="dk-page-scroll" data-page-scroll>
+                    {{ $slot }}
+                </div>
             </div>
         </div>
 
@@ -43,6 +46,13 @@
             @if (request()->routeIs('dashboard'))
                 <livewire:desk.page-panels :route-name="request()->route()?->getName() ?? ''" :page-title="filled($title ?? null) ? __($title) : null" />
             @endif
+        @endif
+
+        @if ($showsInbox && ! $inTab && config('chat.enabled'))
+            {{-- The chat dock (Modules\Hr\Livewire\Chat\Dock): persisted so open tabs survive wire:navigate. --}}
+            @persist('chat-dock')
+                <livewire:hr.chat.dock />
+            @endpersist
         @endif
 
         @unless ($inTab)

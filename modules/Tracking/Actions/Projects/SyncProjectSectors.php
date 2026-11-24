@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Sector;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * Set the sectors a project covers (contracts.md §12.5, D-47). The one
@@ -26,6 +27,8 @@ use Modules\Tracking\Models\Sector;
  */
 final class SyncProjectSectors
 {
+    public function __construct(private ProjectLocationMirror $mirror) {}
+
     /**
      * @param  list<int>  $sectorIds
      *
@@ -80,6 +83,8 @@ final class SyncProjectSectors
                     'removed_sectors' => $removedNames,
                 ]);
             }
+
+            $this->mirror->syncSectors($locked);
         });
 
         $project->unsetRelation('sectors');

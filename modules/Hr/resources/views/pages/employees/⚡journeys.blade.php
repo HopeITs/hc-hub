@@ -31,6 +31,8 @@ new class extends Component {
 
     public string $orientationDate = '';
 
+    public string $managerDate = '';
+
     public bool $showConfirm = false;
 
     /** One of the CONFIRMABLE actions, set together with $showConfirm. */
@@ -46,6 +48,7 @@ new class extends Component {
         Gate::authorize('update', $this->employee);
 
         $this->orientationDate = $this->onboardingJourney?->orientation_scheduled_for?->toDateString() ?? '';
+        $this->managerDate = $this->onboardingJourney?->manager_orientation_scheduled_for?->toDateString() ?? '';
     }
 
     public function placeholder(): string
@@ -149,6 +152,32 @@ new class extends Component {
         $this->done($journeys->completeOrientation($this->authorizedEmployee(), $this->actor()), 'hr_journeys.onboarding.orientation_done');
     }
 
+    /** HR standing in for the manager (the manager has their own page, which uses the same service calls). */
+    public function scheduleManagerOrientation(OnboardingJourneys $journeys): void
+    {
+        $employee = $this->authorizedEmployee();
+
+        $this->validate(
+            ['managerDate' => ['required', 'date_format:Y-m-d']],
+            attributes: ['managerDate' => __('hr_journeys.onboarding.orientation_date')],
+        );
+
+        $changed = $journeys->scheduleManagerOrientation($employee, CarbonImmutable::createFromFormat('Y-m-d', $this->managerDate, config('app.timezone')), $this->actor());
+
+        $this->done($changed, 'hr_journeys.onboarding.manager_orientation_scheduled');
+    }
+
+    public function completeManagerOrientation(OnboardingJourneys $journeys): void
+    {
+        $this->done($journeys->completeManagerOrientation($this->authorizedEmployee(), $this->actor()), 'hr_journeys.onboarding.manager_orientation_done');
+    }
+
+    /** HR picks which IT person of the city hands the electronics over. */
+    public function chooseElectronicsDeliverer(int $deliverer, OnboardingJourneys $journeys): void
+    {
+        $this->done($journeys->chooseElectronicsDeliverer($this->authorizedEmployee(), $deliverer, $this->actor()), 'hr_journeys.onboarding.deliverer_chosen');
+    }
+
     public function markCardHandedOver(OnboardingJourneys $journeys): void
     {
         $this->done($journeys->markCardHandedOver($this->authorizedEmployee(), $this->actor()), 'hr_journeys.onboarding.card_done');
@@ -172,7 +201,7 @@ new class extends Component {
         abort_unless(in_array($action, self::CONFIRMABLE, true), 404);
 
         match ($action) {
-            'reopen-onboarding' => abort_unless(in_array($target, ['card', 'orientation'], true), 404),
+            'reopen-onboarding' => abort_unless(in_array($target, ['card', 'orientation', 'manager_orientation'], true), 404),
             'reopen-offboarding' => abort_unless($target === 'interview', 404),
             default => $this->authorizedRenewal((int) $target),
         };
@@ -196,7 +225,7 @@ new class extends Component {
 
         match ($action) {
             'reopen-onboarding' => $this->done(
-                in_array($target, ['card', 'orientation'], true) && $onboarding->reopen($this->authorizedEmployee(), $target, $this->actor()),
+                in_array($target, ['card', 'orientation', 'manager_orientation'], true) && $onboarding->reopen($this->authorizedEmployee(), $target, $this->actor()),
                 'hr_journeys.reopened',
             ),
             'reopen-offboarding' => $this->done(
@@ -275,7 +304,7 @@ new class extends Component {
     $confirmMessage = match ($confirmAction) {
         'stop' => __('hr_journeys.renewal.stop_message'),
         'undo' => __('hr_journeys.renewal.undo_message'),
-        'reopen-onboarding' => __('hr_journeys.reopen_message', ['step' => __('hr_journeys.onboarding.steps.'.($confirmTarget === 'orientation' ? 'orientation' : 'card'))]),
+        'reopen-onboarding' => __('hr_journeys.reopen_message', ['step' => __('hr_journeys.onboarding.steps.'.(in_array($confirmTarget, ['orientation', 'manager_orientation'], true) ? $confirmTarget : 'card'))]),
         'reopen-offboarding' => __('hr_journeys.reopen_message', ['step' => __('hr_journeys.offboarding.steps.interview')]),
         default => '',
     };

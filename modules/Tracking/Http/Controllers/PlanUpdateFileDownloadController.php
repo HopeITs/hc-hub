@@ -9,7 +9,6 @@ use App\Support\UploadName;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Modules\Tracking\Models\PlanUpdateFile;
-use Modules\Tracking\Policies\PlanUpdatePolicy;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PlanUpdateFileDownloadController extends Controller
@@ -21,7 +20,7 @@ class PlanUpdateFileDownloadController extends Controller
      */
     public function __invoke(Request $request, PlanUpdateFile $planUpdateFile): StreamedResponse
     {
-        abort_unless(PlanUpdatePolicy::canRead($request->user()), 403);
+        abort_unless($request->user()->can('downloadFile', $planUpdateFile->planUpdate()->firstOrFail()), 403);
         abort_unless(Storage::disk($planUpdateFile->disk)->exists($planUpdateFile->path), 404);
 
         $name = UploadName::clean($planUpdateFile->original_name);

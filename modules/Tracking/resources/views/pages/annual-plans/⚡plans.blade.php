@@ -211,7 +211,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
                         $status === PlanUpdateStatus::Returned && $isProjectManager => [0, 'bad', __('annual_plans.next.fix_title', ['month' => $monthName]), __('annual_plans.next.fix_body', ['what' => $what, 'reason' => (string) $update->return_reason]), __('annual_plans.next.fix_button')],
                         $status === PlanUpdateStatus::Sent && $isOfficer => [1, $update->returned_to === 'officer' ? 'bad' : 'warn', __('annual_plans.next.officer_title', ['month' => $monthName]), $what, __('annual_plans.wf.review_now')],
                         $status === PlanUpdateStatus::OfficerApproved && $isMeal => [1, 'warn', __('annual_plans.next.meal_title', ['month' => $monthName]), $what, __('annual_plans.wf.review_now')],
-                        $isProgramManager && ($status === PlanUpdateStatus::Reviewed || ($status === PlanUpdateStatus::OfficerApproved && $update->seen_at === null)) => [2, 'warn', __('annual_plans.next.seen_title', ['month' => $monthName]), $what, __('annual_plans.next.open_update')],
+                        $isProgramManager && $status === PlanUpdateStatus::Reviewed => [2, 'warn', __('annual_plans.next.seen_title', ['month' => $monthName]), $what, __('annual_plans.next.open_update')],
                         ($status === null || $status === PlanUpdateStatus::Draft) && $isProjectManager && $today->gte($month->addMonth()) && $execution->sendBlockers($centre, $month, $today) === [] => [3, $today->gt(PlanCalendar::dueDateOf($month)) ? 'bad' : 'warn', __('annual_plans.next.send_title', ['month' => $monthName]), __('annual_plans.next.send_body', ['what' => $what, 'date' => PlanCalendar::dueDateOf($month)->translatedFormat(__('formats.date'))]), __('annual_plans.next.fill_button')],
                         default => null,
                     };
@@ -310,7 +310,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
         @if ($next !== null)
             <section class="ap-next" data-next-step>
                 <span class="ap-ic is-{{ $next['tone'] }}" aria-hidden="true">!</span>
-                <div style="flex: 1; min-width: 220px"><h2>{{ $next['title'] }}</h2><p class="ap-sm ap-muted" dir="auto">{{ $next['body'] }}</p></div>
+                <div style="flex: 1; min-width: 220px"><h2>{{ $next['title'] }}</h2><p class="ap-sm ap-muted ap-lines" dir="auto">{{ $next['body'] }}</p></div>
                 <a class="dk-btn dk-primary" href="{{ $next['url'] }}" wire:navigate data-test="next-step-button">{{ $next['label'] }}</a>
             </section>
         @endif

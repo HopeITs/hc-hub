@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use InvalidArgumentException;
 use Modules\Hr\Enums\ChecklistItemOrder;
 use Modules\Hr\Enums\LeaveType as LeaveTypeRules;
+use Modules\Hr\Enums\LeavingCategory;
 use Modules\Hr\Models\AnnualLeaveRule;
 use Modules\Hr\Models\ChecklistItem;
 use Modules\Hr\Models\ContractType;
@@ -28,7 +29,7 @@ use Modules\Hr\Models\TerminationReason;
  * Labels live in lang hr_settings.fields.* and option labels in
  * hr_settings.options.<field>.<value>.
  *
- * @phpstan-type Field array{type: string, rules: list<mixed>, unique?: bool, options?: list<int>, dir?: string}
+ * @phpstan-type Field array{type: string, rules: list<mixed>, unique?: bool, options?: list<int|string>, dir?: string}
  * @phpstan-type Definition array{model: class-string<Model>, label: string, order: array{0: string, 1: string}, search: list<string>, columns: list<string>, fields: array<string, Field>, in_use: list<array{0: string, 1: string}>, paginate?: int}
  */
 final class ReferenceTables
@@ -108,8 +109,12 @@ final class ReferenceTables
                 'label' => 'title_en',
                 'order' => ['id', 'asc'],
                 'search' => ['title_en', 'title_ar'],
-                'columns' => ['title_ar', 'title_en'],
-                'fields' => ['title_ar' => $name + ['dir' => 'rtl'], 'title_en' => $name + ['dir' => 'ltr']],
+                'columns' => ['title_ar', 'title_en', 'category'],
+                'fields' => [
+                    'title_ar' => $name + ['dir' => 'rtl'],
+                    'title_en' => $name + ['dir' => 'ltr'],
+                    'category' => ['type' => 'select', 'rules' => ['nullable'], 'options' => array_column(LeavingCategory::cases(), 'value')],
+                ],
                 'in_use' => [['contracts', 'termination_reason_id']],
             ],
             'checklist-items' => [
@@ -184,7 +189,7 @@ final class ReferenceTables
             return '';
         }
 
-        $key = "hr_settings.options.{$field}.".(int) $value;
+        $key = "hr_settings.options.{$field}.".(is_numeric($value) ? (int) $value : (string) $value);
         $label = __($key);
 
         return $label === $key ? (string) $value : (string) $label;

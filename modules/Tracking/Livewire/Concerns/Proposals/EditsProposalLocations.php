@@ -4,15 +4,20 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Proposals;
 
+use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
+use Modules\Tracking\Actions\Targets\ClearLocationTargets;
+use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Support\TargetCounts;
 
 /**
  * The location rows of the proposal form (W-34a slice 3): where a proposal
@@ -28,7 +33,11 @@ use Modules\Tracking\Models\ProposalLocation;
  * also on an approved proposal, which is how centers are given to the
  * proposals entered before the rows existed.
  *
- * Used by ManagesProposalForm.
+ * Used by ManagesProposalForm, which provides `editingProposalId`.
+ *
+ * @property ?int $editingProposalId
+ * @property-read bool $removingLocationDeletesTargets
+ * @property-read string $locationTargetsUrl
  */
 trait EditsProposalLocations
 {
@@ -40,7 +49,7 @@ trait EditsProposalLocations
      * `project` names the linked project of a row that has one and `is_new`
      * carries the stored flag of a kept row; `key` and `project` are not sent.
      *
-     * @var list<array{key: string, city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string, is_new: bool, project: string|null}>
+     * @var list<array{key: string, city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string, is_new: bool, project: string|null, location_id: int|null}>
      */
     public array $locations = [];
 
@@ -51,6 +60,22 @@ trait EditsProposalLocations
      */
     #[Locked]
     public bool $hadLocationRows = false;
+
+    /**
+     * Y-10: removing a saved row that carries targets asks first. The dialog
+     * names how many, offers to delete them (a holder of `targets.delete`,
+     * none reported) or to open them, and the row stays until then.
+     */
+    public bool $showLocationTargetsModal = false;
+
+    #[Locked]
+    public ?int $removingLocationIndex = null;
+
+    /**
+     * @var array{count: int, reported: int}
+     */
+    #[Locked]
+    public array $removingLocationTargets = ['count' => 0, 'reported' => 0];
 
     /**
      * Active cities for the row's city select: id => name.
@@ -99,7 +124,8 @@ trait EditsProposalLocations
                     continue;
                 }
 
-                $byCity[(int) $held->city_id][] = ['id' => (int) $centerId, 'name' => $held->name];
+                // Only a closed center lands here (options() lists active ones): say so (D-66).
+                $byCity[(int) $held->city_id][] = ['id' => (int) $centerId, 'name' => $held->is_active ? $held->name : $held->name.' · '.__('projects.center_inactive_badge')];
             }
         }
 
@@ -139,6 +165,99 @@ trait EditsProposalLocations
             return;
         }
 
+        $row = $this->savedLocationRow($index);
+        $counts = $row === null ? ['count' => 0, 'reported' => 0] : TargetCounts::ofLocation($row);
+
+        if ($counts['count'] > 0) {
+            $this->removingLocationIndex = $index;
+            $this->removingLocationTargets = $counts;
+            unset($this->removingLocationDeletesTargets);
+            $this->showLocationTargetsModal = true;
+
+            return;
+        }
+
+        $this->dropLocationRow($index);
+    }
+
+    /**
+     * Whether the dialog offers to delete the row's targets: none reported,
+     * and the user may delete targets (D-23).
+     */
+    #[Computed]
+    public function removingLocationDeletesTargets(): bool
+    {
+        return $this->removingLocationTargets['count'] > 0 && $this->removingLocationTargets['reported'] === 0 && Gate::allows('targets.delete');
+    }
+
+    /**
+     * "Delete the targets and remove the location": the targets go now
+     * (ClearLocationTargets), the row leaves the form and is removed when
+     * the proposal is saved.
+     */
+    public function clearRemovingLocationTargets(): void
+    {
+        Gate::authorize('targets.delete');
+
+        $index = $this->removingLocationIndex;
+        $row = $index === null ? null : $this->savedLocationRow($index);
+
+        if ($row === null || $this->editingProposalId === null) {
+            $this->closeLocationTargetsModal();
+
+            return;
+        }
+
+        $deleted = app(ClearLocationTargets::class)->handle(Proposal::query()->findOrFail($this->editingProposalId), $row->id);
+
+        $this->closeLocationTargetsModal();
+        $this->dropLocationRow($index);
+
+        Flux::toast(variant: 'success', text: trans_choice('proposals.location_targets_cleared', $deleted, ['count' => $deleted]));
+    }
+
+    /**
+     * The edited proposal's targets tab, which the dialog opens in a new tab.
+     */
+    #[Computed]
+    public function locationTargetsUrl(): string
+    {
+        $proposal = Proposal::query()->findOrFail($this->editingProposalId);
+
+        return route('proposals.show', ['proposal' => $proposal, 'tab' => 'targets']);
+    }
+
+    public function closeLocationTargetsModal(): void
+    {
+        $this->showLocationTargetsModal = false;
+        $this->removingLocationIndex = null;
+        $this->removingLocationTargets = ['count' => 0, 'reported' => 0];
+        unset($this->removingLocationDeletesTargets);
+    }
+
+    /**
+     * The saved row behind a form row, loaded through the edited proposal
+     * (BOLA): a new row, or an id that is not this proposal's, gives null.
+     */
+    private function savedLocationRow(int $index): ?ProposalLocation
+    {
+        $locationId = $this->locations[$index]['location_id'] ?? null;
+
+        if ($locationId === null || $locationId === '' || $this->editingProposalId === null) {
+            return null;
+        }
+
+        return ProposalLocation::query()
+            ->where('proposal_id', $this->editingProposalId)
+            ->whereKey((int) $locationId)
+            ->first();
+    }
+
+    /**
+     * Take a row off the form; it is removed from the proposal on save.
+     */
+    private function dropLocationRow(int $index): void
+    {
         $this->locations = array_values(array_filter($this->locations, fn (int $key): bool => $key !== $index, ARRAY_FILTER_USE_KEY));
         $this->resetValidation();
     }
@@ -217,6 +336,7 @@ trait EditsProposalLocations
             'new_center_name_ar' => '',
             'is_new' => $row->is_new,
             'project' => $row->project?->name,
+            'location_id' => $row->id,
         ])->all());
 
         $this->hadLocationRows = $this->locations !== [];
@@ -226,6 +346,7 @@ trait EditsProposalLocations
     {
         $this->locations = [];
         $this->hadLocationRows = false;
+        $this->closeLocationTargetsModal();
     }
 
     /**
@@ -259,7 +380,7 @@ trait EditsProposalLocations
     }
 
     /**
-     * @param  array{city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_center_name_en: string, new_center_name_ar: string, project: string|null}  $row
+     * @param  array{city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_center_name_en: string, new_center_name_ar: string, project: string|null, location_id?: int|null}  $row
      */
     private function isBlankLocationRow(array $row): bool
     {
@@ -274,7 +395,7 @@ trait EditsProposalLocations
     }
 
     /**
-     * @return array{key: string, city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string, is_new: bool, project: null}
+     * @return array{key: string, city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string, is_new: bool, project: null, location_id: null}
      */
     private function blankLocationRow(): array
     {
@@ -291,6 +412,7 @@ trait EditsProposalLocations
             'new_center_name_ar' => '',
             'is_new' => false,
             'project' => null,
+            'location_id' => null,
         ];
     }
 }

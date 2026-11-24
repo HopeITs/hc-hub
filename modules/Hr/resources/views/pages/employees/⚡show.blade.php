@@ -13,6 +13,7 @@ use Modules\Hr\Livewire\Concerns\Employees\ManagesEmployeeProfile;
 use Modules\Hr\Livewire\Concerns\Employees\ManagesEmployeeRecords;
 use Modules\Hr\Livewire\Concerns\Employees\ReadsEmployeeProfile;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Support\Entitlements\Entitlements;
 
 new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends Component {
     use ManagesBadgeForm;
@@ -21,7 +22,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
     use ReadsEmployeeProfile;
     use WithFileUploads;
 
-    public const TABS = ['overview', 'records', 'family', 'contracts', 'leave', 'equipment', 'badges', 'card', 'journeys'];
+    public const TABS = ['overview', 'records', 'family', 'contracts', 'leave', 'equipment', 'badges', 'card', 'entitlements', 'journeys'];
 
     #[Url(except: 'overview')]
     public string $tab = 'overview';
@@ -89,6 +90,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
             'equipment' => $this->canEdit,
             'badges' => $this->canViewBadges,
             'card' => $this->canViewCard,
+            'entitlements' => app(Entitlements::class)->canAssign(Auth::user(), $this->employee),
             'journeys' => $this->canEdit,
             default => true,
         }));
@@ -185,6 +187,8 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
         @include('hr::pages.employees._show-badges')
     @elseif ($tab === 'card')
         @include('hr::pages.employees._show-card')
+    @elseif ($tab === 'entitlements')
+        <livewire:hr::employees.entitlements :employee-id="$employee->id" :key="'employee-entitlements-'.$employee->id" />
     @elseif ($tab === 'journeys')
         <livewire:hr::employees.journeys :employee-id="$employee->id" :key="'employee-journeys-'.$employee->id" lazy />
     @elseif (isset($moduleTabs[$tab]))

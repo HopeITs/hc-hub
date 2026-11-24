@@ -10,14 +10,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\RagStatus;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\Indicator;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Risk;
 
@@ -26,11 +25,11 @@ use Modules\Tracking\Models\Risk;
  * on pace, funding agreed against requested, high risks and late work.
  *
  * Every figure reuses the app's own definition so it matches its register:
- * indicators belong through their result's program, everything else through
- * its project's program; targets are rated by Indicator::ragStatus() over this calendar year (as the
+ * indicators belong through their result's program, a register risk through
+ * its location row's program (Y-13), everything else through its project's
+ * program; targets are rated by Indicator::ragStatus() over this calendar year (as the
  * Desk rates them), a high risk scores 6 or more on the heat map
- * (Risk::heatScore()), a late milestone is Milestone::isMissed() and a late
- * report is Report::overdue(). Currencies are never added together.
+ * (Risk::heatScore()) and a late report is Report::overdue(). Currencies are never added together.
  *
  * A figure the viewer may not open is null, and its query never runs.
  *
@@ -39,7 +38,7 @@ use Modules\Tracking\Models\Risk;
  *     results: array{on: int, total: int, unrated: int, tone: 'good'|'warn'|'critical'|null, by_program: array<int, array{on: int, total: int}>}|null,
  *     funding: array{lines: list<FundingLine>, percent: int|null, tone: 'good'|'warn'|'critical'|null}|null,
  *     risks: int|null,
- *     late: array{milestones: int|null, reports: int|null, total: int}|null
+ *     late: array{reports: int|null, total: int}|null
  * }
  */
 final class StrategyRollup
@@ -76,24 +75,21 @@ final class StrategyRollup
 
         $results = $canView('indicators') && $canView('targets') ? self::results($strategyIds) : null;
         $funding = $canView('funding-agreements') ? self::funding($projectIds, $projectStrategy) : null;
-        $risks = $canView('risks') ? self::risks($projectIds, $projectStrategy) : null;
-        $milestones = $canView('milestones') ? self::lateMilestones($projectIds, $projectStrategy) : null;
+        $risks = $canView('risks') ? self::risks($strategyIds) : null;
         $reports = $canView('reports') ? self::lateReports($projectIds, $projectStrategy) : null;
 
         $rollups = [];
 
         foreach ($strategyIds as $id) {
-            $lateMilestones = $milestones === null ? null : (int) ($milestones[$id] ?? 0);
             $lateReports = $reports === null ? null : (int) ($reports[$id] ?? 0);
 
             $rollups[$id] = [
                 'results' => $results === null ? null : ($results[$id] ?? ['on' => 0, 'total' => 0, 'unrated' => 0, 'tone' => null, 'by_program' => []]),
                 'funding' => $funding === null ? null : ($funding[$id] ?? ['lines' => [], 'percent' => null, 'tone' => null]),
                 'risks' => $risks === null ? null : (int) ($risks[$id] ?? 0),
-                'late' => $lateMilestones === null && $lateReports === null ? null : [
-                    'milestones' => $lateMilestones,
+                'late' => $lateReports === null ? null : [
                     'reports' => $lateReports,
-                    'total' => ($lateMilestones ?? 0) + ($lateReports ?? 0),
+                    'total' => $lateReports,
                 ],
             ];
         }
@@ -324,32 +320,27 @@ final class StrategyRollup
     }
 
     /**
-     * @param  list<int>  $projectIds
-     * @param  Collection<int, int>  $projectStrategy
+     * High risks per strategy. A register risk belongs to a location row
+     * (Y-13, D-93), so it reaches a strategy through the row's program, not
+     * through a project. Logframe risks carry no row and are not counted here.
+     *
+     * @param  list<int>  $strategyIds
      * @return array<int, int>
      */
-    private static function risks(array $projectIds, Collection $projectStrategy): array
+    private static function risks(array $strategyIds): array
     {
-        return self::countByStrategy(
-            Risk::query()->whereIn('project_id', $projectIds)->whereRaw('likelihood * severity >= ?', [self::HighRiskScore])->pluck('project_id'),
-            $projectStrategy,
-        );
-    }
+        $locationStrategy = ProposalLocation::query()
+            ->join('programs', 'programs.id', '=', 'proposal_locations.program_id')
+            ->whereIn('programs.strategy_id', $strategyIds)
+            ->pluck('programs.strategy_id', 'proposal_locations.id')
+            ->map(fn (mixed $id): int => (int) $id);
 
-    /**
-     * @param  list<int>  $projectIds
-     * @param  Collection<int, int>  $projectStrategy
-     * @return array<int, int>
-     */
-    private static function lateMilestones(array $projectIds, Collection $projectStrategy): array
-    {
         return self::countByStrategy(
-            Milestone::query()
-                ->whereIn('project_id', $projectIds)
-                ->where('status', MilestoneStatus::Planned)
-                ->whereDate('planned_end_date', '<', CarbonImmutable::today())
-                ->pluck('project_id'),
-            $projectStrategy,
+            Risk::query()
+                ->whereIn('proposal_location_id', $locationStrategy->keys())
+                ->whereRaw('likelihood * severity >= ?', [self::HighRiskScore])
+                ->pluck('proposal_location_id'),
+            $locationStrategy,
         );
     }
 
@@ -371,14 +362,17 @@ final class StrategyRollup
     }
 
     /**
-     * @param  Collection<int, mixed>  $projectIds  one entry per counted row
-     * @param  Collection<int, int>  $projectStrategy
+     * Count ids by the strategy they belong to: project ids for funding and
+     * late reports, location row ids for risks (Y-13).
+     *
+     * @param  Collection<int, mixed>  $ids  one entry per counted row
+     * @param  Collection<int, int>  $idStrategy
      * @return array<int, int>
      */
-    private static function countByStrategy(Collection $projectIds, Collection $projectStrategy): array
+    private static function countByStrategy(Collection $ids, Collection $idStrategy): array
     {
-        return $projectIds
-            ->map(fn (mixed $id): int => $projectStrategy[(int) $id])
+        return $ids
+            ->map(fn (mixed $id): int => $idStrategy[(int) $id])
             ->countBy()
             ->all();
     }

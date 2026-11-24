@@ -3,6 +3,7 @@
     and project (or department) by project. Included by ⚡timesheets.
 --}}
 @php
+    use Modules\Hr\Models\MailList;
     use Modules\Hr\Support\Attendance\Grouping;
     use Modules\Hr\Support\Attendance\Timesheet as Sheet;
 
@@ -18,7 +19,7 @@
         Sheet::HOLIDAY => ['bg-zinc-100 text-zinc-400 dark:bg-white/[0.04] dark:text-ink-muted', null],
         Sheet::OUTSIDE => ['border border-dashed border-panel-border text-zinc-400 dark:text-ink-muted', null],
     ];
-    $stateTone = ['open' => \App\Enums\StatusTone::Neutral, 'confirmed' => \App\Enums\StatusTone::Warn, 'approved' => \App\Enums\StatusTone::Active, 'locked' => \App\Enums\StatusTone::Good];
+    $stateColor = ['open' => 'neutral', 'confirmed' => 'warn', 'approved' => 'active', 'locked' => 'good'];
     $hm = fn (?int $minutes): string => $minutes === null ? '' : intdiv($minutes, 60).':'.str_pad((string) ($minutes % 60), 2, '0', STR_PAD_LEFT);
     $groupLabel = $by === Grouping::DEPARTMENT ? 'hr_attendance.timesheets.no-department' : 'hr_attendance.timesheets.no-project';
 @endphp
@@ -61,28 +62,49 @@
             <h2 id="attendance-city-{{ $block['id'] }}" class="text-lg font-semibold">{{ $block['name'] ?? '—' }}</h2>
             <span class="text-sm {{ $muted }}">{{ trans_choice('hr_attendance.timesheets.people-count', $block['totals']['people'], ['count' => $block['totals']['people']]) }}</span>
             @if ($block['totals']['to_decide'] > 0)
-                <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="trans_choice('hr_attendance.timesheets.to-decide', $block['totals']['to_decide'], ['count' => $block['totals']['to_decide']])" />
+                <x-ui.tone-badge tone="critical" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $block['totals']['to_decide'], ['count' => $block['totals']['to_decide']]) }}</x-ui.tone-badge>
+            @endif
+            {{-- The mailing list that stands for this city, when there is one. --}}
+            @php
+                $cityList = MailList::emailFor($block['id'] ? (int) $block['id'] : null, null, null, $mailLists);
+            @endphp
+            @if ($cityList)
+                <a href="{{ $cityList->mailto() }}" class="inline-flex items-center gap-1.5 text-sm font-semibold underline {{ $muted }}" data-test="attendance-email-city">
+                    <flux:icon name="envelope" class="size-4" /> {{ __('hr_mail_lists.email_group') }}
+                </a>
             @endif
         </div>
 
         @foreach ($block['groups'] as $group)
             @php
                 $foldKey = $block['id'].':'.$group['key'];
-                $folded = $collapsed[$foldKey] ?? false;
+                // While a search or the days-to-decide filter is on every group is open, whatever was
+                // folded by hand, so a match is never hidden; clearing it brings back what was chosen.
+                $folded = ! $searching && ($collapsed[$foldKey] ?? $foldedByDefault);
                 $groupParams = $printBase + ['city_id' => $block['id'], 'group' => $group['id'] ?? 'none'];
+                // The list for this project or department (in this city, else nationwide).
+                $groupList = ($group['id'] ?? null) ? MailList::emailForGroup(
+                    $block['id'] ? (int) $block['id'] : null,
+                    $by === Grouping::PROJECT ? (int) $group['id'] : null,
+                    $by === Grouping::DEPARTMENT ? (int) $group['id'] : null,
+                    $mailLists,
+                ) : null;
             @endphp
             <x-ui.panel wire:key="attendance-group-{{ $foldKey }}" data-attendance-group>
                 <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-panel-border px-4 py-2.5">
-                    <button type="button" wire:click="toggleGroup('{{ $foldKey }}')" aria-expanded="{{ $folded ? 'false' : 'true' }}" class="flex min-h-10 items-center gap-2 text-start">
+                    <button type="button" wire:click="toggleGroup('{{ $foldKey }}', {{ $folded ? 'false' : 'true' }})" aria-expanded="{{ $folded ? 'false' : 'true' }}" class="flex min-h-10 items-center gap-2 text-start">
                         <flux:icon name="chevron-down" @class(['size-4 shrink-0 transition', $muted, '-rotate-90 rtl:rotate-90' => $folded]) />
                         <span class="font-semibold" dir="auto">{{ $group['name'] ?? __($groupLabel) }}</span>
                         <span class="text-xs {{ $muted }}">{{ trans_choice('hr_attendance.timesheets.people-count', $group['totals']['people'], ['count' => $group['totals']['people']]) }}</span>
                     </button>
                     <div class="flex flex-wrap items-center gap-3">
                         @if ($group['totals']['to_decide'] > 0)
-                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="trans_choice('hr_attendance.timesheets.to-decide', $group['totals']['to_decide'], ['count' => $group['totals']['to_decide']])" />
+                            <x-ui.tone-badge tone="critical" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $group['totals']['to_decide'], ['count' => $group['totals']['to_decide']]) }}</x-ui.tone-badge>
                         @else
-                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Good" :tone="\App\Enums\StatusTone::Good" :label="__('hr_attendance.timesheets.group-ready')" />
+                            <x-ui.tone-badge tone="good" icon="check">{{ __('hr_attendance.timesheets.group-ready') }}</x-ui.tone-badge>
+                        @endif
+                        @if ($groupList)
+                            <x-ui.button size="sm" icon="envelope" :href="$groupList->mailto()" data-test="attendance-email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
                         @endif
                         @if ($group['totals']['overtime_hours'] > 0)
                             <span class="text-xs tabular-nums {{ $muted }}">{{ __('hr_attendance.timesheets.overtime-line', ['hours' => $group['totals']['overtime_hours'], 'days' => $group['totals']['overtime_days']]) }}</span>
@@ -134,13 +156,13 @@
                                         </td>
                                         <td class="px-3 text-center">
                                             @if ($sheet['totals']['to_decide'] > 0)
-                                                <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="$sheet['totals']['to_decide']" />
+                                                <x-ui.tone-badge tone="critical">{{ $sheet['totals']['to_decide'] }}</x-ui.tone-badge>
                                             @else
                                                 <span class="{{ $muted }}">–</span>
                                             @endif
                                         </td>
                                         <td class="px-3 text-center">
-                                            <x-ui.enum-badge :case="$stateTone[$item['state']]" :tone="$stateTone[$item['state']]" :label="__('hr_attendance.workflow.states.'.$item['state'])" />
+                                            <x-ui.tone-badge :tone="$stateColor[$item['state']]">{{ __('hr_attendance.workflow.states.'.$item['state']) }}</x-ui.tone-badge>
                                         </td>
                                         @foreach ($sheet['rows'] as $row)
                                             @php

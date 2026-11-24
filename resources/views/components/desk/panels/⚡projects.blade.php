@@ -1,6 +1,5 @@
 <?php
 
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\RagStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
@@ -73,7 +72,6 @@ new class extends Component
                 'proposals:id,name,status,donor_id',
                 'proposals.donor:id,name',
                 'proposals.donorNames',
-                'milestones' => fn ($query) => $query->select(['id', 'project_id', 'planned_end_date', 'status'])->whereIn('status', [MilestoneStatus::Planned, MilestoneStatus::Ongoing]),
                 'monthlyReports:id,project_id,period,status,returned_at',
                 'indicators' => fn ($query) => $query->select(['id', 'project_id', 'baseline', 'target'])->whereNotNull('target'),
                 'indicators.progress:id,indicator_id,date,value',

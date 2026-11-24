@@ -48,6 +48,13 @@
             <x-ui.form-textarea wire:model="form.qualifications" :label="__('hr_positions.fields.qualifications')" rows="4" required class="sm:col-span-2" />
             <x-ui.form-textarea wire:model="form.responsibilities" :label="__('hr_positions.fields.responsibilities')" rows="4" required class="sm:col-span-2" />
             <flux:checkbox wire:model="form.is_active" :label="__('hr_positions.fields.is_active')" />
+            @if ($this->criticalMark !== null)
+                {{-- HR only: a critical position must never stay without a holder (alerts and suggested replacements). --}}
+                <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-secondary-soft px-3 py-2.5 sm:col-span-2 dark:border-line" data-critical-toggle>
+                    <p class="text-sm">{{ $this->criticalMark ? __('hr_positions.critical.is_critical_help') : __('hr_positions.critical.not_critical_help') }}</p>
+                    <x-ui.button type="button" size="sm" wire:click="toggleCritical" data-test="toggle-critical">{{ $this->criticalMark ? __('hr_positions.critical.unmark') : __('hr_positions.critical.mark') }}</x-ui.button>
+                </div>
+            @endif
         </div>
     @endif
 </x-ui.modal>

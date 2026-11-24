@@ -6,19 +6,15 @@ namespace App\Support\Desk;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\DeliveryState;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -49,17 +45,6 @@ final class DeskWork
     public static function pipelineProposals(User $user): Builder
     {
         return $user->can('proposals.view') ? Proposal::query() : Proposal::query()->whereRaw('1 = 0');
-    }
-
-    /**
-     * Narrows a milestones query to those that set a proposal's deadline on
-     * the pipeline: open, with a planned end.
-     *
-     * @param  Builder<Model>|Relation<Model, Model, mixed>  $milestones
-     */
-    public static function deadlineMilestones(Builder|Relation $milestones): void
-    {
-        $milestones->whereIn('status', [MilestoneStatus::Planned, MilestoneStatus::Ongoing])->whereNotNull('planned_end_date');
     }
 
     /**
@@ -154,8 +139,8 @@ final class DeskWork
             ->whereNull('parent_task_id')
             ->where('status', '!=', TaskStatus::Done)
             ->where(fn (Builder $query) => $query->whereNull('delivery_state')->orWhereIn('delivery_state', [DeliveryState::Requested, DeliveryState::Returned]))
-            ->where('source_type', 'milestone')
-            ->whereIn('source_id', Milestone::query()->select('id')->whereIn('project_id', self::projectsOwnedBy($user)));
+            ->where('source_type', 'project')
+            ->whereIn('source_id', self::projectsOwnedBy($user));
     }
 
     /**

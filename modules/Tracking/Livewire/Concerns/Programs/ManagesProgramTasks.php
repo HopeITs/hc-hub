@@ -21,7 +21,6 @@ use Modules\Tracking\Actions\Tasks\DeleteTask;
 use Modules\Tracking\Actions\Tasks\RescheduleTask;
 use Modules\Tracking\Enums\TaskPriority;
 use Modules\Tracking\Enums\TaskStatus;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Task;
 
@@ -105,7 +104,7 @@ trait ManagesProgramTasks
 
     /**
      * Limit a task query to this program's tasks: raised against the program,
-     * one of its projects, or a milestone of one of those projects.
+     * or one of its projects.
      *
      * @param  Builder<Task>  $query
      * @return Builder<Task>
@@ -116,8 +115,7 @@ trait ManagesProgramTasks
 
         return $query->where(fn (Builder $query) => $query
             ->where(fn (Builder $query) => $query->where('source_type', 'program')->where('source_id', $this->programId))
-            ->orWhere(fn (Builder $query) => $query->where('source_type', 'project')->whereIn('source_id', $projectIds))
-            ->orWhere(fn (Builder $query) => $query->where('source_type', 'milestone')->whereIn('source_id', Milestone::query()->select('id')->whereIn('project_id', $projectIds))));
+            ->orWhere(fn (Builder $query) => $query->where('source_type', 'project')->whereIn('source_id', $projectIds)));
     }
 
     /**
@@ -302,7 +300,7 @@ trait ManagesProgramTasks
 
     /**
      * Add a task from a group's one-line row, assigned to the person adding
-     * it. The group names where it goes, as "program", "project:ID" or "milestone:ID".
+     * it. The group names where it goes, as "program" or "project:ID".
      */
     public function addProgramTask(string $title, string $target): void
     {
@@ -381,9 +379,6 @@ trait ManagesProgramTasks
 
         $belongs = match ($type) {
             'project' => Project::query()->whereKey($id)->where('program_id', $this->programId)->exists(),
-            'milestone' => Milestone::query()->whereKey($id)
-                ->whereIn('project_id', Project::query()->select('id')->where('program_id', $this->programId))
-                ->exists(),
             default => false,
         };
 

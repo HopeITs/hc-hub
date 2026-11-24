@@ -257,7 +257,9 @@ final class SaveLeaveRequest
     private function validate(LeaveRequestDraft $draft, Employee $employee, ?LeaveRequest $editing): Contract
     {
         $contract = LeaveContext::contractOf((int) $employee->id);
-        $alternatives = app(LeaveAlternativeEmployees::class)->query($employee)->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $alternatives = array_map(intval(...), app(LeaveAlternativeEmployees::class)
+            ->choices($employee, $draft->window(), $editing?->alternative_employee_id === null ? null : (int) $editing->alternative_employee_id)
+            ->modelKeys());
 
         $eligibility = function (string $attribute, mixed $value, \Closure $fail) use ($employee, $editing, $contract): void {
             // An edit that keeps its stored balance is not asked again.

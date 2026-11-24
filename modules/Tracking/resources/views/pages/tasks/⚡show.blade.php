@@ -8,8 +8,9 @@ use Modules\Tracking\Livewire\Concerns\Tasks\ManagesSubtasks;
 use Modules\Tracking\Livewire\Concerns\Tasks\ManagesTaskAttachments;
 use Modules\Tracking\Livewire\Concerns\Tasks\MovesTask;
 use Modules\Hr\Models\Employee;
-use Modules\Tracking\Models\Milestone;
+use Modules\Core\Models\Program;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAttachment;
 use Modules\Tracking\Support\TaskWorkflow;
@@ -125,19 +126,24 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
                 'completed_date',
                 'progress_percentage',
                 'evidence_required',
+                'returned_reason',
                 'created_by',
                 'kind',
                 'department_id',
                 'reportable_type',
                 'reportable_id',
+                'activity_plan_milestone_id',
             ])
             ->with([
-                // morphWith() eager loads the milestone's project on top of
-                // the source itself in the same batch, so the meta line
-                // below can show "milestone · project" without an extra
-                // query — the other four source types have nothing further
-                // to load.
-                'source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id,name', 'proposal:id,name']]),
+                'source' => fn (MorphTo $source) => $source
+                    ->morphWith([
+                        Proposal::class => ['donor:id,name', 'projects:id,slug,name'],
+                        Project::class => ['program', 'user', 'city', 'proposals:id,slug,name,donor_id', 'proposals.donor:id,name'],
+                        Program::class => ['manager', 'strategy:id,name'],
+                    ])
+                    ->morphWithCount([Program::class => ['projects']]),
+                'planMilestone:id,activity_plan_id,title',
+                'planMilestone.plan:id,slug',
                 'taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
                 'creator:id,email',
                 'parentTask:id,title',
@@ -189,6 +195,12 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             $this->dueDate = $validated['dueDate'];
         }
 
+        $evidenceKept = $canEdit && $task->created_by !== auth()->id() && $this->evidenceRequired !== $task->evidence_required;
+
+        if ($evidenceKept) {
+            $this->evidenceRequired = $task->evidence_required;
+        }
+
         $from = $task->status;
         $approved = TaskWorkflow::approves(auth()->user(), $task);
         $note = SendNudge::cleanNote($this->reviewNote);
@@ -204,9 +216,15 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             $this->startDate = $validated['startDate'];
         }
 
-        DB::transaction(function () use ($task, $validated, $canEdit, $startsWork): void {
+        $returnsWork = $from === TaskStatus::UnderReview
+            && in_array($validated['taskStatus'], [TaskStatus::Todo->value, TaskStatus::InProgress->value], true)
+            && $note !== null && $note !== '';
+
+        DB::transaction(function () use ($task, $validated, $canEdit, $startsWork, $returnsWork, $note): void {
             $progress = [
                 ...($startsWork ? ['start_date' => $validated['startDate']] : []),
+                ...($returnsWork ? ['returned_reason' => $note] : []),
+                ...($validated['taskStatus'] === TaskStatus::Done->value ? ['returned_reason' => null] : []),
                 'status' => $validated['taskStatus'],
                 'completed_date' => $validated['completedDate'] === '' ? null : $validated['completedDate'],
                 'progress_percentage' => (int) $validated['progressPercentage'],
@@ -246,6 +264,10 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             Flux::toast(variant: 'danger', text: __('tasks.only_the_task_creator_can_change_the_due_date'));
         }
 
+        if ($evidenceKept) {
+            Flux::toast(variant: 'danger', text: __('tasks.only_the_task_creator_can_change_proof'));
+        }
+
         Flux::toast(variant: 'success', text: __('tasks.task_updated'));
     }
 
@@ -280,6 +302,20 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
         }
 
         $this->saveInPlace('taskStatus');
+    }
+
+    /**
+     * Open the Return box: the approver sends an Under review task back to
+     * To do, and sendBack() saves it once the reason is written.
+     */
+    public function startReturn(): void
+    {
+        if ($this->task->status !== TaskStatus::UnderReview || ! TaskWorkflow::approves(auth()->user(), $this->task)) {
+            return;
+        }
+
+        $this->resetValidation(['taskStatus', 'reviewNote']);
+        $this->taskStatus = TaskStatus::Todo->value;
     }
 
     /**
@@ -456,7 +492,6 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
         id="task-detail-heading"
         :breadcrumbs="[
             ['label' => __('common.tasks'), 'url' => route('tasks.index')],
-            ...($this->task->source instanceof \Modules\Tracking\Models\Milestone ? [array_filter(['label' => $this->task->source->name, 'url' => auth()->user()->can('view', $this->task->source) ? route('milestones.show', $this->task->source) : null])] : []),
             ['label' => $this->task->title],
         ]"
         :title="$this->task->title"
@@ -464,14 +499,11 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
     >
         <x-slot:meta>
             <span class="font-medium text-secondary-dark dark:text-ink">{{ $this->task->sourceLabel() }}</span>
-            @if ($this->task->source instanceof \Modules\Tracking\Models\Milestone && $this->task->source->project !== null)
+            @if ($this->task->planMilestone?->plan !== null)
                 <span aria-hidden="true">·</span>
-                <a href="{{ route('projects.show', $this->task->source->project) }}" wire:navigate class="font-medium hover:underline">
-                    {{ $this->task->source->name }} · {{ $this->task->source->ownerName() }}
+                <a href="{{ route('activity-plans.show', $this->task->planMilestone->plan) }}" wire:navigate class="font-medium hover:underline" data-test="task-plan-milestone" dir="auto">
+                    {{ __('annual_plans.milestones.supports', ['name' => $this->task->planMilestone->title]) }}
                 </a>
-            @elseif ($this->task->source instanceof \Modules\Tracking\Models\Milestone)
-                <span aria-hidden="true">·</span>
-                <span class="font-medium">{{ $this->task->source->name }} · {{ $this->task->source->ownerName() }}</span>
             @endif
             <span aria-hidden="true">·</span>
             <span>{{ __('tasks.created_by_name', ['name' => $this->task->creator->name]) }}</span>
@@ -495,6 +527,9 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             <div class="flex items-center gap-2">
                 @if ($nextStep !== null && $canUpdateTaskStatus)
                     @if ($nextStep['to'] !== null)
+                        @if ($this->task->status === TaskStatus::UnderReview && $approvesTask)
+                            <x-ui.button tone="secondary" wire:click="startReturn" wire:loading.attr="disabled" wire:target="startReturn" data-test="task-return-button">{{ __('tasks.show.return') }}</x-ui.button>
+                        @endif
                         <x-ui.button tone="primary" wire:click="changeStatus('{{ $nextStep['to']->value }}')" wire:loading.attr="disabled" wire:target="changeStatus" data-test="task-next-step">{{ $nextStep['label'] }}</x-ui.button>
                     @else
                         <x-ui.button tone="secondary" disabled data-test="task-next-step">{{ $nextStep['label'] }}</x-ui.button>
@@ -523,10 +558,21 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
 
     @include('tracking::pages.tasks._show-status-panel')
 
+    @if (filled($this->task->returned_reason) && $this->task->status !== TaskStatus::Done)
+        <div class="flex items-start gap-3 rounded-panel border border-primary/40 bg-white p-3 dark:bg-surface-1" role="note" data-test="task-returned-reason">
+            <flux:icon name="arrow-uturn-left" variant="micro" class="mt-0.5 size-4 shrink-0 text-primary" />
+            <div class="min-w-0 text-sm">
+                <p class="font-bold text-primary">{{ __('tasks.show.returned_banner') }}</p>
+                <p class="whitespace-pre-line text-secondary-dark dark:text-ink" dir="auto">{{ $this->task->returned_reason }}</p>
+            </div>
+        </div>
+    @endif
+
     {{-- Content, then the details on the inline-end side once the page is wide. On a phone the details come first. --}}
     <div class="grid items-start gap-4 @4xl/detail:grid-cols-[minmax(0,1fr)_20rem]">
         <aside class="min-w-0 @4xl/detail:sticky @4xl/detail:top-4 @4xl/detail:col-start-2 @4xl/detail:row-start-1" aria-labelledby="task-properties-heading" data-test="task-properties">
             @include('tracking::pages.tasks._show-properties')
+            @include('tracking::pages.tasks._show-related')
         </aside>
 
         <div class="grid min-w-0 gap-4 @4xl/detail:col-start-1 @4xl/detail:row-start-1">

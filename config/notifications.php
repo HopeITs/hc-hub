@@ -22,7 +22,6 @@ use Modules\Tracking\Notifications\Recipients\IndicatorRecipients;
 use Modules\Tracking\Notifications\Recipients\LibraryIndicatorRecipients;
 use Modules\Tracking\Notifications\Recipients\ManagedRecipients;
 use Modules\Tracking\Notifications\Recipients\MealCoverageRecipients;
-use Modules\Tracking\Notifications\Recipients\MilestoneRecipients;
 use Modules\Tracking\Notifications\Recipients\MonthlyReportRecipients;
 use Modules\Tracking\Notifications\Recipients\ProjectRecipients;
 use Modules\Tracking\Notifications\Recipients\ProposalRecipients;
@@ -47,7 +46,6 @@ return [
     */
     'modules' => [
         'tasks' => TaskRecipients::class,
-        'milestones' => MilestoneRecipients::class,
         'projects' => ProjectRecipients::class,
         'programs' => ManagedRecipients::class,
         'annual-plans' => ManagedRecipients::class,
@@ -154,7 +152,6 @@ return [
     */
     'module_icons' => [
         'tasks' => 'clipboard-document-check',
-        'milestones' => 'flag',
         'projects' => 'rectangle-stack',
         'programs' => 'briefcase',
         'annual-plans' => 'calendar-days',

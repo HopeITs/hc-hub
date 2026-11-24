@@ -5,20 +5,20 @@ use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Actions\Tasks\MoveTask;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Task;
 
 /*
 | "Move to" on the task page: a top-level task, with its subtasks, moves to
-| the program itself, one of its projects or one of their milestones — never
-| outside its program.
+| the program itself or one of its projects — never outside its program.
 */
 
 beforeEach(function () {
     $this->program = Program::factory()->create();
     $this->project = Project::factory()->create(['program_id' => $this->program->id, 'name' => 'Wells Project']);
-    $this->milestone = Milestone::factory()->create(['project_id' => $this->project->id, 'name' => 'Pumps installed']);
+    $this->otherProject = Project::factory()->create(['program_id' => $this->program->id, 'name' => 'Pumps Project']);
     $this->manager = userWithRole('General Manager', insertHrEmployee());
     $this->task = Task::factory()->create(['source_type' => 'project', 'source_id' => $this->project->id]);
     $this->subtask = Task::factory()->create(['source_type' => 'project', 'source_id' => $this->project->id, 'parent_task_id' => $this->task->id]);
@@ -32,29 +32,17 @@ test('the task page lists every place in the program and marks the current one',
         ->assertSet('showMoveModal', true)
         ->assertSet('moveTarget', 'project:'.$this->project->id)
         ->assertSeeHtml('data-move-target="program"')
-        ->assertSeeHtml('data-move-target="milestone:'.$this->milestone->id.'"')
-        ->assertSee(['Wells Project', 'Pumps installed', 'Current']);
-});
-
-test('a task moves with its subtasks to a milestone of its program', function () {
-    Livewire::actingAs($this->manager)
-        ->test('tracking::tasks.show', ['task' => $this->task])
-        ->call('openMoveModal')
-        ->set('moveTarget', 'milestone:'.$this->milestone->id)
-        ->call('moveTask')
-        ->assertSet('showMoveModal', false);
-
-    expect($this->task->fresh()->only(['source_type', 'source_id']))->toBe(['source_type' => 'milestone', 'source_id' => $this->milestone->id])
-        ->and($this->subtask->fresh()->only(['source_type', 'source_id']))->toBe(['source_type' => 'milestone', 'source_id' => $this->milestone->id]);
+        ->assertSeeHtml('data-move-target="project:'.$this->otherProject->id.'"')
+        ->assertSee(['Wells Project', 'Pumps Project', 'Current']);
 });
 
 test('a task never moves outside its program', function () {
-    $foreignMilestone = Milestone::factory()->create();
+    $foreignProject = Project::factory()->create();
 
     Livewire::actingAs($this->manager)
         ->test('tracking::tasks.show', ['task' => $this->task])
         ->call('openMoveModal')
-        ->set('moveTarget', 'milestone:'.$foreignMilestone->id)
+        ->set('moveTarget', 'project:'.$foreignProject->id)
         ->call('moveTask')
         ->assertSet('showMoveModal', true);
 
@@ -76,4 +64,41 @@ test('someone who cannot edit the task cannot move it', function () {
 
     expect(fn () => app(MoveTask::class)->handle($this->task, 'program'))->toThrow(AuthorizationException::class)
         ->and($this->task->fresh()->source_type)->toBe('project');
+});
+
+test('a task moves onto a location row of the same program (Y-12)', function () {
+    $proposal = Proposal::factory()->create();
+    $row = ProposalLocation::factory()->create([
+        'proposal_id' => $proposal->id,
+        'program_id' => $this->program->id,
+        'city_wide' => true,
+    ]);
+
+    $move = app(MoveTask::class);
+
+    expect($move->resolveTarget($this->program->id, 'location:'.$row->id))
+        ->toBe(['type' => 'proposal_location', 'id' => $row->id])
+        ->and($move->targetFor('proposal_location', $row->id))->toBe('location:'.$row->id)
+        ->and($move->programIdOfSource('proposal_location', $row->id))->toBe($this->program->id);
+
+    $this->actingAs($this->manager);
+    $move->handle($this->task, 'location:'.$row->id);
+
+    // The subtask follows its parent, as it always has.
+    expect($this->task->fresh()->source_type)->toBe('proposal_location')
+        ->and((int) $this->task->fresh()->source_id)->toBe($row->id)
+        ->and($this->subtask->fresh()->source_type)->toBe('proposal_location')
+        ->and((int) $this->subtask->fresh()->source_id)->toBe($row->id);
+});
+
+test('a row of another program is refused as a move target', function () {
+    $otherProgram = Program::factory()->create();
+    $proposal = Proposal::factory()->create();
+    $foreignRow = ProposalLocation::factory()->create([
+        'proposal_id' => $proposal->id,
+        'program_id' => $otherProgram->id,
+        'city_wide' => true,
+    ]);
+
+    expect(app(MoveTask::class)->resolveTarget($this->program->id, 'location:'.$foreignRow->id))->toBeNull();
 });

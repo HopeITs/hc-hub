@@ -37,6 +37,7 @@ use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalPhase;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Observers\ProjectOwnerMemberObserver;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * @property int $id
@@ -421,16 +422,6 @@ class Project extends Model implements TracksActivity
     }
 
     /**
-     * The milestones planned for this project.
-     *
-     * @return HasMany<Milestone, $this>
-     */
-    public function milestones(): HasMany
-    {
-        return $this->hasMany(Milestone::class);
-    }
-
-    /**
      * The indicator targets attributed to this project.
      *
      * @return HasMany<PlanIndicator, $this>
@@ -723,6 +714,18 @@ class Project extends Model implements TracksActivity
     {
         if ($field === 'user_id') {
             app(ApproveProjectFromProposal::class)->handle($this, 'owner_acknowledgement');
+        }
+    }
+
+    /**
+     * The owner answered — accepted or rejected. Either way the project's
+     * location rows carry a copy of that decision until Y-17, so the mirror
+     * runs here as well as on the approval path (Y-11 slice 2).
+     */
+    public function assignmentResponded(string $field): void
+    {
+        if ($field === 'user_id') {
+            app(ProjectLocationMirror::class)->syncAcknowledgement($this);
         }
     }
 

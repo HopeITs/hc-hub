@@ -14,12 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $id
  * @property int $import_id
+ * @property int|null $device_id
  * @property string $device_no
  * @property int|null $employee_id
  * @property CarbonImmutable $punched_at
  * @property CarbonImmutable|null $created_at
  */
-#[Fillable(['import_id', 'device_no', 'employee_id', 'punched_at'])]
+#[Fillable(['import_id', 'device_id', 'device_no', 'employee_id', 'punched_at'])]
 class AttendancePunch extends Model
 {
     public const UPDATED_AT = null;

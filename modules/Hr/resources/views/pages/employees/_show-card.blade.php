@@ -25,7 +25,7 @@
         @elseif ($cardLink !== null)
             <div class="flex flex-wrap items-center gap-2" x-data="{ copied: false }">
                 <code class="min-w-0 flex-1 truncate rounded-lg bg-secondary-soft px-3 py-2 text-sm {{ $ink }} dark:bg-surface-2" dir="ltr">{{ $cardLink }}</code>
-                <x-ui.button size="sm" icon="clipboard" x-on:click="navigator.clipboard.writeText(@js($cardLink)); copied = true; setTimeout(() => copied = false, 2000)">
+                <x-ui.button size="sm" icon="clipboard" x-on:click="navigator.clipboard.writeText({{ \Illuminate\Support\Js::from($cardLink) }}); copied = true; setTimeout(() => copied = false, 2000)">
                     <span x-show="! copied">{{ __('hr_employees.card.copy_link') }}</span>
                     <span x-show="copied" x-cloak>{{ __('hr_employees.card.copied') }}</span>
                 </x-ui.button>

@@ -4,8 +4,15 @@
  * rules the real pages need on top of it live here instead.
  */
 @layer components {
-    .dk-reg-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-    .dk-reg-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    /*
+     * The page's actions, its own wrapper (flex flex-wrap justify-end on the
+     * finance pages) and Add to desk wrap as one run of buttons, all to the
+     * end. Boxed separately they wrapped apart: two right-aligned rows over a
+     * left-aligned Add to desk.
+     */
+    /* margin-inline-start: auto keeps the run at the end even when it drops below the title onto a line of its own. */
+    .dk-reg-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; margin-inline-start: auto; }
+    .dk-reg-actions { display: contents; }
     .dk-reg-h h1 { flex-wrap: wrap; }
 
     /* A line of figures under the title ("12 reached · 3 missed"), in place of stat tiles. */
@@ -193,20 +200,28 @@
     }
     [data-desk-register] [data-stat-tile]:hover { transform: none; box-shadow: none; }
 
-    /* The pages' own boards and calendars (tasks, milestones, projects, my calendar). */
-    [data-desk-register] [data-test^="task-board-column-"],
-    [data-desk-register] [data-test^="milestone-board-column-"] {
+    /* The pages' own boards and calendars (tasks, projects, my calendar). */
+    [data-desk-register] [data-test^="task-board-column-"] {
         border: 0;
         border-radius: var(--radius-surface);
         background: var(--sunk);
     }
     [data-desk-register] [data-test^="task-calendar-day-"],
-    [data-desk-register] [data-test^="milestone-calendar-day-"],
-    [data-desk-register] [data-test^="calendar-day-"] {
+    /* :not(button): the day number (today's red dot) and the phone item count share the prefix. */
+    [data-desk-register] [data-test^="calendar-day-"]:not(button) {
         border-color: var(--line);
         border-radius: var(--radius-control);
         background: var(--paper);
     }
+}
+
+/*
+ * The finance pages wrap their header actions in their own
+ * "flex flex-wrap justify-end" box. In utilities so it beats Tailwind's
+ * .flex: those buttons join the register's one run (see .dk-reg-tools).
+ */
+@layer utilities {
+    .dk-reg-actions > .flex.flex-wrap.justify-end { display: contents; }
 }
 
 /* The copyright line under every Desk page (user decision 2026-10-22: the footer stays). */
@@ -598,7 +613,7 @@
     @container tc (min-width: 1080px) {
         .dk-tc { grid-template-columns: minmax(0, 1fr) minmax(18rem, 26%); }
         .dk-tc.is-side-closed { grid-template-columns: minmax(0, 1fr) 3.25rem; }
-        .dk-tc-side { position: sticky; top: 16px; max-height: calc(100vh - 32px); }
+        .dk-tc-side { position: sticky; top: 16px; max-height: calc(100dvh - var(--top-h) - 32px); }
         .dk-tc-side-body { overflow: hidden; }
         .dk-tc-side-list { margin-inline: -4px; padding: 2px 4px; overflow-y: auto; }
         .is-side-closed .dk-tc-side-toggle { flex-direction: column; justify-content: center; padding: 8px 0; }

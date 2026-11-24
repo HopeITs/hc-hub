@@ -18,6 +18,7 @@ final class TrackingSchedule implements ScheduleSource
     {
         $schedule->command('monthly-reports:prepare')->dailyAt('05:00')->withoutOverlapping()->onOneServer();
         $schedule->command('annual-plans:remind')->dailyAt('07:00')->withoutOverlapping()->onOneServer();
+        $schedule->command('annual-plans:scan-milestones')->everyMinute()->withoutOverlapping();
         $schedule->command('proposals:remind-owners')->dailyAt('07:05')->withoutOverlapping()->onOneServer();
         $schedule->command('reports:monthly-digest')->dailyAt('08:00')->withoutOverlapping()->onOneServer();
     }

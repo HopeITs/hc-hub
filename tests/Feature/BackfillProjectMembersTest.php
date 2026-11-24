@@ -4,14 +4,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ProjectStatus;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\ProjectMember;
 use Modules\Tracking\Models\Task;
 
 /*
 | The first fill of project teams (roadmap 2.3): every project's owner joins
-| as Owner and the people seen on its milestones and tasks as Members, all
+| as Owner and the people seen on its tasks as Members, all
 | `source = inferred` with no dates. A dry run writes nothing; a second run
 | adds nothing; every run leaves a CSV report.
 */
@@ -23,12 +22,13 @@ beforeEach(function () {
     $this->project = Project::factory()->create(['owner_employee_id' => $this->owner->id]);
 
     $this->responsible = Employee::factory()->create();
-    $milestone = Milestone::factory()->create(['project_id' => $this->project->id, 'responsible_employee_id' => $this->responsible->id]);
-
     $this->assignee = Employee::factory()->create();
-    $task = Task::factory()->create(['source_type' => 'milestone', 'source_id' => $milestone->id]);
-    $task->taskAssignees()->delete();
-    $task->taskAssignees()->create(['employee_id' => $this->assignee->id]);
+
+    foreach ([$this->responsible, $this->assignee] as $employee) {
+        $task = Task::factory()->create(['source_type' => 'project', 'source_id' => $this->project->id]);
+        $task->taskAssignees()->delete();
+        $task->taskAssignees()->create(['employee_id' => $employee->id]);
+    }
 
     // Projects saved before the team existed have no rows yet.
     DB::table('project_members')->delete();

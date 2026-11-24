@@ -11,13 +11,16 @@ use Modules\Core\Models\User;
 use Modules\Hr\Actions\Recruitment\RecruitmentApproverEligibility;
 use Modules\Hr\Models\InAppFeedback;
 use Modules\Hr\Models\MessageTemplate;
+use Modules\Hr\Models\OnboardingJourney;
 use Modules\Hr\Models\RecruitmentApplicant;
 use Modules\Hr\Models\RecruitmentInterview;
 use Modules\Hr\Models\RecruitmentJobOffer;
 use Modules\Hr\Support\Assistant\HrAssistant;
+use Modules\Hr\Support\Entitlements\Entitlements;
 use Modules\Hr\Support\Inbox\WorkInbox;
 use Modules\Hr\Support\Recruitment\Access;
 use Modules\Hr\Support\Recruitment\RecruitmentConfig;
+use Modules\Hr\Support\Reports\ReportCatalog;
 
 /**
  * The HR pages of the sidebar: every HR page with the permission that opens
@@ -65,6 +68,15 @@ final class HrDestinations implements DestinationSource
             ['hr.statistics.contracts', 'statistics_contracts', 'chart', 'nav-file-text', 'people', $can('statistics.view'), 'under' => 'hr.statistics.general'],
             ['hr.statistics.salaries', 'statistics_salaries', 'chart', 'nav-chart-line', 'people', $can('statistics.view'), 'under' => 'hr.statistics.general'],
 
+            // One link for the reports hub; each report opens from it. A report's own gate is ReportCatalog.
+            ['hr.reports.index', 'reports', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::visibleTo($user) !== []],
+            ['hr.reports.leaving-reasons', 'reports_leaving_reasons', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('leaving-reasons', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.recruitment-funnel', 'reports_recruitment_funnel', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('recruitment-funnel', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.leave', 'reports_leave', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('leave', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.vacancies', 'reports_vacancies', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('vacancies', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.training', 'reports_training', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('training', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.profile-completeness', 'reports_profile_completeness', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('profile-completeness', $user), 'under' => 'hr.reports.index'],
+
             ['hr.recruitment.requests.index', 'recruitment_requests', 'file', 'nav-file-plus', 'recruitment', $can('recruitment-requests.view')],
             ['hr.recruitment.approvals.pending', 'recruitment_approvals', 'check', 'nav-list-checks', 'recruitment', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-requests.approve') && self::mayReceiveApprovals($user), 'own' => true],
             ['hr.recruitment.campaigns.index', 'vacancies', 'search', 'nav-clipboard-list', 'recruitment', $can('recruitment-vacancies.view')],
@@ -75,6 +87,8 @@ final class HrDestinations implements DestinationSource
 
             // The viewer's own HR pages join their tasks and calendar.
             ['hr.leave.team-calendar', 'team', 'users', 'nav-calendar-range', 'workspace', $can('leaves.view-own', 'leaves.view-all')],
+            // A new volunteer's own journey, while it is open (and two weeks after); staff who never had one never see it.
+            ['hr.onboarding.my-first-days', 'first_days', 'flag', 'nav-list-checks', 'workspace', fn (User $user): bool => $staff($user) && self::inFirstDays($user), 'own' => true],
             ['hr.leave.index', 'leave_requests', 'cal', 'nav-tree-palm', 'workspace', fn (User $user): bool => $staff($user) && $user->can('leaves.view-own'), 'own' => true],
             ['hr.attendance.timesheets', 'attendance', 'cal', 'nav-calendar-check', 'workspace', fn (User $user): bool => $user->can('attendance.view') || ($staff($user) && $user->can('attendance.view-own'))],
             ['hr.attendance.upload', 'attendance_upload', 'file', 'nav-file-plus', 'workspace', $can('attendance.manage'), 'under' => 'hr.attendance.timesheets'],
@@ -88,6 +102,8 @@ final class HrDestinations implements DestinationSource
             // HR's settings sit with the rest of the administration; the old HR log is opened from the Activity log.
             ['hr.settings.index', 'settings', 'grid', 'nav-settings', 'administration', $can('project-basics.view')],
             ['hr.message-templates.index', 'message_templates', 'file', 'nav-message-circle-question-mark', 'administration', fn (User $user): bool => $user->can('viewAny', MessageTemplate::class)],
+            // Professional access tracked outside the system: HR roles and the administrators.
+            ['hr.entitlements.index', 'entitlements', 'check', 'nav-shield-check', 'administration', fn (User $user): bool => app(Entitlements::class)->canManageLibrary($user)],
             ['hr.activity.index', 'activity', 'undo', 'nav-file-clock', 'administration', $can('activity-log.view'), 'under' => 'activity.index'],
 
             ['hr.employees.me', 'my_profile', 'users', 'nav-circle-user', 'you', $staff, 'own' => true],
@@ -107,6 +123,15 @@ final class HrDestinations implements DestinationSource
         }
 
         return $offered;
+    }
+
+    /** Memoized per request: the desk asks it several times per page. */
+    private static function inFirstDays(User $user): bool
+    {
+        return once(static fn (): bool => OnboardingJourney::query()
+            ->where('employee_id', $user->employee_id)
+            ->where(fn ($open) => $open->whereNull('completed_at')->orWhere('completed_at', '>', now()->subDays(14)))
+            ->exists());
     }
 
     /**

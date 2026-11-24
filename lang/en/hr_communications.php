@@ -31,8 +31,11 @@ return [
             'onboarding' => 'Onboarding',
             'renewal' => 'Renewal',
             'exit' => 'Exit',
+            'probation' => 'Trial review',
+            'onboarding_step' => 'Onboarding step',
         ],
         'journey' => [
+            'probation' => 'Trial review waiting on you',
             'onboarding' => 'Onboarding still open',
             'renewal' => 'Contract renewal still open',
             'exit' => 'Exit still open',

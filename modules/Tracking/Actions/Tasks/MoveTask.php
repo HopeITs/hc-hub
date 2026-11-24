@@ -7,14 +7,14 @@ namespace Modules\Tracking\Actions\Tasks;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Modules\Core\Models\Program;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Task;
 
 /**
  * Move a task, with its subtasks, somewhere else inside its own program: the
- * program itself ("program"), one of its projects ("project:ID") or one of
- * their milestones ("milestone:ID"). A subtask always follows its parent, so
+ * program itself ("program") or one of its location rows ("location:ID";
+ * "project:ID" is still accepted for an unmapped legacy task). A subtask always follows its parent, so
  * it never moves on its own, and a task raised outside a program (a proposal,
  * a report…) has nowhere to move to.
  *
@@ -26,7 +26,7 @@ class MoveTask
     /**
      * Where the task may go, or null when it cannot be moved at all.
      *
-     * @return array{program: array{id: int, name: string}, projects: list<array{id: int, name: string, milestones: list<array{id: int, name: string}>}>}|null
+     * @return array{program: array{id: int, name: string}, projects: list<array{id: int, name: string}>}|null
      */
     public function destinations(Task $task): ?array
     {
@@ -42,7 +42,7 @@ class MoveTask
     /**
      * Every place inside a program a task can belong to, or null when the program is gone.
      *
-     * @return array{program: array{id: int, name: string}, projects: list<array{id: int, name: string, milestones: list<array{id: int, name: string}>}>}|null
+     * @return array{program: array{id: int, name: string}, projects: list<array{id: int, name: string}>}|null
      */
     public function placesInProgram(int $programId): ?array
     {
@@ -52,25 +52,12 @@ class MoveTask
             return null;
         }
 
-        $milestones = Milestone::query()
-            ->select(['id', 'name', 'project_id'])
-            ->whereIn('project_id', Project::query()->select('id')->where('program_id', $program->id))
-            ->orderBy('name')
-            ->get()
-            ->groupBy('project_id');
-
         $projects = Project::query()
             ->select(['id', 'name'])
             ->where('program_id', $program->id)
             ->orderBy('name')
             ->get()
-            ->map(fn (Project $project): array => [
-                'id' => $project->id,
-                'name' => $project->name,
-                'milestones' => array_values(($milestones->get($project->id) ?? collect())
-                    ->map(fn (Milestone $milestone): array => ['id' => $milestone->id, 'name' => $milestone->name])
-                    ->all()),
-            ]);
+            ->map(fn (Project $project): array => ['id' => $project->id, 'name' => $project->name]);
 
         return [
             'program' => ['id' => $program->id, 'name' => $program->name],
@@ -101,7 +88,7 @@ class MoveTask
     }
 
     /**
-     * A target ("program", "project:ID", "milestone:ID") inside the program, or null for anything else.
+     * A target ("program", "project:ID") inside the program, or null for anything else.
      *
      * @return array{type: string, id: int}|null
      */
@@ -113,27 +100,36 @@ class MoveTask
 
         [$type, $id] = array_pad(explode(':', $target, 2), 2, '');
         $id = (int) $id;
-        $projectIds = Project::query()->select('id')->where('program_id', $programId);
 
+        // "location:ID" is where a task moves from Y-12 on; "project:ID" is
+        // still accepted for tasks the backfill could not map (until Y-18).
         $belongs = match ($type) {
+            'location' => ProposalLocation::query()->whereKey($id)->where('program_id', $programId)->exists(),
             'project' => Project::query()->whereKey($id)->where('program_id', $programId)->exists(),
-            'milestone' => Milestone::query()->whereKey($id)->whereIn('project_id', $projectIds)->exists(),
             default => false,
         };
 
-        return $belongs ? ['type' => $type, 'id' => $id] : null;
+        if (! $belongs) {
+            return null;
+        }
+
+        return ['type' => $type === 'location' ? 'proposal_location' : $type, 'id' => $id];
     }
 
     /**
-     * A record's place in the target format: "program", "project:ID" or "milestone:ID".
+     * A record's place in the target format: "program" or "project:ID".
      */
     public function targetFor(string $type, int $id): string
     {
-        return $type === 'program' ? 'program' : $type.':'.$id;
+        return match ($type) {
+            'program' => 'program',
+            'proposal_location' => 'location:'.$id,
+            default => $type.':'.$id,
+        };
     }
 
     /**
-     * The program a task source lives in: itself, a project's, or a milestone's project's.
+     * The program a task source lives in: itself, or a project's.
      */
     public function programIdOfSource(string $type, int $id): ?int
     {
@@ -141,13 +137,11 @@ class MoveTask
             return $id;
         }
 
-        $projectId = match ($type) {
-            'project' => $id,
-            'milestone' => Milestone::query()->whereKey($id)->value('project_id'),
+        $programId = match ($type) {
+            'proposal_location' => ProposalLocation::programIdFor($id),
+            'project' => Project::query()->whereKey($id)->value('program_id'),
             default => null,
         };
-
-        $programId = $projectId === null ? null : Project::query()->whereKey($projectId)->value('program_id');
 
         return $programId === null ? null : (int) $programId;
     }

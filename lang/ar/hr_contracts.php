@@ -58,6 +58,7 @@ return [
         'show_hours_per_week' => 'عدد الساعات في الأسبوع',
         'show_hours_per_day' => 'عدد الساعات في اليوم',
         'show_day_range' => 'أيام العمل',
+        'show_weekend_clause' => 'تضمين «يعتبر يوم :days يوم عطلة» في العقد المطبوع',
         'flex_days_per_week' => 'الأيام في الأسبوع',
         'flex_hours_per_week' => 'الساعات في الأسبوع',
         'flex_hours_per_month' => 'الساعات في الشهر',
@@ -77,6 +78,8 @@ return [
     ],
 
     'form' => [
+        'work_weekdays' => 'أيام الدوام، تُحدَّد يومًا يومًا',
+        'work_weekdays_help' => 'اترك الأيام فارغة لاستعمال النطاق أعلاه. كل يوم غير محدَّد يُعدّ يوم عطلة عند احتساب الإجازات. لا يمكن تحديد يوم عطلة المركز.',
         'create_title' => 'عقد جديد',
         'edit_title' => 'تعديل العقد',
         'renew_title' => 'تجديد العقد',
@@ -133,6 +136,7 @@ return [
     ],
 
     'errors' => [
+        'work_weekdays_center_day_off' => 'لا يمكن أن يكون يوم عطلة المركز يوم دوام.',
         'position_full' => 'لا يوجد مقعد شاغر في هذا المنصب.',
         'employee_incomplete' => 'سجل الموظف مسودة. أكمله قبل إضافة عقد.',
         'service_requires_freelance' => 'عقد الخدمة يجب أن يكون دواماً حراً.',

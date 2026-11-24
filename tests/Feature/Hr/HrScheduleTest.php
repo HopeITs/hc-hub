@@ -52,6 +52,10 @@ test('the leave decision reminders run every morning', function () {
     expect(hrScheduledEvents()['leaves:send-decision-reminders']->expression)->toBe('5 8 * * *');
 });
 
+test('the birthday conflict reminders run every morning', function () {
+    expect(hrScheduledEvents()['birthday:notify-conflicts']->expression)->toBe('25 8 * * *');
+});
+
 test('every recruitment command is registered with Artisan', function () {
     $registered = array_keys(Artisan::all());
 
@@ -69,4 +73,13 @@ test('every recruitment command is registered with Artisan', function () {
         'recruitment:retention-sweep',
         'recruitment:sync-campaign-states',
     );
+});
+
+test('the mail-list starters queue runs every morning, after the attendance reminders', function () {
+    $events = hrScheduledEvents();
+
+    expect($events)->toHaveKey('mail-lists:queue-starters')
+        ->and($events['mail-lists:queue-starters']->expression)->toBe('20 8 * * *')
+        ->and($events['mail-lists:queue-starters']->withoutOverlapping)->toBeTrue()
+        ->and($events['mail-lists:queue-starters']->onOneServer)->toBeTrue();
 });

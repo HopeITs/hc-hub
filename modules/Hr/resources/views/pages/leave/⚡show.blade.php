@@ -12,6 +12,7 @@ use Modules\Hr\Actions\Leave\DecideLeaveRequest;
 use Modules\Hr\Actions\Leave\DeleteLeaveRequest;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Livewire\Concerns\Leave\ManagesLeaveRequestForm;
+use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Support\Leave\LeaveContext;
 use Modules\Hr\Support\Leave\LeaveDecisionAlreadyMade;
@@ -36,6 +37,9 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
     public string $decision = '';
 
     public string $rejectReason = '';
+
+    /** The covering colleague the decider keeps or names instead; written with an acceptance only. */
+    public string $decisionAlternative = '';
 
     public bool $showReviewModal = false;
 
@@ -100,6 +104,31 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         ];
     }
 
+    /**
+     * The decision dialog's covering-colleague choices and whether the one the
+     * request names is busy in its period; null once the request is decided.
+     *
+     * @return array{choices: array<int, string>, currentUnavailable: bool}|null
+     */
+    #[Computed]
+    public function decisionAlternatives(): ?array
+    {
+        $leaveRequest = $this->leaveRequest;
+
+        if ($leaveRequest->status !== LeaveRequestStatus::Pending->value) {
+            return null;
+        }
+
+        $decide = app(DecideLeaveRequest::class);
+
+        return [
+            'choices' => $decide->alternativesFor($leaveRequest)
+                ->mapWithKeys(fn (Employee $candidate) => [(int) $candidate->id => (string) $candidate->name])
+                ->all(),
+            'currentUnavailable' => $decide->alternativeIsUnavailable($leaveRequest),
+        ];
+    }
+
     public function openDecide(string $decision): void
     {
         Gate::authorize('decide', $this->leaveRequest);
@@ -107,6 +136,7 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         $this->resetValidation();
         $this->decision = $decision === 'reject' ? 'reject' : 'accept';
         $this->rejectReason = '';
+        $this->decisionAlternative = (string) ($this->leaveRequest->alternative_employee_id ?? '');
         $this->showDecideModal = true;
     }
 
@@ -115,7 +145,7 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         $status = $this->decision === 'reject' ? LeaveRequestStatus::Rejected->value : LeaveRequestStatus::Accepted->value;
 
         try {
-            app(DecideLeaveRequest::class)->handle(Auth::user(), $this->leaveRequestId, $status, $this->rejectReason);
+            app(DecideLeaveRequest::class)->handle(Auth::user(), $this->leaveRequestId, $status, $this->rejectReason, $this->decisionAlternative);
         } catch (LeaveDecisionAlreadyMade $exception) {
             $this->closeDecide();
             unset($this->leaveRequest);
@@ -135,6 +165,7 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         $this->showDecideModal = false;
         $this->decision = '';
         $this->rejectReason = '';
+        $this->decisionAlternative = '';
     }
 
     public function openReview(string $kind): void
@@ -353,6 +384,22 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
                 @if ($decision === 'reject')
                     <x-ui.form-textarea wire:model="rejectReason" :label="__('hr_leave.fields.reject_reason')" required maxlength="255" />
                 @endif
+                @if ($decision !== 'reject' && $this->decisionAlternatives !== null)
+                    <div data-decision-alternative>
+                        <x-ui.form-select wire:model="decisionAlternative" :label="__('hr_leave.alternative.decision_label')" :placeholder="__('hr_leave.alternative.none')" :help="__('hr_leave.alternative.decision_hint')" searchable>
+                            <option value="">{{ __('hr_leave.alternative.none') }}</option>
+                            @foreach ($this->decisionAlternatives['choices'] as $optionId => $optionName)
+                                <option value="{{ $optionId }}">{{ $optionName }}</option>
+                            @endforeach
+                        </x-ui.form-select>
+                        @if ($this->decisionAlternatives['currentUnavailable'])
+                            <p class="form-error" data-decision-alternative-busy>{{ __('hr_leave.alternative.current_unavailable') }}</p>
+                        @endif
+                    </div>
+                @endif
+                @error('alternative')
+                    <p class="form-error">{{ $message }}</p>
+                @enderror
                 @error('status')
                     <p class="form-error">{{ $message }}</p>
                 @enderror

@@ -22,6 +22,7 @@ return [
     'ask_corrected' => 'Showing results for “:query”',
     'ask_nothing_title' => 'Nothing found',
     'ask_nothing_body' => 'Try a name, a page, a question like “what is due today?” or an action like “new task”.',
+    'key_alt' => 'Alt',
     'key_esc' => 'Esc',
     'ask_move' => 'move',
     'ask_open' => 'open',
@@ -81,6 +82,8 @@ return [
             'finish_proposal' => 'Your project · finish the proposal',
             'send_proposal' => 'Your project · send the proposal to the donor',
         ],
+        'plan' => 'Annual plan sent to MEAL',
+        'plan_fix' => 'MEAL sent your plan back',
         'review' => 'Your :stage review',
         'validate' => ':month report to validate',
         'approve' => 'Sent for your review',
@@ -91,6 +94,8 @@ return [
         'recruitment' => 'Recruitment request · :what',
     ],
     'decision_action' => [
+        'plan' => 'Review',
+        'plan_fix' => 'Fix it',
         'proposal' => 'Open',
         'review' => 'Review',
         'validate' => 'Validate',
@@ -128,7 +133,6 @@ return [
     'risk_cell' => 'Likelihood :likelihood, severity :severity: :count',
     'final_report' => 'Final report',
     'no_end_date' => 'no end date',
-    'milestone_progress' => ':done of :tasks tasks done',
     'weight' => 'weight',
     'internal' => 'Internal',
     'proposals_count' => '{0} no proposals|{1} 1 proposal|[2,*] :count proposals',
@@ -264,7 +268,6 @@ return [
         'draft' => 'Open',
     ],
     'kind' => [
-        'milestone' => 'Milestone',
         'task' => 'Task',
         'report' => 'Indicator report',
         'transfer' => 'Transfer',
@@ -372,7 +375,7 @@ return [
     'ask_cta' => 'Ask or find anything',
     'start' => [
         'task' => 'New task', 'report' => 'Monthly report', 'proposal' => 'New proposal',
-        'project' => 'New project', 'milestone' => 'New milestone', 'transfer' => 'New transfer',
+        'project' => 'New project', 'transfer' => 'New transfer',
         'donor' => 'New donor', 'agreement' => 'New agreement',
     ],
     'draft_count' => '{0} No panels in the draft|{1} 1 panel in the draft|[2,*] :count panels in the draft',
@@ -389,7 +392,7 @@ return [
         ],
         'overdue' => [
             'title' => 'Past the deadline',
-            'description' => 'Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.',
+            'description' => 'Tasks and reports of yours that missed their date, oldest first, so nothing late hides.',
             'locked' => 'Everyone has this panel.',
         ],
         'glance' => [
@@ -415,7 +418,7 @@ return [
         ],
         'coming' => [
             'title' => 'My agenda',
-            'description' => 'Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.',
+            'description' => 'Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.',
             'empty' => 'Nothing has a date in the next six weeks.',
             'locked' => 'Your role does not open the calendar.',
         ],
@@ -487,17 +490,17 @@ return [
             'empty' => 'Every indicator is on pace.',
             'locked' => 'Your role does not open targets.',
         ],
+        'plan-milestones' => [
+            'title' => 'Plan milestones',
+            'description' => 'Milestones for the plans you manage.',
+            'empty' => 'No milestones in your plans.',
+            'locked' => 'Available to program and project managers.',
+        ],
         'duties' => [
             'title' => 'Donor reporting',
             'description' => 'Reports owed to donors, by due date.',
             'empty' => 'No donor reports are open.',
             'locked' => 'Donor reports are built by the people who aggregate reports or manage agreements, or who are responsible for one.',
-        ],
-        'milestones' => [
-            'title' => 'Milestones',
-            'description' => 'Checkpoints coming up, with their weight in the project.',
-            'empty' => 'No open milestones.',
-            'locked' => 'Your role does not open milestones.',
         ],
         'donors' => [
             'title' => 'Donors',
@@ -534,13 +537,13 @@ return [
         'today' => '{0} Nothing is due today|{1} 1 thing is due by today|[2,*] :count things are due by today',
         'week' => '{0} Nothing is due this week|{1} 1 thing is due this week|[2,*] :count things are due this week',
     ],
-    'ask_due_body' => 'Milestones, tasks, transfers and reports you can see, soonest first.',
+    'ask_due_body' => 'Tasks, transfers and reports you can see, soonest first.',
     'ask_reviews_title' => '{0} Nothing is waiting for your review|{1} 1 proposal is waiting for your review|[2,*] :count proposals are waiting for your review',
     'ask_reviews_body' => 'Proposals where you are a reviewer and have not answered yet.',
     'ask_count_title' => ':count :things',
     'ask_count_body' => 'Counted across everything you are allowed to see.',
     'ask_things' => [
-        'projects' => 'projects', 'proposals' => 'proposals', 'donors' => 'donors', 'tasks' => 'open tasks', 'milestones' => 'milestones',
+        'projects' => 'projects', 'proposals' => 'proposals', 'donors' => 'donors', 'tasks' => 'open tasks',
         'risks' => 'risks', 'transfers' => 'transfers', 'indicators' => 'indicators', 'annual-plans' => 'annual plans', 'strategies' => 'strategies',
     ],
     'ask_suggest' => [
@@ -548,7 +551,7 @@ return [
         'money' => 'How is the money?', 'new_task' => 'New task', 'count_projects' => 'How many projects?',
     ],
     'ask_new' => [
-        'proposal' => 'New proposal', 'project' => 'New project', 'task' => 'New task', 'milestone' => 'New milestone', 'donor' => 'New donor',
+        'proposal' => 'New proposal', 'project' => 'New project', 'task' => 'New task', 'donor' => 'New donor',
         'transfer' => 'New transfer', 'agreement' => 'New funding agreement', 'risk' => 'New risk', 'indicator' => 'New indicator', 'target' => 'New target',
         'report' => 'Record a report', 'result' => 'New result', 'annual_plan' => 'New annual plan', 'strategy' => 'New strategy', 'account' => 'New account',
         'library_entry' => 'New library indicator',
@@ -586,7 +589,6 @@ return [
     ],
     'facet_value' => [
         'task' => 'Task',
-        'milestone' => 'Milestone',
         'transfer' => 'Transfer',
         'risk' => 'Risk',
         'review' => 'Review',
@@ -649,7 +651,7 @@ return [
             'money' => ['title' => 'Money tracking', 'purpose' => 'What is arriving, what is late and what we owe donors'],
             'donors' => ['title' => 'Donor tracking', 'purpose' => 'Each donor, their proposals, reports and money'],
             'tasks' => ['title' => 'Tasks tracking', 'purpose' => 'Your tasks, who you wait on, what your team carries'],
-            'delivery' => ['title' => 'Project delivery', 'purpose' => 'Projects by stage, with milestones and targets'],
+            'delivery' => ['title' => 'Project delivery', 'purpose' => 'Projects by stage, with tasks and targets'],
             'impact' => ['title' => 'Results and MEAL', 'purpose' => 'Targets behind, reports to validate, what is missing'],
             'fundraising' => ['title' => 'Fundraising', 'purpose' => 'Proposals in the pipeline, reviews and their donors'],
             'team' => ['title' => 'Team lead', 'purpose' => 'Who is overloaded, who is stuck, what needs you'],

@@ -11,10 +11,10 @@ use Modules\Tracking\Models\Risk;
 use Modules\Tracking\Support\TrackingDuties;
 
 /**
- * Risks follow their project: besides holders of the risks.* permissions, the
- * project's owner and its program's manager (see TrackingDuties::ownedProjectIds()) log
- * and edit the risks of projects they answer for. Deleting stays with
- * risks.delete.
+ * Risks follow their location row (Y-13, D-93): besides holders of the risks.*
+ * permissions, the row's responsible employee and its program's manager (see
+ * TrackingDuties::ownedLocationIds()) log and edit the risks of the rows they
+ * answer for. Deleting stays with risks.delete.
  *
  * Since W-09 (D-61) new risks are picked from the library onto a proposal's
  * logframe: `attach` and `detach` follow whoever may update that proposal
@@ -40,18 +40,18 @@ class RiskPolicy
     }
 
     /**
-     * Determine whether the user can log a risk — on the given project, or
-     * (with no project yet chosen) on at least one project.
+     * Determine whether the user can log a risk — on the given location row,
+     * or (with no row yet chosen) on at least one row.
      */
-    public function create(User $user, ?int $projectId = null): bool
+    public function create(User $user, ?int $locationId = null): bool
     {
         if ($user->can('risks.create')) {
             return true;
         }
 
-        $ownedProjectIds = TrackingDuties::for($user)->ownedProjectIds();
+        $ownedLocationIds = TrackingDuties::for($user)->ownedLocationIds();
 
-        return $projectId === null ? $ownedProjectIds !== [] : in_array($projectId, $ownedProjectIds, true);
+        return $locationId === null ? $ownedLocationIds !== [] : in_array($locationId, $ownedLocationIds, true);
     }
 
     /**
@@ -59,7 +59,7 @@ class RiskPolicy
      */
     public function update(User $user, Risk $risk): bool
     {
-        return $user->can('risks.update') || in_array($risk->project_id, TrackingDuties::for($user)->ownedProjectIds(), true);
+        return $user->can('risks.update') || in_array($risk->proposal_location_id, TrackingDuties::for($user)->ownedLocationIds(), true);
     }
 
     /**

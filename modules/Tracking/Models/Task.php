@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\DeliverableKind;
 use Modules\Tracking\Enums\DeliveryState;
@@ -55,6 +56,8 @@ use Modules\Tracking\Observers\ScheduleItemObserver;
  * @property CarbonImmutable|null $start_date
  * @property CarbonImmutable|null $due_date
  * @property CarbonImmutable|null $completed_date
+ * @property string|null $completion_note why it was marked done with checks still open (framework task)
+ * @property int|null $completed_by the user who marked it done (framework task)
  * @property int $progress_percentage
  * @property bool $evidence_required
  * @property int $created_by
@@ -66,6 +69,7 @@ use Modules\Tracking\Observers\ScheduleItemObserver;
  */
 #[Fillable([
     'parent_task_id',
+    'activity_plan_milestone_id',
     'source_type',
     'source_id',
     'department_id',
@@ -85,6 +89,8 @@ use Modules\Tracking\Observers\ScheduleItemObserver;
     'start_date',
     'due_date',
     'completed_date',
+    'completion_note',
+    'completed_by',
     'progress_percentage',
     'evidence_required',
     'created_by',
@@ -201,11 +207,8 @@ class Task extends Model implements TracksActivity
 
         $programId = match ($this->activityAttribute('source_type')) {
             'program' => $sourceId,
+            'proposal_location' => ProposalLocation::programIdFor($sourceId),
             'project' => Project::query()->whereKey($sourceId)->value('program_id'),
-            'milestone' => Milestone::query()
-                ->join('projects', 'projects.id', '=', 'milestones.project_id')
-                ->where('milestones.id', $sourceId)
-                ->value('projects.program_id'),
             default => null,
         };
 
@@ -236,8 +239,8 @@ class Task extends Model implements TracksActivity
     }
 
     /**
-     * The milestone, proposal, project, program, department or employee this
-     * task is raised against.
+     * The proposal, project, program, department or employee this task is
+     * raised against.
      *
      * There is no foreign key behind source_id, so a source can be deleted
      * out from under this row.
@@ -247,6 +250,16 @@ class Task extends Model implements TracksActivity
     public function source(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * The annual plan milestone this task supports, when it was raised from one.
+     *
+     * @return BelongsTo<ActivityPlanMilestone, $this>
+     */
+    public function planMilestone(): BelongsTo
+    {
+        return $this->belongsTo(ActivityPlanMilestone::class, 'activity_plan_milestone_id');
     }
 
     /**
@@ -290,20 +303,30 @@ class Task extends Model implements TracksActivity
     }
 
     /**
-     * The project this task's source sits under, when its source is a
-     * milestone. Used to bucket tasks under a project card (e.g. on a
-     * proposal's Tasks tab).
+     * The location row this task is raised against, or null for any other
+     * source (Y-12). Reads the column, so it costs no query.
+     */
+    public function sourceLocationId(): ?int
+    {
+        return $this->activityAttribute('source_type') === 'proposal_location'
+            ? (int) $this->activityAttribute('source_id')
+            : null;
+    }
+
+    /**
+     * The project this task's source is, when it is raised against one. Used
+     * to bucket tasks under a project card (e.g. on a proposal's Tasks tab).
      */
     public function sourceProjectId(): ?int
     {
         $source = $this->loadedSource();
 
-        return $source instanceof Milestone ? $source->project_id : null;
+        return $source instanceof Project ? $source->id : null;
     }
 
     /**
      * Whether this task belongs to a paused project (D-66, W-02): its source
-     * is that project, or a milestone of it. The chip on a task only says so;
+     * is that project. The chip on a task only says so;
      * the due date and status stay. Pass the paused ids once per render.
      *
      * @param  list<int>|null  $pausedProjectIds  from Project::pausedIds()
@@ -311,18 +334,22 @@ class Task extends Model implements TracksActivity
     public function isPaused(?array $pausedProjectIds = null): bool
     {
         $source = $this->loadedSource();
-        $projectId = match (true) {
-            $source instanceof Project => $source->id,
-            $source instanceof Milestone => $source->project_id,
-            default => null,
-        };
+
+        // A row knows whether one of its own centers is deactivated (Y-11),
+        // so a row-sourced task asks the row. The `project` source stays
+        // readable until Y-18 for tasks the backfill could not map.
+        if ($source instanceof ProposalLocation) {
+            return $source->isPaused();
+        }
+
+        $projectId = $source instanceof Project ? $source->id : null;
 
         return $projectId !== null && in_array($projectId, $pausedProjectIds ?? Project::pausedIds(), true);
     }
 
     /**
      * Leaves out the tasks of a paused project: those whose source is the
-     * project, or one of its milestones. Program-, proposal- and
+     * project. Program-, proposal- and
      * annual-plan-level tasks are never paused.
      *
      * @param  Builder<Task>  $query
@@ -331,11 +358,16 @@ class Task extends Model implements TracksActivity
     protected function notPaused(Builder $query): void
     {
         $paused = Project::query()->paused()->select('projects.id');
+        $pausedRows = ProposalLocation::query()
+            ->select('proposal_locations.id')
+            ->where('proposal_locations.city_wide', false)
+            ->whereIn('proposal_locations.id', ProposalLocationCenter::query()
+                ->select('proposal_location_id')
+                ->whereIn('center_id', Center::inactiveIds()));
 
-        $query
-            ->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'project')->orWhereNotIn('tasks.source_id', $paused))
-            ->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'milestone')
-                ->orWhereNotIn('tasks.source_id', Milestone::query()->select('milestones.id')->whereIn('milestones.project_id', $paused)));
+        $query->where(fn (Builder $inner) => $inner
+            ->where(fn (Builder $project) => $project->where('tasks.source_type', '!=', 'project')->orWhereNotIn('tasks.source_id', $paused))
+            ->where(fn (Builder $row) => $row->where('tasks.source_type', '!=', 'proposal_location')->orWhereNotIn('tasks.source_id', $pausedRows)));
     }
 
     /**
@@ -396,7 +428,7 @@ class Task extends Model implements TracksActivity
 
     /**
      * Tasks raised against one record: a program, project, proposal,
-     * milestone, department or employee (the morph map key).
+     * department or employee (the morph map key).
      *
      * @param  Builder<Task>  $query
      */

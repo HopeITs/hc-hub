@@ -49,6 +49,41 @@ final class LeaveFormat
         return $negative ? '−'.$text : $text;
     }
 
+    /**
+     * The same amounts in whole and half hours, for the employee's own cards: "6 days
+     * and 1 hour" reads at a glance where "6 days, 1 hour and 20 minutes" does not.
+     * Rounds DOWN to the half hour, so what may still be taken never promises time the
+     * request form would refuse. Display only: requests still take any number of
+     * minutes, and HR's tables keep the exact figures (see hours()).
+     */
+    public static function rounded(float $hours, ?float $hoursPerDay): string
+    {
+        $negative = $hours < 0;
+        [$days, $rest] = LeaveRequestPricing::splitDays(abs($hours), $hoursPerDay);
+        // A hair under a half hour after float arithmetic is that half hour, not the one below.
+        $halves = (int) floor(($rest + 0.001) * 2);
+        $wholeHours = intdiv($halves, 2);
+        $parts = [];
+
+        if ($days > 0) {
+            $parts[] = trans_choice('hr_leave.units.days', $days, ['count' => $days]);
+        }
+
+        if ($halves % 2 === 1) {
+            $parts[] = trans_choice('hr_leave.units.hours_half', $wholeHours, ['count' => $wholeHours]);
+        } elseif ($wholeHours > 0) {
+            $parts[] = trans_choice('hr_leave.units.hours', $wholeHours, ['count' => $wholeHours]);
+        }
+
+        if ($parts === []) {
+            return trans_choice('hr_leave.units.days', 0, ['count' => 0]);
+        }
+
+        $text = implode(__('hr_leave.units.and'), $parts);
+
+        return $negative ? '−'.$text : $text;
+    }
+
     /** How long a stored request is (its snapshot, else the legacy rule). */
     public static function duration(LeaveRequest $leaveRequest, ?float $hoursPerDay): string
     {

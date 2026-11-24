@@ -207,6 +207,10 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.form')] class extends 
         </x-slot:meta>
     </x-ui.detail-header>
 
+    @unless ($editing)
+        @include('hr::pages.employees._form-offers-awaiting')
+    @endunless
+
     <form wire:submit="save" novalidate class="flex flex-col gap-5">
         <x-ui.panel :title="__('hr_employees.form.identity')">
             <div class="p-4 {{ $grid }}">

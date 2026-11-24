@@ -10,6 +10,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\Program;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * Take an archived project out of the archive (D-27, contracts.md §3).
@@ -21,6 +22,8 @@ use Modules\Tracking\Models\Project;
  */
 final class RestoreProject
 {
+    public function __construct(private ProjectLocationMirror $mirror) {}
+
     /**
      * @throws ValidationException when the project is not archived or another open project holds its center and program
      */
@@ -51,6 +54,8 @@ final class RestoreProject
 
             $locked->status = $locked->start_date !== null && $locked->end_date !== null ? ProjectStatus::Closed : ProjectStatus::Draft;
             $locked->save();
+
+            $this->mirror->sync($locked);
 
             return $locked->status;
         });

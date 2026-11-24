@@ -18,6 +18,7 @@ use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Contracts\ContractOptions;
+use Modules\Hr\Support\Contracts\WeekendClause;
 use Modules\Hr\Support\Employees\HrAccess;
 
 /**
@@ -30,8 +31,8 @@ trait ManagesContractForm
         'employee_id', 'position_id', 'contract_type_id', 'type', 'place', 'is_active', 'auto_renew',
         'start_date', 'end_date', 'terminated_at', 'termination_reason_id', 'reason_of_termination',
         'weekly_hours', 'work_days_en', 'work_days_ar', 'schedule_mode', 'work_hours_from', 'work_hours_to',
-        'work_hours_2_from', 'work_hours_2_to', 'work_day_from', 'work_day_to', 'show_days_per_week',
-        'show_hours_per_week', 'show_hours_per_day', 'show_day_range', 'flex_days_per_week', 'flex_hours_per_week',
+        'work_hours_2_from', 'work_hours_2_to', 'work_day_from', 'work_day_to', 'work_weekdays', 'show_days_per_week',
+        'show_hours_per_week', 'show_hours_per_day', 'show_day_range', 'show_weekend_clause', 'flex_days_per_week', 'flex_hours_per_week',
         'flex_hours_per_month', 'flex_varies_by_requirements', 'flex_coordinated_with_manager', 'flex_custom_en',
         'flex_custom_ar', 'pay_mode', 'currency', 'salary', 'salary_per', 'session_duration',
     ];
@@ -82,10 +83,13 @@ trait ManagesContractForm
             'work_hours_2_to' => '',
             'work_day_from' => '',
             'work_day_to' => '',
+            // The days picked one by one (Carbon numbering), instead of the from-to range; empty = the range.
+            'work_weekdays' => [],
             'show_days_per_week' => true,
             'show_hours_per_week' => true,
             'show_hours_per_day' => true,
             'show_day_range' => true,
+            'show_weekend_clause' => false,
             'flex_days_per_week' => '',
             'flex_hours_per_week' => '',
             'flex_hours_per_month' => '',
@@ -114,6 +118,7 @@ trait ManagesContractForm
             $value = $contract->getAttribute($field);
 
             $this->form[$field] = match (true) {
+                $field === 'work_weekdays' => array_map('strval', $contract->workWeekdays() ?? []),
                 is_bool($value) => $value,
                 $value instanceof \DateTimeInterface => $value->format('Y-m-d'),
                 in_array($field, ['work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to'], true) => $value === null ? '' : substr((string) $value, 0, 5),
@@ -211,6 +216,51 @@ trait ManagesContractForm
             ->get()
             ->mapWithKeys(fn (Position $position): array => [$position->id => $position->title.' ('.(int) $position->exist_emp.'/'.(int) $position->max_emp.')'])
             ->all();
+    }
+
+    /**
+     * The place's day(s) off, which no working-day pick may include (the picker greys them out).
+     *
+     * @return list<int>
+     */
+    #[Computed]
+    public function placeDaysOff(): array
+    {
+        $positionId = (int) ($this->form['position_id'] ?? 0);
+
+        if ($positionId === 0) {
+            return [];
+        }
+
+        $position = Position::query()
+            ->with(['program:id,slug', 'center:id,city_id,weekends'])
+            ->select(['id', 'program_id', 'center_id', 'city_id'])
+            ->find($positionId);
+
+        return app(WeekendClause::class)->placeDaysForPosition($position);
+    }
+
+    /**
+     * The day(s) off a Study Zone contract on the chosen position may state;
+     * empty (no checkbox) for other programs or when no center weekend is set.
+     *
+     * @return list<int>
+     */
+    #[Computed]
+    public function weekendClauseDays(): array
+    {
+        $positionId = (int) ($this->form['position_id'] ?? 0);
+
+        if ($positionId === 0) {
+            return [];
+        }
+
+        $position = Position::query()
+            ->with(['program:id,slug', 'center:id,city_id,weekends'])
+            ->select(['id', 'program_id', 'center_id', 'city_id'])
+            ->find($positionId);
+
+        return app(WeekendClause::class)->daysForPosition($position);
     }
 
     /**

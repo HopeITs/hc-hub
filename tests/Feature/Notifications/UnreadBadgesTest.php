@@ -9,7 +9,6 @@ use App\Notifications\UnreadSubjects;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\DonorProposal;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Report;
@@ -45,7 +44,6 @@ test('list rows carry a dot only for records with unread notifications', functio
         ->assertDontSeeHtml('data-unread-dot="'.$type.'-'.$quiet->id.'"');
 })->with([
     'tasks' => ['tasks.index', 'task', fn () => Task::factory()->create()],
-    'milestones' => ['milestones.index', 'milestone', fn () => Milestone::factory()->create()],
     'projects' => ['projects.index', 'project', fn () => Project::factory()->create()],
     'reports' => ['reports.index', 'report', fn () => Report::factory()->create()],
     'proposals' => ['proposals.index', 'proposal', fn () => Proposal::factory()->create()],
@@ -60,7 +58,6 @@ test('record headers carry the dot only while the record has unread notification
     $this->actingAs($viewer)->get(route($route, $quiet))->assertDontSeeHtml('data-unread-dot');
 })->with([
     'task' => ['tasks.show', 'task', fn () => Task::factory()->create()],
-    'milestone' => ['milestones.show', 'milestone', fn () => Milestone::factory()->create()],
     'project' => ['projects.show', 'project', fn () => Project::factory()->create()],
     'report' => ['reports.show', 'report', fn () => Report::factory()->create()],
     'proposal' => ['proposals.show', 'proposal', fn () => Proposal::factory()->create()],

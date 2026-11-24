@@ -7,6 +7,7 @@ use App\Enums\MediaCollection;
 use App\Models\Activity;
 use App\Models\Media;
 use Carbon\CarbonImmutable;
+use Database\Seeders\Concerns\SeedsReportTemplates;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -17,12 +18,10 @@ use Modules\Tracking\Enums\DeliverableKind;
 use Modules\Tracking\Enums\DeliveryState;
 use Modules\Tracking\Enums\IndicatorCollector;
 use Modules\Tracking\Enums\LineSchedule;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Enums\ReportTemplateLineStatus;
-use Modules\Tracking\Enums\ReportTemplateStatus;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Enums\ReviewerSlot;
 use Modules\Tracking\Enums\ReviewStage;
@@ -34,15 +33,14 @@ use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\FundingAgreementInstallment;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\IndicatorProgress;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\ProposalStatusNote;
 use Modules\Tracking\Models\Report;
-use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\ReportTemplateLine;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Risk;
@@ -53,10 +51,10 @@ use Modules\Tracking\Support\Reporting\PlaceBridge;
 /**
  * Fills "Al-Wadi Training Center" and its GIZ proposal with fake data for
  * every section of the project page and the proposal it embeds: the
- * project's story fields, milestones, tasks, risks, monthly reports,
+ * project's story fields, tasks, risks, monthly reports,
  * report template, targets and files; the proposal's reviewers, status
  * history, logical framework, indicators, targets, reports, plan
- * (milestones, media, finance and department tasks), documents, funding
+ * (media, finance and department tasks), documents, funding
  * agreement installments and tranches; and a short activity trail.
  *
  * Needs the project and proposal from RealProjectsSeeder and
@@ -67,6 +65,8 @@ use Modules\Tracking\Support\Reporting\PlaceBridge;
  */
 class AlWadiShowcaseSeeder extends Seeder
 {
+    use SeedsReportTemplates;
+
     private const PROJECT_SLUG = 'al-wadi-training-center';
 
     private CarbonImmutable $today;
@@ -90,7 +90,6 @@ class AlWadiShowcaseSeeder extends Seeder
 
         Model::unguarded(fn () => Activity::withoutRecording(function () use ($project, $proposal): void {
             $this->fillProject($project);
-            $this->seedProjectMilestones($project);
             $this->seedMonthlyReports($project);
             $this->seedRisks($project);
             $this->seedTasks('project', $project->id, [
@@ -112,7 +111,6 @@ class AlWadiShowcaseSeeder extends Seeder
 
             $this->seedReviewers($proposal);
             $this->seedStatusHistory($proposal);
-            $this->seedProposalPlan($proposal, $outputs);
             $this->seedTasks('proposal', $proposal->id, [
                 ['Photos of the tailoring class', TaskKind::MediaDeliverable, TaskStatus::UnderReview, TaskPriority::Medium, 10],
                 ['Short video of the graduation event', TaskKind::MediaDeliverable, TaskStatus::Todo, TaskPriority::Medium, 75],
@@ -148,50 +146,18 @@ class AlWadiShowcaseSeeder extends Seeder
     }
 
     /**
-     * Seven weighted milestones: three reached, two ongoing, two planned.
-     */
-    private function seedProjectMilestones(Project $project): void
-    {
-        $plan = [
-            ['Baseline survey and participant selection', -7, -6, MilestoneStatus::Reached, 10],
-            ['Tailoring course, cohort 1', -6, -3, MilestoneStatus::Reached, 15],
-            ['Solar installation course, cohort 1', -5, -2, MilestoneStatus::Reached, 15],
-            ['Toolkit distribution to graduates', -2, -1, MilestoneStatus::Ongoing, 15],
-            ['Mobile repair course, cohort 2', -1, 1, MilestoneStatus::Ongoing, 15],
-            ['Business coaching round 1', 1, 3, MilestoneStatus::Planned, 15],
-            ['Endline survey and graduation event', 3, 5, MilestoneStatus::Planned, 15],
-        ];
-
-        foreach ($plan as $index => [$name, $start, $end, $status, $weight]) {
-            $reached = $status === MilestoneStatus::Reached;
-
-            Milestone::query()->firstOrNew(['project_id' => $project->id, 'name' => $name])->forceFill([
-                'description' => 'Showcase milestone.',
-                'planned_start_date' => $this->today->addMonths($start)->toDateString(),
-                'planned_end_date' => $this->today->addMonths($end)->toDateString(),
-                'actual_start_date' => $reached ? $this->today->addMonths($start)->toDateString() : null,
-                'actual_end_date' => $reached ? $this->today->addMonths($end)->subDays(4)->toDateString() : null,
-                'status' => $status,
-                'sequence' => $index + 1,
-                'weight_percentage' => $weight,
-                // saveQuietly() skips the model's mirroring, so both columns are written (roadmap 1.9).
-                'responsible_employee_id' => $this->user($index)->employee_id,
-                'responsible_user_id' => $this->user($index)->employee_id,
-            ])->saveQuietly();
-        }
-    }
-
-    /**
      * Six monthly reports: four validated, one sent back, one waiting for MEAL.
      */
     private function seedMonthlyReports(Project $project): void
     {
         $user = $this->user(0);
+        $template = $this->reportTemplateFor($project, $this->user(1)->id, $this->today->subMonths(6), legacyKind: true);
 
         foreach ([6 => 'validated', 5 => 'validated', 4 => 'validated', 3 => 'validated', 2 => 'returned', 1 => 'submitted'] as $monthsAgo => $state) {
             $period = $this->today->startOfMonth()->subMonths($monthsAgo);
 
-            MonthlyReport::query()->firstOrNew(['project_id' => $project->id, 'period' => $period->toDateString()])->forceFill([
+            MonthlyReport::query()->firstOrNew(['report_template_id' => $template->id, 'period' => $period->toDateString()])->forceFill([
+                'project_id' => $project->id,
                 'status' => match ($state) {
                     'validated' => MonthlyReportStatus::Validated,
                     'submitted' => MonthlyReportStatus::Submitted,
@@ -294,7 +260,7 @@ class AlWadiShowcaseSeeder extends Seeder
 
             PlanIndicator::query()->firstOrCreate(
                 ['source_type' => 'proposal', 'source_id' => $proposal->id, 'indicator_id' => $indicator->id, 'project_id' => $project->id],
-                ['target' => $target, 'target_population' => $measure === 'numeric' ? $target : null, 'period' => $period, ...app(PlaceBridge::class)->placeColumnsForTargets($proposal, [$project->id])[$project->id]],
+                ['target' => $target, 'target_population' => $measure === 'numeric' ? $target : null, 'period' => $period, 'proposal_location_id' => ProposalLocation::query()->where('proposal_id', $proposal->id)->where('project_id', $project->id)->value('id'), ...app(PlaceBridge::class)->placeColumnsForTargets($proposal, [$project->id])[$project->id]],
             );
 
             IndicatorProgress::query()->firstOrCreate(
@@ -343,13 +309,7 @@ class AlWadiShowcaseSeeder extends Seeder
     private function seedReportTemplate(Project $project, Collection $targets): void
     {
         $confirmedBy = $this->user(1)->id;
-        // A template that predates Y-02: it keeps its project and gets the project's place and proposals.
-        $template = ReportTemplate::query()->firstOrCreate(
-            ['project_id' => $project->id],
-            ['city_id' => $project->city_id, 'program_id' => $project->program_id, 'center_id' => $project->center_id],
-        );
-        $template->proposals()->syncWithoutDetaching(array_fill_keys($project->proposals()->pluck('proposals.id')->all(), ['joined_at' => $this->today]));
-        $template->forceFill(['status' => ReportTemplateStatus::Confirmed, 'confirmed_at' => $this->today->subMonths(6), 'confirmed_by' => $confirmedBy])->saveQuietly();
+        $template = $this->reportTemplateFor($project, $confirmedBy, $this->today->subMonths(6), legacyKind: true);
 
         foreach ($targets as $target) {
             ReportTemplateLine::query()->firstOrCreate(
@@ -403,32 +363,6 @@ class AlWadiShowcaseSeeder extends Seeder
                 ['proposal_id' => $proposal->id, 'status' => $status],
                 ['context' => $context, 'date' => $this->today->subMonths($monthsAgo)->toDateString(), 'changed_by' => $this->user(0)->id],
             );
-        }
-    }
-
-    /**
-     * @param  list<Result>  $outputs
-     */
-    private function seedProposalPlan(Proposal $proposal, array $outputs): void
-    {
-        foreach ([
-            ['Recruit trainers and select participants', -8, -7, MilestoneStatus::Reached, 20],
-            ['Courses for cohort 1', -7, -3, MilestoneStatus::Reached, 30],
-            ['Toolkits and coaching for cohort 1', -3, 1, MilestoneStatus::Ongoing, 25],
-            ['Endline survey and final report', 2, 4, MilestoneStatus::Planned, 25],
-        ] as $index => [$name, $start, $end, $status, $weight]) {
-            Milestone::query()->firstOrNew(['proposal_id' => $proposal->id, 'name' => $name])->forceFill([
-                'description' => 'Showcase milestone.',
-                'planned_start_date' => $this->today->addMonths($start)->toDateString(),
-                'planned_end_date' => $this->today->addMonths($end)->toDateString(),
-                'status' => $status,
-                'sequence' => $index + 1,
-                'weight_percentage' => $weight,
-                // saveQuietly() skips the model's mirroring, so both columns are written (roadmap 1.9).
-                'responsible_employee_id' => $this->user($index)->employee_id,
-                'responsible_user_id' => $this->user($index)->employee_id,
-                'result_id' => $outputs[$index % 3]->id,
-            ])->saveQuietly();
         }
     }
 

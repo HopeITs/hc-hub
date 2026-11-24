@@ -131,6 +131,48 @@ test('without a linked center in the city nothing changes', function () {
         ->and($quote->errors)->toContain(LeaveQuote::OUTSIDE_WORKING_HOURS);
 });
 
+test('the contracts own working days leave the volunteers day off uncounted', function () {
+    // The center closes on Friday and the volunteer works five days, so a second day off (Tuesday) is theirs:
+    // a leave from Monday to Wednesday is two days, not three, and Tuesday is listed as their own day off.
+    ($this->center)($this->homs, '5', '08:00', '21:00', [$this->studyZone]);
+    [$contract, $balance] = ($this->volunteer)($this->studyZone, $this->homs);
+    $contract->update(['work_weekdays' => '6,0,1,3,4']);
+    $contract = $contract->fresh();
+
+    $quote = $this->pricing->quote($contract, $balance, LeaveWindow::days('2026-11-02', '2026-11-04'));
+
+    expect($this->pricing->weekendFor($contract))->toBe([[2, 5], 'contract'])
+        ->and($quote->countedDays)->toBe(2)
+        ->and($quote->excludedDates)->toBe([['date' => '2026-11-03', 'reason' => 'day_off']])
+        // Five working days: 40 h a week is 8 h a day.
+        ->and($quote->requestedHours)->toBe(16.0);
+});
+
+test('a leave across the centers day and the volunteers own lists both', function () {
+    ($this->center)($this->homs, '5', '09:00', '17:00', [$this->studyZone]);
+    [$contract, $balance] = ($this->volunteer)($this->studyZone, $this->homs);
+    $contract->update(['work_weekdays' => '0,1,2,3,4']);
+
+    // Thursday 5 Nov to Sunday 8 Nov: Friday is the center's, Saturday is the volunteer's own.
+    $quote = $this->pricing->quote($contract->fresh(), $balance, LeaveWindow::days('2026-11-05', '2026-11-08'));
+
+    expect($quote->countedDays)->toBe(2)
+        ->and($quote->excludedDates)->toBe([
+            ['date' => '2026-11-06', 'reason' => 'weekend'],
+            ['date' => '2026-11-07', 'reason' => 'day_off'],
+        ]);
+});
+
+test('the place weekend ignores the days the contract picked', function () {
+    ($this->center)($this->homs, '5', '09:00', '17:00', [$this->studyZone]);
+    [$contract] = ($this->volunteer)($this->studyZone, $this->homs);
+    $contract->update(['work_weekdays' => '6,0,1,3,4']);
+
+    expect($this->pricing->placeWeekendFor($contract->fresh()))->toBe([[5], 'program'])
+        ->and(Contract::parseWeekdays('4, 0,x,9,0'))->toBe([0, 4])
+        ->and($contract->fresh()->workWeekdays())->toBe([0, 1, 3, 4, 6]);
+});
+
 test('an inactive linked center is ignored', function () {
     ($this->center)($this->homs, '5', '08:00', '21:00', [$this->studyZone], false);
     [$contract] = ($this->volunteer)($this->studyZone, $this->homs);

@@ -16,7 +16,6 @@ use Modules\Tracking\Http\Controllers\ReportFileDownloadController;
 use Modules\Tracking\Http\Controllers\ReportFilePreviewController;
 use Modules\Tracking\Http\Controllers\TaskFileDownloadController;
 use Modules\Tracking\Http\Controllers\TaskFilePreviewController;
-use Modules\Tracking\Http\Middleware\RedirectProposalToStory;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\RiskLibrary;
 use Modules\Tracking\Models\Task;
@@ -107,14 +106,6 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
         ->can('risks.view')
         ->name('risks.index');
 
-    Route::livewire('milestones', 'tracking::milestones.index')
-        ->can('milestones.view')
-        ->name('milestones.index');
-
-    Route::livewire('milestones/{milestone}', 'tracking::milestones.show')
-        ->can('milestones.view')
-        ->name('milestones.show');
-
     Route::livewire('results', 'tracking::results.index')
         ->can('results.view')
         ->name('results.index');
@@ -159,7 +150,6 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
 
     Route::livewire('proposals/{proposal}', 'tracking::proposals.show')
         ->can('view', 'proposal')
-        ->middleware(RedirectProposalToStory::class)
         ->name('proposals.show');
 
     Route::get('proposals/{proposal}/files/{media}/download', ProposalFileDownloadController::class)

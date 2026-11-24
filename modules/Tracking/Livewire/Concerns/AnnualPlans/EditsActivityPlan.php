@@ -17,16 +17,20 @@ use Modules\Tracking\Actions\AnnualPlans\AddPlanActivity;
 use Modules\Tracking\Actions\AnnualPlans\ChooseActivityPlanActivities;
 use Modules\Tracking\Actions\AnnualPlans\CopyActivityPlanItemSettings;
 use Modules\Tracking\Actions\AnnualPlans\ManageActivityPlanFollowUps;
+use Modules\Tracking\Actions\AnnualPlans\ManagePlanMilestones;
 use Modules\Tracking\Actions\AnnualPlans\ReviewActivityPlan;
 use Modules\Tracking\Actions\AnnualPlans\SaveActivityPlanItem;
 use Modules\Tracking\Actions\AnnualPlans\SubmitActivityPlan;
+use Modules\Tracking\Enums\ActivityKind;
 use Modules\Tracking\Enums\ActivityPlanStatus;
 use Modules\Tracking\Enums\CountUnit;
 use Modules\Tracking\Enums\FollowUpTrigger;
+use Modules\Tracking\Enums\Period;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Models\ActivityPlan;
 use Modules\Tracking\Models\ActivityPlanBatch;
 use Modules\Tracking\Models\ActivityPlanItem;
+use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Policies\ActivityPlanPolicy;
@@ -40,7 +44,7 @@ use Modules\Tracking\Support\PlanExecution;
  * The plan page of annual-plans (2026-11-11 workflow): the program manager's
  * four steps (proposal, activities, dates and places, check and send), the
  * MEAL manager's read-only review with follow-up tasks, and the approved
- * plan. Every write goes through an App\Actions\AnnualPlans action, which
+ * plan. Every write goes through an Modules\Tracking\Actions\AnnualPlans action, which
  * authorizes; this trait only keeps the form of the open activity.
  *
  * @property-read ActivityPlan $plan
@@ -68,6 +72,18 @@ trait EditsActivityPlan
     /** @var list<int|string> */
     public array $copyTargets = [];
 
+    /**
+     * Whether the dates step shows the whole-plan calendar: shown at first,
+     * with a button to hide it while filling an activity.
+     */
+    public bool $showPlanCalendar = true;
+
+    /**
+     * Said under "Where does it run?" when opening an activity dropped
+     * governorates that are no longer part of the plan (null when none were).
+     */
+    public ?string $removedCitiesNote = null;
+
     public string $followUpItem = '';
 
     public string $followUpTrigger = 'finish';
@@ -82,11 +98,146 @@ trait EditsActivityPlan
 
     public bool $attentionOnly = false;
 
+    public bool $showMilestoneModal = false;
+
+    public bool $showDeleteMilestoneModal = false;
+
+    #[Locked]
+    public ?int $editingMilestoneId = null;
+
+    #[Locked]
+    public ?int $deletingMilestoneId = null;
+
+    /** @var array<string, mixed> */
+    public array $milestoneForm = [];
+
+    public bool $showMilestoneTaskModal = false;
+
+    #[Locked]
+    public ?int $taskMilestoneId = null;
+
+    /** @var array{title: string, due_date: string, assignees: list<string>} */
+    public array $milestoneTaskForm = ['title' => '', 'due_date' => '', 'assignees' => []];
+
+    #[Computed]
+    public function milestones(): Collection
+    {
+        abort_unless(app(ManagePlanMilestones::class)->mayView($this->user(), $this->plan), 403);
+
+        return $this->plan->milestones()->with(['target.indicator', 'target.reports', 'tasks:id,slug,activity_plan_milestone_id,title,status,due_date'])->get()->toBase();
+    }
+
+    #[Computed]
+    public function milestoneTargets(): Collection
+    {
+        abort_unless(app(ManagePlanMilestones::class)->mayManage($this->user(), $this->plan), 403);
+
+        return PlanIndicator::query()->where('source_type', 'proposal')
+            ->where('source_id', $this->plan->proposal_id)
+            ->whereHas('indicator.result', fn ($query) => $query->where(fn ($query) => $query
+                ->where('program_id', $this->plan->program_id)->orWhereNull('program_id')))
+            ->with('indicator')->get()->toBase();
+    }
+
+    public function openMilestoneModal(?int $id = null): void
+    {
+        abort_unless(app(ManagePlanMilestones::class)->mayManage($this->user(), $this->plan), 403);
+        $milestone = $id === null ? null : $this->plan->milestones()->findOrFail($id);
+        $this->editingMilestoneId = $milestone?->id;
+        $this->milestoneForm = [
+            'title' => $milestone?->title ?? '',
+            'description' => $milestone?->description ?? '',
+            'due_date' => $milestone?->due_date?->toDateString() ?? '',
+            'measure' => $milestone?->measure ?? 'checkpoint',
+            'plan_indicator_id' => (string) ($milestone?->plan_indicator_id ?? ''),
+            'threshold' => (string) ($milestone?->threshold ?? ''),
+        ];
+        $this->resetErrorBag();
+        $this->showMilestoneModal = true;
+    }
+
+    public function saveMilestone(ManagePlanMilestones $action): void
+    {
+        try {
+            $action->save($this->user(), $this->plan, $this->editingMilestoneId, $this->milestoneForm);
+        } catch (ValidationException $exception) {
+            foreach ($exception->errors() as $field => $messages) {
+                $this->addError('milestoneForm.'.$field, $messages[0]);
+            }
+
+            return;
+        }
+        $this->showMilestoneModal = false;
+        unset($this->milestones);
+    }
+
+    public function completeMilestone(int $id, bool $complete, ManagePlanMilestones $action): void
+    {
+        $action->setCompleted($this->user(), $this->plan, $id, $complete);
+        unset($this->milestones);
+    }
+
+    public function openMilestoneTaskModal(int $milestoneId): void
+    {
+        abort_unless(app(ManagePlanMilestones::class)->mayManage($this->user(), $this->plan), 403);
+        $milestone = $this->plan->milestones()->findOrFail($milestoneId);
+        $this->taskMilestoneId = $milestone->id;
+        $this->milestoneTaskForm = ['title' => '', 'due_date' => $milestone->due_date->toDateString(), 'assignees' => []];
+        $this->resetErrorBag();
+        $this->showMilestoneTaskModal = true;
+    }
+
+    public function saveMilestoneTask(ManagePlanMilestones $action): void
+    {
+        if ($this->taskMilestoneId === null) {
+            return;
+        }
+
+        try {
+            $action->addTask($this->user(), $this->plan, $this->taskMilestoneId, $this->milestoneTaskForm);
+        } catch (ValidationException $exception) {
+            foreach ($exception->errors() as $field => $messages) {
+                $this->addError('milestoneTaskForm.'.str($field)->before('.'), $messages[0]);
+            }
+
+            return;
+        }
+
+        $this->showMilestoneTaskModal = false;
+        $this->taskMilestoneId = null;
+        unset($this->milestones);
+    }
+
+    public function confirmDeleteMilestone(int $id): void
+    {
+        abort_unless(app(ManagePlanMilestones::class)->mayManage($this->user(), $this->plan), 403);
+        $this->plan->milestones()->findOrFail($id);
+        $this->deletingMilestoneId = $id;
+        $this->showDeleteMilestoneModal = true;
+    }
+
+    public function deleteMilestone(ManagePlanMilestones $action): void
+    {
+        if ($this->deletingMilestoneId === null) {
+            return;
+        }
+
+        $action->delete($this->user(), $this->plan, $this->deletingMilestoneId);
+        $this->cancelDeleteMilestone();
+        unset($this->milestones);
+    }
+
+    public function cancelDeleteMilestone(): void
+    {
+        $this->showDeleteMilestoneModal = false;
+        $this->deletingMilestoneId = null;
+    }
+
     #[Computed]
     public function plan(): ActivityPlan
     {
         return ActivityPlan::query()
-            ->with(['proposal', 'items.activity:id,statement,activity_kind', 'items.batches', 'items.cities', 'followUps', 'submitter', 'approver', 'sentBackBy'])
+            ->with(['proposal', 'program', 'items.activity:id,statement,activity_kind', 'items.batches', 'items.cities', 'followUps', 'submitter', 'approver', 'sentBackBy'])
             ->findOrFail($this->planId);
     }
 
@@ -150,6 +301,29 @@ trait EditsActivityPlan
     }
 
     /**
+     * The plan's centres whose governorate is missing or unknown in HR, so they
+     * never appear under "Where does it run?": named with a link to fix them,
+     * instead of a bare "No centres linked yet".
+     *
+     * @return list<array{name: string, url: string}>
+     */
+    #[Computed]
+    public function centresWithoutGovernorate(): array
+    {
+        $centres = [];
+
+        foreach (ActivityPlanScope::projects($this->plan) as $project) {
+            $cityId = MealCoverage::cityIdOf($project);
+
+            if ($cityId === null || ! array_key_exists($cityId, $this->cityNames)) {
+                $centres[] = ['name' => (string) $project->name, 'url' => route('projects.show', $project)];
+            }
+        }
+
+        return $centres;
+    }
+
+    /**
      * @return list<array{outcome: string, activities: list<Result>}>
      */
     #[Computed]
@@ -195,7 +369,7 @@ trait EditsActivityPlan
     {
         $this->picked = array_values($this->plan->items->pluck('result_id')->map(fn (int $id): string => (string) $id)->all());
 
-        if ($this->mode === 'plan' && $this->plan->step === 2) {
+        if ($this->mode === 'plan' && $this->plan->items->isNotEmpty()) {
             $this->openFirstUnready();
         }
     }
@@ -246,7 +420,13 @@ trait EditsActivityPlan
 
     public string $newActivityParent = '';
 
-    public bool $newActivitySingle = false;
+    /**
+     * The new activity's kind and checking period, asked the same way as the
+     * Logical Framework's own "Add result" form (Event = it happens once).
+     */
+    public string $newActivityKind = 'continuous';
+
+    public string $newActivityPeriod = 'quarterly';
 
     /**
      * The outcomes and outputs of the plan's program a new activity can serve.
@@ -272,10 +452,11 @@ trait EditsActivityPlan
     {
         $this->run(function (): void {
             $activity = app(AddPlanActivity::class)->handle(
-                $this->user(), $this->plan, $this->newActivityName, (int) $this->newActivityParent, $this->newActivitySingle,
+                $this->user(), $this->plan, $this->newActivityName, (int) $this->newActivityParent,
+                $this->newActivityKind === ActivityKind::Event->value, Period::tryFrom($this->newActivityPeriod),
             );
             $this->picked[] = (string) $activity->id;
-            $this->reset('newActivityName', 'newActivitySingle', 'addingActivity');
+            $this->reset('newActivityName', 'newActivityKind', 'newActivityPeriod', 'addingActivity');
             unset($this->activityGroups, $this->activityParentOptions);
             Flux::toast(variant: 'success', text: __('annual_plans.wf.activity_added'));
         });
@@ -428,6 +609,12 @@ trait EditsActivityPlan
 
     // ---- MEAL review ----------------------------------------------------------------
 
+    /**
+     * The follow-up form opens from its own button, the way a missing
+     * activity is added on step 2; it closes once the task is on the list.
+     */
+    public bool $addingFollowUp = false;
+
     public function addFollowUp(): void
     {
         $this->run(function (): void {
@@ -436,7 +623,7 @@ trait EditsActivityPlan
             }
 
             app(ManageActivityPlanFollowUps::class)->add($this->user(), $this->plan, (int) $this->followUpItem, $this->followUpTrigger, $this->followUpText);
-            $this->followUpText = '';
+            $this->reset('followUpText', 'followUpItem', 'addingFollowUp');
             $this->refreshPlan();
         });
     }
@@ -577,6 +764,17 @@ trait EditsActivityPlan
             return;
         }
 
+        // A governorate the plan no longer has (its centre moved or left the
+        // proposal) cannot be ticked off and would fail "cities.0 is invalid" on
+        // every save, so it is dropped here and named in a note (AP-1 decision).
+        $planCityIds = ActivityPlanScope::cityIds($this->plan);
+        $stored = $item->cityIds();
+        $removed = array_values(array_diff($stored, $planCityIds));
+        $removedNames = ActivityPlanScope::cityNames($removed);
+        $this->removedCitiesNote = $removed === [] ? null : ($removedNames === []
+            ? __('annual_plans.wf.removed_city_unknown')
+            : __('annual_plans.wf.removed_cities', ['cities' => implode('، ', $removedNames)]));
+
         $this->openItemId = $item->id;
         $this->copyTargets = [];
         $this->resetErrorBag();
@@ -584,7 +782,7 @@ trait EditsActivityPlan
             'single_week' => $item->is_single_week,
             'unit' => $item->unit->value,
             'unit_other' => (string) ($item->unit_other ?? ''),
-            'cities' => array_map('strval', $item->cityIds()),
+            'cities' => array_map('strval', array_values(array_intersect($stored, $planCityIds))),
             'expected_people' => $item->expected_people === null ? '' : (string) $item->expected_people,
             'note' => (string) ($item->note ?? ''),
             'batches' => $this->batchRows($item),

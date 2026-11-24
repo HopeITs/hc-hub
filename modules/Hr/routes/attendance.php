@@ -20,6 +20,11 @@ Route::prefix('hr/attendance')->name('hr.attendance.')->group(function (): void 
         ->can('attendance.manage')
         ->name('upload');
 
+    // The devices that push their punches by themselves, and the centers they hang in.
+    Route::livewire('devices', 'hr::attendance.devices')
+        ->can('attendance.manage')
+        ->name('devices');
+
     Route::post('upload', AttendanceUploadController::class)
         ->can('attendance.manage')
         ->middleware('throttle:20,1')

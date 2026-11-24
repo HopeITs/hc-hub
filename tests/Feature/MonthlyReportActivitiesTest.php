@@ -53,6 +53,9 @@ beforeEach(function () {
     ]));
     $this->proposal = Activity::withoutRecording(fn (): Proposal => Proposal::factory()->create(['status' => ProposalStatus::Approved, 'name' => 'Proposal Alpha', 'planned_date_begin' => '2026-10-01', 'planned_date_end' => '2027-03-31']));
     $this->project->proposals()->attach($this->proposal->id, ['target_beneficiaries' => 100]);
+    // The report's activities come from its template's proposals (D-76).
+    Activity::withoutRecording(fn () => ReportTemplate::factory()->create(['project_id' => $this->project->id]))
+        ->proposals()->attach($this->proposal->id, ['joined_at' => now()]);
     $this->output = Activity::withoutRecording(fn (): Result => Result::factory()->type(ResultType::Output)->create(['proposal_id' => $this->proposal->id]));
 });
 
@@ -103,7 +106,12 @@ function mraSchedule(Result $activity, string $month, ?array $weeks = null, ?int
 
 function mraReport(string $month, MonthlyReportStatus $status = MonthlyReportStatus::Draft): MonthlyReport
 {
-    $attributes = ['project_id' => test()->project->id, 'period' => $month];
+    // The report follows the project's newest template, so one made by mraTemplate() wins (Y-03).
+    $attributes = [
+        'project_id' => test()->project->id,
+        'report_template_id' => ReportTemplate::query()->where('project_id', test()->project->id)->max('id'),
+        'period' => $month,
+    ];
 
     return Activity::withoutRecording(fn (): MonthlyReport => match ($status) {
         MonthlyReportStatus::Draft => MonthlyReport::factory()->create($attributes),

@@ -57,14 +57,21 @@ return [
     'detach_confirm_title' => 'Remove this risk?',
     'detach_confirm_message' => 'The risk is removed from this result. It stays in the library.',
     'detach_confirm_button' => 'Remove',
-    'heat_title' => 'Risk heat map',
-    'heat_unrated' => '{1} 1 risk is not rated and is left off the map.|[2,*] :count risks are not rated and are left off the map.',
-    'heat_table_caption' => 'Rated risks by likelihood and severity',
-    'heat_count' => 'Risks',
 
     'moved_notice' => 'New risks are picked from the MEAL library on a proposal’s Logical Framework tab. This register keeps the earlier entries and will be retired.',
     'moved_notice_link' => 'Open the proposals',
 
-    'heat_axes' => 'Rows: likelihood, high at the top. Columns: severity, low to high.',
     'high_risks' => 'High risks',
+
+    'console' => [
+        'backfill_applying' => 'Applying: register risks will be moved onto their location row.',
+        'backfill_dry_run' => 'Dry run: nothing will be written.',
+        'backfill_moved' => 'Register risks moved onto a row: :count.',
+        'backfill_by_date' => 'Decided by the day the risk was recorded: :count.',
+        'backfill_by_most_recent' => 'Decided by the most recent proposal (no single period covered the day): :count.',
+        'backfill_by_own_proposal' => 'Decided by the risk’s own proposal (no date rule): :count.',
+        'backfill_rows' => 'Risks per row (row id x count): :rows.',
+        'backfill_unmapped' => 'Risks no row could take (ids, left alone): :ids.',
+        'backfill_none' => 'none',
+    ],
 ];

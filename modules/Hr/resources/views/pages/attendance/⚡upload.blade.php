@@ -189,6 +189,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.upload')] class exten
 
 <x-desk.register class="@container" heading-id="hr-attendance-upload-heading" :title="__('hr_attendance.upload.title')" data-hr-attendance-upload>
     <x-slot:actions>
+        <x-ui.button tone="action" icon="signal" :href="route('hr.attendance.devices')" wire:navigate data-test="attendance-devices-link">{{ __('hr_attendance.devices.title') }}</x-ui.button>
         <x-ui.button tone="action" icon="clock" :href="route('hr.attendance.timesheets')" wire:navigate>{{ __('hr_attendance.upload.then') }}</x-ui.button>
     </x-slot:actions>
 
@@ -252,9 +253,9 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.upload')] class exten
                             <x-ui.data-table.cell :label="__('hr_attendance.upload.punches')"><span class="tabular-nums">{{ $row['punches'] }}</span></x-ui.data-table.cell>
                             <x-ui.data-table.cell :label="__('hr_attendance.upload.status')">
                                 @if ($row['name'])
-                                    <x-ui.enum-badge :case="\App\Enums\StatusTone::Good" :tone="\App\Enums\StatusTone::Good" :label="__('hr_attendance.upload.matched')" />
+                                    <x-ui.tone-badge tone="good" icon="check">{{ __('hr_attendance.upload.matched') }}</x-ui.tone-badge>
                                 @else
-                                    <x-ui.enum-badge :case="\App\Enums\StatusTone::Warn" :tone="\App\Enums\StatusTone::Warn" :label="__('hr_attendance.upload.not-matched')" />
+                                    <x-ui.tone-badge tone="warn" icon="exclamation-triangle">{{ __('hr_attendance.upload.not-matched') }}</x-ui.tone-badge>
                                 @endif
                             </x-ui.data-table.cell>
                         </tr>

@@ -230,6 +230,14 @@ test('the sidebar offers the theme toggle and the other language', function () {
         ->assertSee('name="locale" value="en"', false);
 });
 
+test('both language switches on the desk are marked so a switch keeps the open desk tab', function () {
+    // desk-tabs.js listens for a submit of either form and comes back on the tab in front.
+    $this->actingAs(User::factory()->create(['locale' => 'en']))
+        ->get(route('dashboard'))
+        ->assertSee('data-locale-toggle', false)
+        ->assertSee('data-locale-form', false);
+});
+
 test('stored enum values stay english while their labels follow the language', function () {
     app()->setLocale('en');
     expect(TaskStatus::InProgress->label())->toBe('In Progress')
@@ -437,7 +445,8 @@ function physicalDirectionClasses(string $source): array
  */
 function literalUiTextAllowlist(): array
 {
-    return ['OP1.2', 'https://', 'email@example.com'];
+    // Keyboard key names, printed on the key itself in every language.
+    return ['OP1.2', 'https://', 'email@example.com', 'Alt', 'Esc'];
 }
 
 /**
@@ -484,7 +493,7 @@ function literalUiText(string $source): array
         if ($line === '' || str_starts_with($line, '@') || str_starts_with($line, '//') || str_starts_with($line, '*')) {
             continue;
         }
-        if (preg_match('/\p{L}/u', $line) === 1) {
+        if (preg_match('/\p{L}/u', $line) === 1 && ! in_array($line, literalUiTextAllowlist(), true)) {
             $found[] = $line;
         }
     }

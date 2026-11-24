@@ -6,7 +6,8 @@ use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 
 /**
- * The 194 permission names the hub database held on 2026-11-20, when HR's
+ * The 190 permission names the hub database held on 2026-11-20 (194 less the
+ * four milestones.* permissions retired with the milestones), when HR's
  * existed only because hub:import-hr had copied them (roadmap 4.1).
  *
  * @return list<string>
@@ -33,8 +34,7 @@ function permissionsBeforeTheCatalogHeldHr(): array
         'indicators.delete', 'indicators.update', 'indicators.view', 'leaves.create',
         'leaves.decide', 'leaves.delete', 'leaves.export', 'leaves.manage-balances',
         'leaves.review', 'leaves.update', 'leaves.view-all', 'leaves.view-own',
-        'meal-coverage.manage', 'milestones.create', 'milestones.delete', 'milestones.update',
-        'milestones.view', 'narrative-questions.manage', 'news.create', 'news.delete',
+        'meal-coverage.manage', 'narrative-questions.manage', 'news.create', 'news.delete',
         'news.update', 'news.view', 'notification-settings.manage', 'positions.create',
         'positions.delete', 'positions.export', 'positions.update', 'positions.view',
         'programs.create', 'programs.delete', 'programs.update', 'programs.view',
@@ -75,7 +75,7 @@ test('syncing an empty database creates every permission the hub held before HR 
 
     $created = Permission::query()->where('guard_name', 'web')->pluck('name')->all();
 
-    expect(permissionsBeforeTheCatalogHeldHr())->toHaveCount(194)
+    expect(permissionsBeforeTheCatalogHeldHr())->toHaveCount(190)
         ->and(array_values(array_diff(permissionsBeforeTheCatalogHeldHr(), $created)))->toBe([]);
 });
 

@@ -30,8 +30,8 @@ use Modules\Tracking\Support\ProposalFramework;
  * through. The form writes into one framework: `formProposalId` (null = the
  * program framework), taken from the pinned proposal, the parent a child is
  * added under, or the result being edited — never from the request.
- * forgetFramework() unsets the computed reads of BuildsResultsFramework,
- * BuildsResultsTree and SummarisesResults, so a write re-renders the tree it
+ * forgetFramework() unsets the computed reads of BuildsResultsFramework
+ * and BuildsResultsTree, so a write re-renders the tree it
  * just changed in the same request.
  *
  * @property-read Collection<int, Result> $parentOptions
@@ -139,7 +139,7 @@ trait ManagesResultForm
      * under an outcome, an outcome under an impact.
      *
      * Excludes the node and its descendants so ResultObserver's
-     * InvalidParentException stays a backstop. Unlike milestones there is no
+     * InvalidParentException stays a backstop. There is no
      * project constraint.
      *
      * @return Collection<int, Result>

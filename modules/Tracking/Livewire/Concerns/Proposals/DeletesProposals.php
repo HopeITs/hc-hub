@@ -11,6 +11,7 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Modules\Tracking\Actions\Proposals\DeleteProposal;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Support\TargetCounts;
 
 /**
  * The register's delete confirmation for a proposal. The delete itself, its
@@ -54,7 +55,22 @@ trait DeletesProposals
             return null;
         }
 
-        return Proposal::query()->select(['id', 'name', 'internal_project_number'])->find($this->deletingProposalId);
+        return Proposal::query()->select(['id', 'name', 'slug', 'internal_project_number'])->find($this->deletingProposalId);
+    }
+
+    /**
+     * The targets the open confirmation would delete with the proposal, and
+     * how many have reports, which keep the proposal from being deleted
+     * (Y-10, DeleteProposal).
+     *
+     * @return array{count: int, reported: int}
+     */
+    #[Computed]
+    public function deletingProposalTargets(): array
+    {
+        $proposal = $this->deletingProposal;
+
+        return $proposal === null ? ['count' => 0, 'reported' => 0] : TargetCounts::ofProposal($proposal);
     }
 
     public function confirmDelete(int $proposalId): void
@@ -69,6 +85,7 @@ trait DeletesProposals
     {
         $this->deletingProposalId = null;
         $this->showDeleteModal = false;
+        unset($this->deletingProposal, $this->deletingProposalTargets);
     }
 
     public function deleteProposal(): void

@@ -18,10 +18,8 @@ use Modules\Core\Models\User;
 use Modules\Tracking\Actions\Proposals\DeleteProposalFile;
 use Modules\Tracking\Actions\Proposals\RecordFinalReportAcceptance;
 use Modules\Tracking\Actions\Proposals\SaveProposalFile;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Models\Donor;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
 
 /**
@@ -54,8 +52,8 @@ trait ManagesFinalReportAcceptance
 
     /**
      * Whether the button applies: the viewer may edit the proposal, it is
-     * active and donor-funded, its final-report milestone is reached, the
-     * final report is filed and the acceptance is not recorded yet.
+     * active and donor-funded, the final report is filed and the acceptance
+     * is not recorded yet.
      */
     #[Computed]
     public function canRecordFinalReportAcceptance(): bool
@@ -69,14 +67,7 @@ trait ManagesFinalReportAcceptance
             return false;
         }
 
-        // A payroll proposal (W-32) has no final-report milestone: the filed report is enough.
-        $milestoneReached = $proposal->isPayroll() || Milestone::query()
-            ->where('proposal_id', $proposal->id)
-            ->where('is_final_report', true)
-            ->where('status', MilestoneStatus::Reached)
-            ->exists();
-
-        return $milestoneReached && $proposal->media()->where('collection', MediaCollection::FinalReport)->exists();
+        return $proposal->media()->where('collection', MediaCollection::FinalReport)->exists();
     }
 
     /**

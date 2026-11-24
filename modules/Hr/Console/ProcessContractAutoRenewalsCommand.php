@@ -31,9 +31,63 @@ class ProcessContractAutoRenewalsCommand extends Command
 
         $this->notifyCityHr($contracts, $ledger);
 
-        $this->components->info('Renewed '.$contracts->count().' contract(s).');
+        $waiting = $this->notifyAwaitingNewYear($renewals->waitingForNewYear(), $ledger);
+
+        $this->components->info('Renewed '.$contracts->count().' contract(s); told HR of '.$waiting.' newly waiting for the new year.');
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Tell city HR, once per contract, which contracts ended in October to
+     * December and will only be renewed on 1 January. The ledger is keyed on
+     * the contract's end date, so a re-run or a later night sends nothing new.
+     *
+     * @param  Collection<int, Contract>  $contracts
+     */
+    private function notifyAwaitingNewYear(Collection $contracts, DeliveryLedger $ledger): int
+    {
+        $told = [];
+
+        $contracts
+            ->filter(fn (Contract $contract): bool => $contract->employee?->city_id !== null)
+            ->groupBy(fn (Contract $contract): int => (int) $contract->employee->city_id)
+            ->each(function (Collection $group, int $cityId) use ($ledger, &$told): void {
+                foreach ($ledger->cityHr($cityId) as $recipient) {
+                    $new = $group->filter(fn (Contract $contract): bool => $ledger->claim(
+                        'contract_renews_new_year', $recipient->id, [$contract->id], $contract->end_date,
+                    ) !== [])->values();
+
+                    if ($new->isEmpty()) {
+                        continue;
+                    }
+
+                    $notice = new JourneyNotice('contracts-awaiting-new-year', [
+                        'count' => $new->count(),
+                        'date' => ContractAutoRenewalService::renewalStart($new->first())->toDateString(),
+                        'names' => [
+                            'en' => $new->map(fn (Contract $contract): string => $contract->employee->nameForLocale('en'))->implode(', '),
+                            'ar' => $new->map(fn (Contract $contract): string => $contract->employee->nameForLocale('ar'))->implode('، '),
+                        ],
+                    ], route('hr.contracts.index'));
+
+                    try {
+                        $recipient->notify($notice);
+                    } catch (Throwable $e) {
+                        report($e);
+                        $ledger->release('contract_renews_new_year', $recipient->id, $new->pluck('id')->all(), $new->first()->end_date);
+
+                        continue;
+                    }
+
+                    foreach ($new as $contract) {
+                        $ledger->markDelivered('contract_renews_new_year', $recipient->id, [$contract->id], $contract->end_date);
+                        $told[$contract->id] = true;
+                    }
+                }
+            });
+
+        return count($told);
     }
 
     /**

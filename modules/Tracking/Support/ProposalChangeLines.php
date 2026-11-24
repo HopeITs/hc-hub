@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support;
 
-use App\Enums\Locale;
-use App\Notifications\EmployeeRecipients;
+use App\Support\EmployeeProfile;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Str;
@@ -183,7 +182,7 @@ final class ProposalChangeLines
         return [
             'donors' => $ids['donors'] === [] ? [] : Donor::query()->whereKey($ids['donors'])->pluck('name', 'id')->all(),
             'cities' => $ids['cities'] === [] ? [] : HrCity::query()->whereKey($ids['cities'])->get(['id', 'name_en', 'name_ar'])->mapWithKeys(fn (HrCity $city): array => [$city->id => (string) $city->name])->all(),
-            'employees' => array_map(fn (array $name): string => $name[Locale::current()->value] ?: $name['en'], app(EmployeeRecipients::class)->names($ids['employees'])),
+            'employees' => $ids['employees'] === [] ? [] : EmployeeProfile::namesByIds($ids['employees']),
             'projects' => $ids['projects'] === [] ? [] : app(PlaceBridge::class)->projectsByIds($ids['projects'])->map(fn (mixed $project): string => (string) $project->name)->all(),
         ];
     }
