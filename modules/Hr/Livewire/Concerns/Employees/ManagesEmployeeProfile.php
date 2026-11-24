@@ -9,14 +9,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Computed;
-use Modules\Core\Models\City;
-use Modules\Core\Models\Program;
 use Modules\Hr\Actions\Contracts\ReservePosition;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Employees\DigitalId;
-use Modules\Hr\Support\Employees\HrAccess;
 
 /**
  * The small edits made from the profile page itself: the contact and skills
@@ -24,6 +20,8 @@ use Modules\Hr\Support\Employees\HrAccess;
  */
 trait ManagesEmployeeProfile
 {
+    use PicksDraftPosition;
+
     /** The profile sections edited in place, and the columns each holds. */
     public const SECTIONS = [
         'personal-contact' => ['personal_phone', 'personal_email', 'address_ar', 'address_en'],
@@ -42,12 +40,6 @@ trait ManagesEmployeeProfile
     public string $sectionVersion = '';
 
     public bool $showDraftModal = false;
-
-    public string $draftCityId = '';
-
-    public string $draftProgramId = '';
-
-    public string $draftPositionId = '';
 
     /**
      * HR edits every section; the employee edits their own personal contact
@@ -221,17 +213,6 @@ trait ManagesEmployeeProfile
         $this->resetValidation();
     }
 
-    public function updatedDraftCityId(): void
-    {
-        $this->draftProgramId = '';
-        $this->draftPositionId = '';
-    }
-
-    public function updatedDraftProgramId(): void
-    {
-        $this->draftPositionId = '';
-    }
-
     public function saveDraft(): void
     {
         abort_unless($this->canEdit, 404);
@@ -249,54 +230,6 @@ trait ManagesEmployeeProfile
         unset($this->contracts, $this->currentContract);
 
         Flux::toast(variant: 'success', text: __('hr_employees.toasts.position_reserved'));
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    #[Computed]
-    public function draftCityOptions(): array
-    {
-        $allowed = HrAccess::cityIds(auth()->user());
-
-        return array_filter(City::options(), fn (int $id): bool => $allowed === null || in_array($id, $allowed, true), ARRAY_FILTER_USE_KEY);
-    }
-
-    /**
-     * The programs that have an open position in the chosen city.
-     *
-     * @return array<int, string>
-     */
-    #[Computed]
-    public function draftProgramOptions(): array
-    {
-        if ($this->draftCityId === '') {
-            return [];
-        }
-
-        $programIds = Position::query()->inCity((int) $this->draftCityId)->visible()->distinct()->pluck('program_id')->all();
-
-        return array_intersect_key(Program::namesById(), array_flip($programIds));
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    #[Computed]
-    public function draftPositionOptions(): array
-    {
-        if ($this->draftCityId === '' || $this->draftProgramId === '') {
-            return [];
-        }
-
-        return Position::query()
-            ->inCity((int) $this->draftCityId)
-            ->where('program_id', (int) $this->draftProgramId)
-            ->visible()
-            ->orderBy(Position::translatedColumn('title'))
-            ->get(['id', 'city_id', 'title_en', 'title_ar'])
-            ->mapWithKeys(fn (Position $position): array => [$position->id => (string) $position->title])
-            ->all();
     }
 
     /**
