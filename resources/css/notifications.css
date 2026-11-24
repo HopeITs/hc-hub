@@ -1,4 +1,4 @@
-/* Notifications: the inbox thread, bell and toasts, and the notification rules page. */
+/* Notifications: the inbox thread, bell and toasts, and the notification rules tab. */
 
 @layer components {
         /* Notifications: who did it and what it was about carry the sentence. */
@@ -125,7 +125,7 @@
 }
 
 /*
- * Notification rules (pages/admin/⚡notification-settings + _rules-* partials):
+ * Notification rules (components/notifications/⚡rules + notifications/rules/* partials):
  * one row per rule — name and hint on the start side, one control on the end side.
  */
 @layer components {

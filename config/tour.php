@@ -85,8 +85,6 @@ return [
         'notification-settings.edit' => [
             ['id' => 'popups', 'targets' => ['[data-popup-preference]']],
             ['id' => 'mutes', 'targets' => ['[data-module-mutes]']],
-        ],
-        'admin.notification-settings.edit' => [
             ['id' => 'savebar', 'targets' => ['[data-rules-savebar]']],
             ['id' => 'default_reviewers', 'targets' => ['[data-default-reviewers]']],
         ],

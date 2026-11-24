@@ -360,7 +360,6 @@ return [
         'admin_cities_index' => 'Cities and centers we work in',
         'admin_accounts_index' => 'Bank accounts money moves through',
         'strategies_index' => 'Strategies and their pillars',
-        'admin_notification_settings_edit' => 'Who is told what, and when',
         'notification_settings_edit' => 'Mute modules, desktop popups',
         'activity_index' => 'Who changed what',
         'security_edit' => 'Email codes, authenticator, passkeys',

@@ -450,7 +450,7 @@ return [
     'position_vacant' => 'Position vacant',
     'position_vacant_hint' => 'Nobody holds this position in HR, so nobody was invited for it.',
     'position_not_set' => 'Not set up',
-    'position_not_set_hint' => 'No HR position is chosen for this seat yet, so nobody was invited for it. An admin chooses it in Notification Rules → Default proposal reviewers.',
+    'position_not_set_hint' => 'No HR position is chosen for this seat yet, so nobody was invited for it. An admin chooses it in Notification settings → Organization rules → Default proposal reviewers.',
     'inactive_account' => 'Inactive account',
     'no_reviewers_yet' => 'No reviewers yet. They are invited when the concept note or the proposal is sent for review.',
     'review_meeting_on' => 'Review meeting: :date',

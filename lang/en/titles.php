@@ -42,7 +42,6 @@ return [
     'transfers' => 'Transfers',
     'user_directory' => 'User Directory',
     'activity_log' => 'Activity Log',
-    'notification_rules' => 'Notification Rules',
     'notifications' => 'Notifications',
     'my_reviews' => 'My Reviews',
     'notification_settings' => 'Notification Settings',

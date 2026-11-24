@@ -2,7 +2,6 @@
 
 return [
     'activity_log' => 'Activity Log',
-    'notification_settings' => 'Notification Rules',
     'administration' => 'Administration',
     'application_navigation' => 'Application navigation',
     'documentation' => 'Documentation',

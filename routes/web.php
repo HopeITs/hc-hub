@@ -50,9 +50,7 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
 
     Route::livewire('waiting-on-me', 'pages::waiting.index')->name('waiting.index');
 
-    Route::livewire('admin/notification-settings', 'pages::admin.notification-settings')
-        ->can('notification-settings.manage')
-        ->name('admin.notification-settings.edit');
+    Route::redirect('admin/notification-settings', '/notifications-settings?tab=rules', 301);
 
     Route::livewire('activity', 'pages::activity.index')
         ->can('activity-log.view')

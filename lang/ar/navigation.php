@@ -2,7 +2,6 @@
 
 return [
     'activity_log' => 'سجل النشاط',
-    'notification_settings' => 'قواعد الإشعارات',
     'administration' => 'الإدارة',
     'application_navigation' => 'التنقل في التطبيق',
     'documentation' => 'التوثيق',

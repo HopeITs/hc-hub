@@ -6,7 +6,6 @@ use App\Models\UserNotification;
 use App\Notifications\UnreadCounts;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -22,13 +21,6 @@ new class extends Component {
      * it; until then only the cached unread count is read.
      */
     public bool $opened = false;
-
-    /**
-     * Whether the panel's settings menu offers the notification rules; the
-     * top bar decides, so the bell itself never loads the viewer's permissions.
-     */
-    #[Locked]
-    public bool $canManageRules = false;
 
     /**
      * @return array{total: int, critical: int, modules: array<string, int>}
@@ -176,27 +168,9 @@ new class extends Component {
                     </button>
                 @endif
 
-                @if ($canManageRules)
-                    <div class="relative" x-data="{ menu: false }" x-on:click.outside="menu = false" x-on:keydown.escape.stop="menu = false; $refs.gear.focus()">
-                        <button type="button" x-ref="gear" x-on:click="menu = ! menu" x-bind:aria-expanded="menu.toString()" aria-haspopup="menu" class="dk-nb-ic dk-tip" aria-label="{{ __('notifications.bell.settings') }}" data-tip="{{ __('notifications.bell.settings') }}" data-bell-settings>
-                            <flux:icon name="nav-settings" class="size-4" />
-                        </button>
-                        <div x-show="menu" x-cloak role="menu" class="dk-nb-menu" x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from">
-                            <a role="menuitem" href="{{ route('notification-settings.edit') }}" wire:navigate>
-                                <flux:icon name="nav-bell-ring" class="size-4" />
-                                {{ __('notifications.settings_link') }}
-                            </a>
-                            <a role="menuitem" href="{{ route('admin.notification-settings.edit') }}" wire:navigate data-bell-rules>
-                                <flux:icon name="nav-sliders-horizontal" class="size-4" />
-                                {{ __('navigation.notification_settings') }}
-                            </a>
-                        </div>
-                    </div>
-                @else
-                    <a href="{{ route('notification-settings.edit') }}" wire:navigate class="dk-nb-ic dk-tip" aria-label="{{ __('notifications.settings_link') }}" data-tip="{{ __('notifications.settings_link') }}" data-bell-settings>
-                        <flux:icon name="nav-settings" class="size-4" />
-                    </a>
-                @endif
+                <a href="{{ route('notification-settings.edit') }}" wire:navigate class="dk-nb-ic dk-tip" aria-label="{{ __('notifications.settings_link') }}" data-tip="{{ __('notifications.settings_link') }}" data-bell-settings>
+                    <flux:icon name="nav-settings" class="size-4" />
+                </a>
             </div>
         </div>
 

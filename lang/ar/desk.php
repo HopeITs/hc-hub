@@ -360,7 +360,6 @@ return [
         'admin_cities_index' => 'المدن والمراكز التي نعمل فيها',
         'admin_accounts_index' => 'الحسابات البنكية التي تمرّ بها الأموال',
         'strategies_index' => 'الاستراتيجيات وركائزها',
-        'admin_notification_settings_edit' => 'من يُبلَّغ بماذا ومتى',
         'notification_settings_edit' => 'كتم الوحدات، إشعارات سطح المكتب',
         'activity_index' => 'من غيّر ماذا',
         'security_edit' => 'رموز البريد، تطبيق المصادقة، مفاتيح المرور',

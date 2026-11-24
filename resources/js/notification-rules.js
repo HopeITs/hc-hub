@@ -1,10 +1,10 @@
 /**
- * The notification rules page: a live draft of every rule, held in the
+ * The notification rules tab: a live draft of every rule, held in the
  * Livewire component's own properties through $wire (no request until Save),
  * plus what is drawn from it — the late-item steps, the unsaved-change count
  * and the "use default" links.
  *
- * Bounds mirror the server rules in pages/admin/⚡notification-settings; the
+ * Bounds mirror the server rules in components/notifications/⚡rules; the
  * server still validates everything on Save.
  */
 

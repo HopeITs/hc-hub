@@ -217,14 +217,6 @@
             "module": "access-management"
         },
         {
-            "route": "admin.notification-settings.edit",
-            "label": "Notification Rules",
-            "icon": "bell",
-            "hero": "nav-sliders-horizontal",
-            "group": "administration",
-            "module": null
-        },
-        {
             "route": "activity.index",
             "label": "Activity Log",
             "icon": "undo",
@@ -1210,12 +1202,6 @@
             "icon": "grid"
         },
         "g-admin-users": {
-            "kind": "buttons",
-            "rows": 1,
-            "min_rows": 1,
-            "icon": "grid"
-        },
-        "g-admin-notification-settings-edit": {
             "kind": "buttons",
             "rows": 1,
             "min_rows": 1,
@@ -19625,14 +19611,6 @@
                     "module": "access-management"
                 },
                 {
-                    "route": "admin.notification-settings.edit",
-                    "label": "Notification Rules",
-                    "icon": "bell",
-                    "hero": "nav-sliders-horizontal",
-                    "group": "administration",
-                    "module": null
-                },
-                {
                     "route": "activity.index",
                     "label": "Activity Log",
                     "icon": "undo",
@@ -19973,7 +19951,6 @@
                 "calendar.index",
                 "notifications.index",
                 "admin.users.index",
-                "admin.notification-settings.edit",
                 "activity.index",
                 "admin.cities.index",
                 "admin.sectors.index",
@@ -20979,15 +20956,6 @@
                         "register": "admin.users.index",
                         "kind": "page"
                     },
-                    "g-admin-notification-settings-edit": {
-                        "id": "g-admin-notification-settings-edit",
-                        "title": "Notification Rules",
-                        "description": "A button that opens Notification Rules.",
-                        "icon": "nav-sliders-horizontal",
-                        "size": "S",
-                        "register": "admin.notification-settings.edit",
-                        "kind": "page"
-                    },
                     "g-activity": {
                         "id": "g-activity",
                         "title": "Activity Log",
@@ -21566,7 +21534,6 @@
                     "calendar.index": "coming",
                     "notifications.index": "g-notifications",
                     "admin.users.index": "p-admin-users",
-                    "admin.notification-settings.edit": "g-admin-notification-settings-edit",
                     "activity.index": "p-activity",
                     "admin.cities.index": "p-admin-cities",
                     "admin.sectors.index": "p-admin-sectors",
@@ -22558,15 +22525,6 @@
                     "icon": "nav-users",
                     "route": "admin.users.index",
                     "href": "http://hc-hub.test/admin/users"
-                },
-                "g-admin-notification-settings-edit": {
-                    "id": "g-admin-notification-settings-edit",
-                    "key": "admin-notification-settings-edit",
-                    "kind": "page",
-                    "label": "Notification Rules",
-                    "icon": "nav-sliders-horizontal",
-                    "route": "admin.notification-settings.edit",
-                    "href": "http://hc-hub.test/admin/notification-settings"
                 },
                 "g-activity": {
                     "id": "g-activity",

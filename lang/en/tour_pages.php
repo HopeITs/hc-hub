@@ -108,6 +108,8 @@ return [
             'intro' => ['title' => 'Notification settings', 'body' => 'Decide how and when HC Hub gets your attention.'],
             'popups' => ['title' => 'Pop-ups', 'body' => 'Choose whether new notifications appear as pop-ups on your device.'],
             'mutes' => ['title' => 'Mute a module', 'body' => 'Silence the modules you do not need to hear about.'],
+            'savebar' => ['title' => 'Save your changes', 'body' => 'Rules apply only after you save. This bar shows whether anything is unsaved.'],
+            'default_reviewers' => ['title' => 'Default reviewers', 'body' => 'The positions invited to review every proposal; a vacant position is skipped with a warning.'],
         ],
         'indicator_library_index' => [
             'intro' => ['title' => 'Indicator Library', 'body' => 'The shared catalogue of indicators every proposal draws from. Look here before you create anything new.'],
@@ -126,11 +128,6 @@ return [
         'admin_sectors_index' => [
             'intro' => ['title' => 'Sectors', 'body' => 'The list of sectors a project can work in. A sector that is in use is deactivated, never deleted.'],
             'create' => ['title' => 'Add a sector', 'body' => 'Create a sector with an Arabic name; the English name is optional.'],
-        ],
-        'admin_notification_settings_edit' => [
-            'intro' => ['title' => 'Notification rules', 'body' => 'Set who gets notified about what, and when, for the whole organization.'],
-            'savebar' => ['title' => 'Save your changes', 'body' => 'Rules apply only after you save. This bar shows whether anything is unsaved.'],
-            'default_reviewers' => ['title' => 'Default reviewers', 'body' => 'The positions invited to review every proposal; a vacant position is skipped with a warning.'],
         ],
         'admin_users_index' => [
             'intro' => ['title' => 'User directory', 'body' => 'Everyone with access, their role and status. Invite people, change roles or deactivate access here.'],

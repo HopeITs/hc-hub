@@ -5,31 +5,48 @@ use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\Alerts\WorkingCalendar;
 use Carbon\CarbonImmutable;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Modules\Core\Models\User;
+use Spatie\Permission\PermissionRegistrar;
 
 use function Livewire\invade;
 
-test('only administrators open notification settings', function (string $role, int $status) {
-    $this->actingAs(userWithRole($role))->get(route('admin.notification-settings.edit'))->assertStatus($status);
+test('only administrators see the rules tab and its form', function (string $role, bool $manages) {
+    $page = $this->actingAs(userWithRole($role))->get(route('notification-settings.edit', ['tab' => 'rules']))->assertOk();
+
+    $manages
+        ? $page->assertSee('data-settings-tabs', false)->assertSee('data-notification-rules', false)
+        : $page->assertDontSee('data-settings-tabs', false)->assertDontSee('data-notification-rules', false)->assertSee('data-module-mutes', false);
 })->with([
-    ['Super Admin', 200],
-    ['General Manager', 403],
-    ['Managers', 403],
+    ['Super Admin', true],
+    ['General Manager', false],
+    ['Managers', false],
 ]);
 
-test('a general manager who is given the permission directly opens notification settings', function () {
+test('the rules form is forbidden to people without the permission', function (string $role) {
+    Livewire::actingAs(userWithRole($role))->test('notifications.rules')->assertForbidden();
+})->with(['General Manager', 'Managers']);
+
+test('a general manager who is given the permission directly gets the rules tab', function () {
     $generalManager = userWithRole('General Manager');
 
-    $this->actingAs($generalManager)->get(route('admin.notification-settings.edit'))->assertForbidden();
+    $this->actingAs($generalManager)->get(route('notification-settings.edit', ['tab' => 'rules']))->assertDontSee('data-notification-rules', false);
 
     $generalManager->givePermissionTo('notification-settings.manage');
 
-    $this->actingAs($generalManager->fresh())->get(route('admin.notification-settings.edit'))->assertOk();
+    $this->actingAs($generalManager->fresh())->get(route('notification-settings.edit', ['tab' => 'rules']))->assertSee('data-notification-rules', false)->assertSee('data-settings-tab="rules"', false);
+});
+
+test('the personal tab is the default and the old rules address redirects to the rules tab', function () {
+    $admin = userWithRole('Super Admin');
+
+    $this->actingAs($admin)->get(route('notification-settings.edit'))->assertOk()->assertSee('data-module-mutes', false)->assertDontSee('data-notification-rules', false);
+    $this->actingAs($admin)->get('/admin/notification-settings')->assertRedirect('/notifications-settings?tab=rules');
 });
 
 test('an administrator changes thresholds and working days and they take effect', function () {
-    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')
+    Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')
         ->assertSet('workingDays', [1, 2, 3, 4, 5])
         ->assertSet('dueSoonDays', '7, 3, 1')
         ->set('workingDays', [7, 1, 2, 3, 4])
@@ -50,7 +67,7 @@ test('an administrator changes thresholds and working days and they take effect'
 });
 
 test('settings are validated', function (string $property, mixed $value) {
-    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')
+    Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')
         ->set($property, $value)
         ->call('save')
         ->assertHasErrors($property);
@@ -65,14 +82,30 @@ test('settings are validated', function (string $property, mixed $value) {
     'a bad time' => ['weeklyDigestTime', '8am'],
 ]);
 
+/**
+ * The rules form mounted by someone who then loses the permission, so only the action's own check stands in the way.
+ */
+function rulesFormWithRevokedPermission(): Testable
+{
+    $user = userWithRole('General Manager');
+    $user->givePermissionTo('notification-settings.manage');
+
+    $component = Livewire::actingAs($user)->test('notifications.rules');
+
+    $user->revokePermissionTo('notification-settings.manage');
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    return $component;
+}
+
 test('a non-administrator cannot save by calling the action', function () {
-    Livewire::actingAs(userWithRole('Managers'))->test('pages::admin.notification-settings')->call('save')->assertForbidden();
+    rulesFormWithRevokedPermission()->call('save')->assertForbidden();
 });
 
 test('in arabic every working-day checkbox is labelled with its own weekday', function () {
     app()->setLocale('ar');
 
-    $html = Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')->html();
+    $html = Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')->html();
     preg_match_all('/data-weekday="(\d)".*?value="\1".*?<span class="rules-day-name">\s*<span[^>]*>([^<]+?)<\/span>/su', $html, $matches, PREG_SET_ORDER);
 
     expect(collect($matches)->mapWithKeys(fn (array $match): array => [(int) $match[1] => trim($match[2])])->all())
@@ -80,7 +113,7 @@ test('in arabic every working-day checkbox is labelled with its own weekday', fu
 });
 
 test('the escalation catch-up window is saved and validated', function () {
-    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')
+    Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')
         ->assertSet('escalationCatchUp', 3)
         ->set('escalationCatchUp', 5)
         ->call('save')
@@ -88,14 +121,14 @@ test('the escalation catch-up window is saved and validated', function () {
 
     expect(app(NotificationSettings::class)->get('escalation_catch_up_days'))->toBe(5);
 
-    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')
+    Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')
         ->set('escalationCatchUp', 0)
         ->call('save')
         ->assertHasErrors('escalationCatchUp');
 });
 
 test('saving hands the page back the stored, normalised rules and tells it to take a fresh snapshot', function () {
-    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')
+    Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')
         ->set('workingDays', ['5', '1', '3', '1'])
         ->set('dueSoonDays', '3,10 , 3')
         ->call('save')
@@ -109,7 +142,7 @@ test('saving hands the page back the stored, normalised rules and tells it to ta
 });
 
 test('a failed save neither stores the rules nor tells the page to take a snapshot', function () {
-    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')
+    Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')
         ->set('overdueRepeat', 0)
         ->call('save')
         ->assertNotDispatched('notification-rules-saved');
@@ -120,7 +153,7 @@ test('a failed save neither stores the rules nor tells the page to take a snapsh
 test('the reset-to-defaults values are the shipped defaults, not the stored rules', function () {
     app(NotificationSettings::class)->save(['working_days' => [7, 1, 2, 3, 4], 'due_soon_days' => [5], 'stalled_proposal_days' => 45]);
 
-    $component = Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings');
+    $component = Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules');
 
     expect($component->get('stalledProposal'))->toBe(45)
         ->and(invade($component->instance())->clientConfig()['defaults'])->toBe([
@@ -145,7 +178,7 @@ test('the reset-to-defaults values are the shipped defaults, not the stored rule
 });
 
 test('discarding the draft clears the errors of a failed save', function () {
-    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')
+    Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')
         ->set('overdueRepeat', 0)
         ->call('save')
         ->assertHasErrors('overdueRepeat')
@@ -157,14 +190,14 @@ test('discarding the draft clears the errors of a failed save', function () {
 test('in arabic the page script gets one plural form per arabic range', function () {
     app()->setLocale('ar');
 
-    $plurals = invade(Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')->instance())->clientConfig()['plurals'];
+    $plurals = invade(Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')->instance())->clientConfig()['plurals'];
 
     expect($plurals['workingDays'])->toBe([1 => 'يوم عمل', 2 => 'يوما عمل', 3 => 'أيام عمل', 11 => 'يوم عمل'])
         ->and($plurals['unsaved'][11])->toBe(':count تغييرًا غير محفوظ');
 });
 
 test('the page renders every rule section with its controls', function () {
-    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')
+    Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')
         ->assertSeeHtml('id="rules-week"')
         ->assertSeeHtml('id="rules-deadlines"')
         ->assertSeeHtml('id="rules-stalled"')
@@ -191,7 +224,7 @@ test('the default proposal reviewers section stores a position for each slot and
     $finance = insertHrPosition(insertHrDepartment('Finance'), 'Finance Manager');
     $ceo = insertHrPosition(insertHrDepartment('Board'), 'CEO');
 
-    Livewire::actingAs(reviewerSettingsAdmin())->test('pages::admin.notification-settings')
+    Livewire::actingAs(reviewerSettingsAdmin())->test('notifications.rules')
         ->assertSeeHtml('id="rules-default-reviewers"')
         ->set('reviewerPositions.finance_manager', (string) $finance)
         ->set('reviewerPositions.ceo', (string) $ceo)
@@ -201,13 +234,13 @@ test('the default proposal reviewers section stores a position for each slot and
     expect(app(NotificationSettings::class)->get('proposal_default_reviewers'))
         ->toEqual(['meal_manager' => null, 'finance_manager' => $finance, 'fundraising_manager' => null, 'ceo' => $ceo]);
 
-    Livewire::actingAs(reviewerSettingsAdmin())->test('pages::admin.notification-settings')
+    Livewire::actingAs(reviewerSettingsAdmin())->test('notifications.rules')
         ->assertSet('reviewerPositions.finance_manager', (string) $finance)
         ->assertSet('reviewerPositions.meal_manager', '');
 });
 
 test('a default reviewer slot must be an HR position', function (string $value) {
-    Livewire::actingAs(reviewerSettingsAdmin())->test('pages::admin.notification-settings')
+    Livewire::actingAs(reviewerSettingsAdmin())->test('notifications.rules')
         ->set('reviewerPositions.ceo', $value)
         ->call('saveDefaultReviewers')
         ->assertHasErrors(['reviewerPositions.ceo']);
@@ -216,9 +249,7 @@ test('a default reviewer slot must be an HR position', function (string $value) 
 })->with(['not a number' => ['ceo'], 'unknown in HR' => ['999999']]);
 
 test('without notification-settings.manage nobody saves the default reviewers', function () {
-    Livewire::actingAs(userWithRole('General Manager'))->test('pages::admin.notification-settings')
-        ->call('saveDefaultReviewers')
-        ->assertForbidden();
+    rulesFormWithRevokedPermission()->call('saveDefaultReviewers')->assertForbidden();
 });
 
 test('moving the MEAL Manager slot to another position is logged and tells both holders', function () {
@@ -229,7 +260,7 @@ test('moving the MEAL Manager slot to another position is logged and tells both 
     insertHrContract($nextHolder, $nextPosition);
     $nextUser = userWithRole('MEAL', $nextHolder);
 
-    Livewire::actingAs(reviewerSettingsAdmin())->test('pages::admin.notification-settings')
+    Livewire::actingAs(reviewerSettingsAdmin())->test('notifications.rules')
         ->set('reviewerPositions.meal_manager', (string) $nextPosition)
         ->call('saveDefaultReviewers')
         ->assertHasNoErrors();
@@ -246,7 +277,7 @@ test('moving the MEAL Manager slot to another position is logged and tells both 
 test('saving the default reviewers without moving the MEAL Manager logs nothing', function () {
     holdMealManagerSlot();
 
-    Livewire::actingAs(reviewerSettingsAdmin())->test('pages::admin.notification-settings')
+    Livewire::actingAs(reviewerSettingsAdmin())->test('notifications.rules')
         ->set('reviewerPositions.ceo', (string) insertHrPosition(insertHrDepartment('Board'), 'CEO'))
         ->call('saveDefaultReviewers');
 
@@ -254,7 +285,7 @@ test('saving the default reviewers without moving the MEAL Manager logs nothing'
 });
 
 test('the page script is handed its real config, not an uncompiled directive', function () {
-    $html = Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')->html();
+    $html = Livewire::actingAs(userWithRole('Super Admin'))->test('notifications.rules')->html();
 
     expect($html)->toContain('x-data="notificationRules(')
         ->not->toContain('@js(')

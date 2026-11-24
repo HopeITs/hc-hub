@@ -42,7 +42,6 @@ return [
     'transfers' => 'التحويلات',
     'user_directory' => 'دليل المستخدمين',
     'activity_log' => 'سجل النشاط',
-    'notification_rules' => 'قواعد الإشعارات',
     'notifications' => 'الإشعارات',
     'my_reviews' => 'مراجعاتي',
     'notification_settings' => 'إعدادات الإشعارات',

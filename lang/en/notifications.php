@@ -9,7 +9,8 @@ return [
     'inbox' => 'Notifications',
     'bell_label' => '{0} Notifications, none unread|{1} Notifications, 1 unread|[2,*] Notifications, :count unread',
     'settings_link' => 'Notification settings',
-    'bell' => ['settings' => 'Settings', 'unread' => 'unread', 'critical_count' => ':count critical'],
+    'settings_tabs' => ['personal' => 'My notifications', 'rules' => 'Organization rules'],
+    'bell' => ['unread' => 'unread', 'critical_count' => ':count critical'],
     'empty' => 'You are all caught up.',
     'loading' => 'Loading…',
     'mark_all_read' => 'Mark all read',
@@ -278,7 +279,6 @@ return [
     ],
 
     'admin' => [
-        'title' => 'Notification Rules',
         'save' => 'Save rules',
         'saved' => 'Notification rules saved.',
         'discard' => 'Discard',

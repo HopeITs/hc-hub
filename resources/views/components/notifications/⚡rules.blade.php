@@ -16,11 +16,9 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
 use Livewire\Component;
 
-new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends Component {
+new class extends Component {
     /**
      * One row per EventCatalog key, in catalog order (the Event Notifications section).
      *
@@ -90,6 +88,8 @@ new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends
 
     public function mount(NotificationSettings $settings, EventCatalog $catalog): void
     {
+        Gate::authorize('notification-settings.manage');
+
         $this->fill($this->toForm($settings->all()));
         $this->events = $this->eventRows($catalog);
         $this->fillReviewerPositions();
@@ -435,12 +435,12 @@ new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends
     }
 }; ?>
 
-<x-desk.register class="rules-page @container/rules" heading-id="notification-rules-heading" :title="__('notifications.admin.title')" :x-data="'notificationRules('.\Illuminate\Support\Js::from($this->clientConfig())->toHtml().')'">
+<div class="rules-page @container/rules" x-data="notificationRules({{ \Illuminate\Support\Js::from($this->clientConfig())->toHtml() }})" data-notification-rules>
 
-    <form x-on:submit.prevent="save()" class="flex flex-1 flex-col pt-8" novalidate>
+    <form x-on:submit.prevent="save()" class="flex flex-1 flex-col" novalidate>
         <div class="grid items-start gap-x-16 gap-y-12 @5xl/rules:grid-cols-2">
             <div class="grid gap-12">
-                @include('pages.admin._rules-week')
+                @include('notifications.rules.week')
 
                 <section id="rules-deadlines" aria-labelledby="rules-deadlines-heading" class="rules-group">
                     <h2 id="rules-deadlines-heading" class="rules-group-title">{{ __('notifications.admin.sections.deadlines') }}</h2>
@@ -456,13 +456,13 @@ new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends
                     </ol>
 
                     <div class="rules-rows">
-                        @include('pages.admin._rules-warnings')
-                        @include('pages.admin._rules-row', ['property' => 'overdueRepeat', 'label' => __('notifications.admin.remind_every'), 'hint' => __('notifications.admin.remind_every_hint')])
-                        @include('pages.admin._rules-row', ['property' => 'departmentTaskDue', 'label' => __('notifications.admin.department_task_due'), 'hint' => __('notifications.admin.department_task_due_hint')])
-                        @include('pages.admin._rules-row', ['property' => 'monthlyReportDue', 'label' => __('notifications.admin.monthly_report_due'), 'hint' => __('notifications.admin.monthly_report_due_hint')])
-                        @include('pages.admin._rules-row', ['property' => 'escalateManagerAfter', 'label' => __('notifications.admin.manager_after'), 'hint' => __('notifications.admin.manager_after_hint')])
-                        @include('pages.admin._rules-row', ['property' => 'escalateTopAfter', 'label' => __('notifications.admin.top_after'), 'hint' => __('notifications.admin.top_after_hint')])
-                        @include('pages.admin._rules-row', ['property' => 'escalationCatchUp', 'label' => __('notifications.admin.escalation_window'), 'hint' => __('notifications.admin.escalation_window_hint')])
+                        @include('notifications.rules.warnings')
+                        @include('notifications.rules.row', ['property' => 'overdueRepeat', 'label' => __('notifications.admin.remind_every'), 'hint' => __('notifications.admin.remind_every_hint')])
+                        @include('notifications.rules.row', ['property' => 'departmentTaskDue', 'label' => __('notifications.admin.department_task_due'), 'hint' => __('notifications.admin.department_task_due_hint')])
+                        @include('notifications.rules.row', ['property' => 'monthlyReportDue', 'label' => __('notifications.admin.monthly_report_due'), 'hint' => __('notifications.admin.monthly_report_due_hint')])
+                        @include('notifications.rules.row', ['property' => 'escalateManagerAfter', 'label' => __('notifications.admin.manager_after'), 'hint' => __('notifications.admin.manager_after_hint')])
+                        @include('notifications.rules.row', ['property' => 'escalateTopAfter', 'label' => __('notifications.admin.top_after'), 'hint' => __('notifications.admin.top_after_hint')])
+                        @include('notifications.rules.row', ['property' => 'escalationCatchUp', 'label' => __('notifications.admin.escalation_window'), 'hint' => __('notifications.admin.escalation_window_hint')])
                     </div>
                 </section>
             </div>
@@ -473,12 +473,12 @@ new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends
                     <p class="rules-group-hint">{{ __('notifications.admin.stalled_hint') }}</p>
 
                     <div class="rules-rows">
-                        @include('pages.admin._rules-row', ['property' => 'stalledTaskInProgress', 'label' => __('notifications.admin.stalled_task_in_progress')])
-                        @include('pages.admin._rules-row', ['property' => 'stalledTaskUnderReview', 'label' => __('notifications.admin.stalled_task_under_review')])
-                        @include('pages.admin._rules-row', ['property' => 'stalledReportDraft', 'label' => __('notifications.admin.stalled_report_draft')])
-                        @include('pages.admin._rules-row', ['property' => 'stalledReportReviewed', 'label' => __('notifications.admin.stalled_report_reviewed')])
-                        @include('pages.admin._rules-row', ['property' => 'stalledProposal', 'label' => __('notifications.admin.stalled_proposal')])
-                        @include('pages.admin._rules-row', ['property' => 'extensionLead', 'label' => __('notifications.admin.extension_lead'), 'hint' => __('notifications.admin.extension_lead_help')])
+                        @include('notifications.rules.row', ['property' => 'stalledTaskInProgress', 'label' => __('notifications.admin.stalled_task_in_progress')])
+                        @include('notifications.rules.row', ['property' => 'stalledTaskUnderReview', 'label' => __('notifications.admin.stalled_task_under_review')])
+                        @include('notifications.rules.row', ['property' => 'stalledReportDraft', 'label' => __('notifications.admin.stalled_report_draft')])
+                        @include('notifications.rules.row', ['property' => 'stalledReportReviewed', 'label' => __('notifications.admin.stalled_report_reviewed')])
+                        @include('notifications.rules.row', ['property' => 'stalledProposal', 'label' => __('notifications.admin.stalled_proposal')])
+                        @include('notifications.rules.row', ['property' => 'extensionLead', 'label' => __('notifications.admin.extension_lead'), 'hint' => __('notifications.admin.extension_lead_help')])
                     </div>
                 </section>
 
@@ -486,15 +486,15 @@ new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends
                     <h2 id="rules-digests-heading" class="rules-group-title">{{ __('notifications.admin.sections.digests') }}</h2>
 
                     <div class="rules-rows">
-                        @include('pages.admin._rules-row', ['property' => 'offTrackPace', 'label' => __('notifications.admin.off_track'), 'hint' => __('notifications.admin.off_track_hint'), 'unit' => '%'])
-                        @include('pages.admin._rules-row', ['property' => 'dailyBriefTime', 'label' => __('notifications.admin.daily_brief'), 'hint' => __('notifications.admin.daily_brief_hint'), 'type' => 'time'])
-                        @include('pages.admin._rules-row', ['property' => 'weeklyDigestTime', 'label' => __('notifications.admin.weekly_digest'), 'liveHint' => 'weeklyDigestHint', 'type' => 'time'])
+                        @include('notifications.rules.row', ['property' => 'offTrackPace', 'label' => __('notifications.admin.off_track'), 'hint' => __('notifications.admin.off_track_hint'), 'unit' => '%'])
+                        @include('notifications.rules.row', ['property' => 'dailyBriefTime', 'label' => __('notifications.admin.daily_brief'), 'hint' => __('notifications.admin.daily_brief_hint'), 'type' => 'time'])
+                        @include('notifications.rules.row', ['property' => 'weeklyDigestTime', 'label' => __('notifications.admin.weekly_digest'), 'liveHint' => 'weeklyDigestHint', 'type' => 'time'])
                     </div>
                 </section>
             </div>
         </div>
 
-        @include('pages.admin._rules-events')
+        @include('notifications.rules.events')
 
         <div
             class="rules-savebar sticky bottom-4 z-30 mt-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-secondary-dark px-5 py-3 text-white shadow-lg dark:bg-surface-3 dark:shadow-raised dark:text-ink"
@@ -525,5 +525,5 @@ new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends
         </div>
     </form>
 
-    @include('pages.admin._default-reviewers')
-</x-desk.register>
+    @include('notifications.rules.default-reviewers')
+</div>

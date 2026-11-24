@@ -103,7 +103,7 @@ test('no page a viewer may open falls out of the sidebar, whatever their role', 
     $this->seed(RolesAndPermissionsSeeder::class);
 
     $destinations = app(Destinations::class);
-    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'admin.notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index', 'hr.attendance.upload'];
+    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index', 'hr.attendance.upload'];
 
     foreach ($destinations->routes() as $route) {
         expect(Destinations::Groups)->toContain($destinations->find($route)['group']);
@@ -154,7 +154,7 @@ test('a Team Member sidebar leaves out the pages their role cannot open', functi
     $routes = deskPageRoutes(User::factory()->role('Team Member')->create());
 
     expect($routes)->toContain('dashboard', 'security.edit', 'notification-settings.edit')
-        ->not->toContain('admin.users.index', 'admin.accounts.index', 'admin.notification-settings.edit', 'transfers.index');
+        ->not->toContain('admin.users.index', 'admin.accounts.index', 'transfers.index');
 });
 
 test('the rendered sidebar links only what the role may open', function () {

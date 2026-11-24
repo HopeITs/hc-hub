@@ -100,14 +100,13 @@ final class AskEngine
         'calendar.index' => ['calendar', 'schedule', 'agenda', 'تقويم', 'رزنامه'],
         'notifications.index' => ['notifications', 'inbox', 'alerts', 'messages', 'اشعارات', 'تنبيهات'],
         'admin.users.index' => ['users', 'people', 'staff', 'employees', 'roles', 'permissions', 'access', 'مستخدمين', 'موظفين', 'صلاحيات', 'ادوار'],
-        'admin.notification-settings.edit' => ['rules', 'settings', 'قواعد', 'اعدادات'],
         'activity.index' => ['activity', 'log', 'history', 'audit', 'سجل', 'نشاط'],
         'admin.cities.index' => ['cities', 'city', 'locations', 'places', 'مدن', 'مدينه', 'مواقع'],
         'admin.sectors.index' => ['sectors', 'sector', 'قطاعات', 'قطاع'],
         'admin.evidence-types.index' => ['evidence', 'proof', 'شواهد', 'دليل'],
         'admin.narrative-questions.index' => ['narrative', 'questions', 'اسئله', 'سرديه'],
         'security.edit' => ['security', 'password', '2fa', 'twofactor', 'passkey', 'devices', 'امان', 'كلمه', 'مرور'],
-        'notification-settings.edit' => ['preferences', 'notifications', 'settings', 'تفضيلات', 'اعدادات'],
+        'notification-settings.edit' => ['preferences', 'notifications', 'settings', 'rules', 'تفضيلات', 'اعدادات', 'قواعد'],
     ];
 
     /**

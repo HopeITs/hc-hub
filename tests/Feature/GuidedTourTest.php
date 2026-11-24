@@ -81,7 +81,7 @@ dataset('page tours', [
     'report template queue' => ['report-templates.index', 'MEAL', [], ['Templates to confirm', 'The queue'], 'قوالب بانتظار التأكيد', 'data-report-template-queue'],
     'sectors' => ['admin.sectors.index', 'MEAL', [], ['Sectors', 'Add a sector'], 'القطاعات', 'data-tour="sectors-create"'],
     'supervision' => ['admin.users.index', 'General Manager', ['tab' => 'supervision'], ['Supervision'], 'دليل المستخدمين', 'data-supervision-tab'],
-    'default reviewers' => ['admin.notification-settings.edit', 'Super Admin', [], ['Default reviewers'], 'قواعد الإشعارات', 'data-default-reviewers'],
+    'default reviewers' => ['notification-settings.edit', 'Super Admin', ['tab' => 'rules'], ['Default reviewers'], 'إعدادات الإشعارات', 'data-default-reviewers'],
     'proposal reviewers' => ['proposals.show', 'General Manager', [], ['Reviewers'], 'تفاصيل المقترح', 'data-proposal-reviewers'],
     'proposal logical framework' => ['proposals.show', 'General Manager', ['tab' => 'logframe'], ['Logical Framework'], 'تفاصيل المقترح', 'data-tour="proposal-logframe"'],
     'proposal indicators and targets' => ['proposals.show', 'General Manager', ['tab' => 'targets'], ['Indicators & Targets'], 'تفاصيل المقترح', 'data-tour="proposal-targets-grid"'],

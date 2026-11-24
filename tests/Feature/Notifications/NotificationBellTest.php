@@ -157,14 +157,9 @@ test('the panel lists every module together, with no module filter', function ()
         ->assertDontSeeHtml('data-bell-module');
 });
 
-test('only rule managers find the notification rules in the settings menu', function () {
+test('the bell has one settings link, for everyone', function () {
     $user = Activity::withoutRecording(fn () => User::factory()->create());
 
-    Livewire::actingAs($user)->test('notifications.bell', ['canManageRules' => true])
-        ->assertSeeHtml(route('notification-settings.edit'))
-        ->assertSeeHtml(route('admin.notification-settings.edit'));
-
     Livewire::actingAs($user)->test('notifications.bell')
-        ->assertSeeHtml(route('notification-settings.edit'))
-        ->assertDontSeeHtml(route('admin.notification-settings.edit'));
+        ->assertSeeHtml('href="'.route('notification-settings.edit').'"');
 });

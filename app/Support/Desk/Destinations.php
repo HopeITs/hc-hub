@@ -38,7 +38,7 @@ final class Destinations
      *
      * @var list<string>
      */
-    private const array OutsideSidebar = ['notifications.index', 'notification-settings.edit', 'admin.notification-settings.edit'];
+    private const array OutsideSidebar = ['notifications.index', 'notification-settings.edit'];
 
     /**
      * Sidebar group => its heading's translation key.
@@ -353,7 +353,6 @@ final class Destinations
             $page('notifications.index', 'desk.notifications', 'bell', 'nav-bell', 'overview', $everyone),
 
             $page('admin.users.index', 'navigation.user_directory', 'users', 'nav-users', 'administration', fn (User $user): bool => $user->can('viewAny', User::class), 'access-management'),
-            $page('admin.notification-settings.edit', 'navigation.notification_settings', 'bell', 'nav-sliders-horizontal', 'administration', $can('notification-settings.manage')),
             $page('activity.index', 'navigation.activity_log', 'undo', 'nav-file-clock', 'administration', $can('activity-log.view')),
             $page('admin.cities.index', 'common.cities', 'map', 'nav-map-pin', 'administration', $can('cities.view')),
             $page('admin.sectors.index', 'navigation.sectors', 'grid', 'nav-tags', 'administration', $can('sectors.view')),

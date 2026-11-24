@@ -63,7 +63,7 @@
         <div class="dk-top-end">
             <div class="dk-tools" role="group" aria-label="{{ __('navigation.tools') }}" data-desk-tools>
                 @if ($showsInbox)
-                    <livewire:notifications.bell :can-manage-rules="(bool) $user?->can('notification-settings.manage')" />
+                    <livewire:notifications.bell />
                 @endif
 
                 <div class="dk-pmenu dk-helpmenu" x-data="hcTopMenu" x-on:click.outside="close()" x-on:keydown.escape.stop="close(true)" data-tour="help" data-help-menu>

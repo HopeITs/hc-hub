@@ -6,6 +6,7 @@ use App\Notifications\EventCatalog;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Spatie\Permission\PermissionRegistrar;
 
 /**
  * The row of one catalog key in the page's `events` list.
@@ -17,7 +18,7 @@ function eventRow(string $key): int
 
 function eventSettingsPage(string $role = 'Super Admin'): Testable
 {
-    return Livewire::actingAs(userWithRole($role))->test('pages::admin.notification-settings');
+    return Livewire::actingAs(userWithRole($role))->test('notifications.rules');
 }
 
 test('every catalog event is listed with its default', function () {
@@ -74,13 +75,18 @@ test('scanner events keep their catalog importance and none-oversight events tak
 });
 
 test('a non-administrator cannot save event overrides', function () {
-    eventSettingsPage('Managers')
+    eventSettingsPage('Managers')->assertForbidden();
+
+    $manager = userWithRole('General Manager');
+    $manager->givePermissionTo('notification-settings.manage');
+    $component = Livewire::actingAs($manager)->test('notifications.rules');
+    $manager->revokePermissionTo('notification-settings.manage');
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    $component
         ->set('events.'.eventRow('project.created').'.enabled', false)
         ->call('save')
         ->assertForbidden();
-
-    $fresh = fn () => eventSettingsPage('General Manager');
-    $fresh()->call('save')->assertForbidden();
 
     expect(app(NotificationSettings::class)->get('event_overrides'))->toBe([]);
 });
@@ -152,7 +158,7 @@ test('the event section adds a flat number of queries however many overrides are
             $queries++;
         });
 
-        Livewire::actingAs($admin)->test('pages::admin.notification-settings');
+        Livewire::actingAs($admin)->test('notifications.rules');
 
         return $queries;
     };
