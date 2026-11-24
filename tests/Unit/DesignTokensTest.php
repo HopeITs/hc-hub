@@ -406,3 +406,9 @@ test('readable text never uses the faint grey: it is for icons, borders and disa
     expect($views['components/ui/input.blade.php'])->toContain('placeholder:text-ink-muted!')->not->toContain('placeholder:text-secondary-light')
         ->and($views['components/ui/select.blade.php'])->toContain('placeholder:text-ink-muted!')->not->toContain('placeholder:text-secondary-light');
 });
+
+test('one catch-all rule removes animations, transitions and smooth scrolling for reduced motion', function () {
+    $base = file_get_contents(dirname(__DIR__, 2).'/resources/css/base.css');
+
+    expect($base)->toMatch('/@media \(prefers-reduced-motion: reduce\) \{\s*\*,\s*\*::before,\s*\*::after \{[^}]*animation-duration: 0\.01ms !important;[^}]*animation-iteration-count: 1 !important;[^}]*transition-duration: 0\.01ms !important;[^}]*scroll-behavior: auto !important;/');
+});

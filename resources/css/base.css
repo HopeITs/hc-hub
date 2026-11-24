@@ -141,3 +141,19 @@
     border-color: transparent;
     box-shadow: none;
 }
+
+/*
+ * Reduced motion (task 1.8): one catch-all for anyone who asks the system for less
+ * motion. Durations drop to near zero instead of `none`, so animationend and
+ * transitionend still fire for the scripts that wait on them.
+ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
