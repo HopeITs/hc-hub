@@ -7,11 +7,15 @@ use Modules\Core\Models\Center;
 use Modules\Core\Models\User;
 use Modules\Hr\Actions\Contracts\SaveContract;
 use Modules\Hr\Actions\Contracts\TerminateContract;
+use Modules\Hr\Actions\Employees\SaveEmployee;
 use Modules\Hr\Enums\ContractAmendmentStatus;
 use Modules\Hr\Enums\ContractPlace;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Modules\Hr\Enums\Currency;
+use Modules\Hr\Enums\Gender;
+use Modules\Hr\Enums\LeaveType as LeaveTypeRule;
 use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Enums\MaritalStatus;
 use Modules\Hr\Enums\PayMode;
 use Modules\Hr\Enums\SalaryPer;
 use Modules\Hr\Enums\ScheduleMode;
@@ -237,4 +241,25 @@ test('renew with edit opens the form on the chosen period under a renewing banne
         ->assertSee('data-test="renewal-banner"', false)
         ->assertSee('2027-12-01')
         ->assertSee('2028-06-30');
+});
+
+test('editing the employee marital status re-syncs the current contract leave balances', function () {
+    LeaveType::query()->whereKey(LeaveTypeCases::Paternity)->update([
+        'marital_status' => LeaveTypeRule::MARITAL_STATUS_MARRIED,
+        'allowed_gender' => LeaveTypeRule::GENDER_MALE,
+        'base_days' => 3,
+    ]);
+    $this->employee->forceFill(['gender' => Gender::Male->value, 'marital_status' => MaritalStatus::Married->value])->save();
+
+    $contract = app(SaveContract::class)->handle(null, ($this->form)(), [], $this->hr);
+    $hasPaternity = fn (): bool => DB::table('leave_balances')->where('contract_id', $contract->id)->where('type_id', LeaveTypeCases::Paternity)->exists();
+
+    expect($hasPaternity())->toBeTrue();
+
+    $editor = User::factory()->create();
+    $editor->givePermissionTo(Permission::findOrCreate('employees.update', 'web'));
+
+    app(SaveEmployee::class)->handle($this->employee->fresh(), ['marital_status' => MaritalStatus::Single->value], true, $editor->fresh());
+
+    expect($hasPaternity())->toBeFalse();
 });
