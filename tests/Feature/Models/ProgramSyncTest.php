@@ -2,11 +2,11 @@
 
 use App\Http\Middleware\SyncProgramsFromHr;
 use App\Models\Activity;
-use Modules\Core\Models\Program as HrProgram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Program;
+use Modules\Core\Models\Program as HrProgram;
 use Modules\Tracking\Models\Project;
 use Symfony\Component\HttpFoundation\Response;
 

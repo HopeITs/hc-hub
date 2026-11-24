@@ -1,7 +1,7 @@
 <?php
 
-use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Result;
