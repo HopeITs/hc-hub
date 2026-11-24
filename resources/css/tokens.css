@@ -106,9 +106,8 @@
     --color-status-warn-soft: #f7eedd;
     --color-status-critical: var(--color-primary);
     --color-status-critical-soft: color-mix(in srgb, var(--color-grey-line) 65%, white);
-    /* Critical as small text. Light is the brand red (6.1:1 on white); dark needs
-       its own lighter value, because --color-status-critical stayed at the brand
-       red there while every sibling was lightened, and 14px of it reads 3.8:1. */
+    /* Critical as small text. Light is the brand red (6.1:1 on white). Dark cannot use red for small text
+       (2.9:1 on the page ground), so it reads in light ink beside an icon (D2). */
     --color-status-critical-text: var(--color-primary);
     --color-status-active: #2563a8;
     --color-status-active-soft: #e5eef7;
@@ -282,9 +281,11 @@
         --color-line: var(--color-graphite-line);
         --color-line-strong: var(--color-graphite-line-strong);
         --color-field-line: var(--color-graphite-ink-faint);
-        --color-brand: #d4343a;
-        --color-brand-hover: #e04046;
-        --color-brand-text: #d4343a;
+        /* D2: the brand red is never brightened in dark. It is a fill (buttons, markers) with white text only; text
+           tokens (brand-text, brand-ink, status-critical-text) read in light ink, with an icon beside them. */
+        --color-brand: var(--color-primary);
+        --color-brand-hover: color-mix(in srgb, var(--color-primary) 85%, black);
+        --color-brand-text: var(--color-graphite-ink);
 
         /* Flux's neutral accent (primary Flux buttons, checked controls): ink on the page ground. */
         --color-accent: var(--color-ink);
@@ -295,9 +296,9 @@
         --color-status-good-soft: rgb(92 198 144 / 0.13);
         --color-status-warn: #e3ad52;
         --color-status-warn-soft: rgb(227 173 82 / 0.13);
-        --color-status-critical: #d4343a;
+        --color-status-critical: var(--color-primary);
         --color-status-critical-soft: rgb(255 255 255 / 0.07);
-        --color-status-critical-text: #ff5a60;
+        --color-status-critical-text: var(--color-graphite-ink);
         --color-status-active: #7cb1ee;
         --color-status-active-soft: rgb(124 177 238 / 0.13);
         --color-funding: #79bccb;
@@ -327,7 +328,7 @@
         --color-desk-line: var(--color-graphite-line);
         --color-desk-line-2: var(--color-graphite-line-strong);
         --color-brand-soft: rgb(255 255 255 / 0.07);
-        --color-brand-ink: #d4343a;
+        --color-brand-ink: var(--color-graphite-ink);
         --color-scrim: rgb(0 0 0 / 0.55);
         --color-header-bg: rgb(21 22 24 / 0.86);
         --shadow-e1: 0 1px 3px 0 rgb(0 0 0 / 0.3);

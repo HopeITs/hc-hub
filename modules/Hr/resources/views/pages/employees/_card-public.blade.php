@@ -3,16 +3,17 @@
     person who scans a Hope Center card sees. Rendered by EmployeeCardController.
 --}}
 <x-layouts::print :title="__('hr_employees.card.public.heading')">
-    <article class="mx-auto flex max-w-sm flex-col items-center gap-4 rounded-panel border border-panel-border bg-white p-6 text-center shadow-card" data-digital-id>
-        <img src="{{ asset('logo-hub.png') }}" alt="{{ __('common.organisation_short_name') }}" class="h-10 w-auto">
-        <p class="text-xs font-semibold uppercase tracking-wide text-secondary-medium">{{ __('hr_employees.card.public.heading') }}</p>
+    <article class="mx-auto flex max-w-sm flex-col items-center gap-4 rounded-panel border border-panel-border bg-white p-6 dark:bg-surface-1 text-center shadow-card" data-digital-id>
+        <img src="{{ asset('logo-hub.png') }}" alt="{{ __('common.organisation_short_name') }}" class="h-10 w-auto dark:hidden" data-no-dim>
+        <img src="{{ asset('logo-hub-white.png') }}" alt="{{ __('common.organisation_short_name') }}" class="hidden h-10 w-auto dark:block" data-no-dim>
+        <p class="text-xs font-semibold uppercase tracking-wide text-secondary-medium dark:text-ink-muted">{{ __('hr_employees.card.public.heading') }}</p>
         <img src="{{ $photoUrl }}" alt="{{ $name }}" class="size-32 rounded-full object-cover ring-4 ring-primary/20">
         <div>
             <h1 class="text-2xl font-bold" dir="ltr">{{ $name }}</h1>
             @if ($positionTitle)
                 <p class="mt-1 text-base font-semibold text-primary" dir="ltr">{{ $positionTitle }}</p>
             @endif
-            <p class="mt-1 text-sm text-secondary-medium" dir="ltr">{{ collect([$centerName, $cityName])->filter()->implode(' · ') }}</p>
+            <p class="mt-1 text-sm text-secondary-medium dark:text-ink-muted" dir="ltr">{{ collect([$centerName, $cityName])->filter()->implode(' · ') }}</p>
         </div>
 
         <dl class="grid w-full gap-2 text-start text-sm">

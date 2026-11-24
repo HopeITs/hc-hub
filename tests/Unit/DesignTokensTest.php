@@ -412,3 +412,21 @@ test('one catch-all rule removes animations, transitions and smooth scrolling fo
 
     expect($base)->toMatch('/@media \(prefers-reduced-motion: reduce\) \{\s*\*,\s*\*::before,\s*\*::after \{[^}]*animation-duration: 0\.01ms !important;[^}]*animation-iteration-count: 1 !important;[^}]*transition-duration: 0\.01ms !important;[^}]*scroll-behavior: auto !important;/');
 });
+
+test('dark mode keeps the brand red as a fill and never brightens it', function () {
+    $css = dirname(__DIR__, 2).'/resources/css/';
+
+    // D2: the three brightened reds are gone from every stylesheet.
+    expect(preg_match('/#(?:d4343a|e04046|ff5a60)/i', stylesheetSource()))->toBe(0);
+
+    // The dark fill tokens are the brand red itself.
+    [, $dark] = explode('.dark {', file_get_contents($css.'tokens.css'), 2);
+
+    expect($dark)->toContain('--color-brand: var(--color-primary);')
+        ->and($dark)->toContain('--color-status-critical: var(--color-primary);');
+
+    // Red is never small text in dark: the text-side tokens read in light ink.
+    expect($dark)->toContain('--color-brand-text: var(--color-graphite-ink);')
+        ->and($dark)->toContain('--color-brand-ink: var(--color-graphite-ink);')
+        ->and($dark)->toContain('--color-status-critical-text: var(--color-graphite-ink);');
+});

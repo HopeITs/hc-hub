@@ -157,3 +157,19 @@
         scroll-behavior: auto !important;
     }
 }
+
+/*
+ * D2: in dark the brand red is a fill with white text only; it is never small text (2.9 : 1 on the page ground).
+ * Every red text utility reads in light ink there, and views keep the icon beside the words so the meaning is not
+ * colour alone. Last in the utilities layer, so it beats Tailwind's own text-* rules at equal specificity.
+ */
+@layer utilities {
+    :where(.dark) :is(.text-primary, .text-brand, .text-status-critical, .dark\:text-status-critical) {
+        color: var(--color-status-critical-text);
+    }
+
+    /* Tailwind's own `!` utilities are !important, so these must be too. */
+    :where(.dark) :is(.text-primary\!, .text-brand\!, .text-status-critical\!) {
+        color: var(--color-status-critical-text) !important;
+    }
+}

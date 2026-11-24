@@ -403,7 +403,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
                                     <tr wire:key="exp-row-{{ $option }}">
                                         @php $invalid = $errors->has('ranges.'.$option); @endphp
                                         <th scope="row" class="sticky start-0 z-[1] rounded-inset px-2 py-1.5 text-start align-middle font-medium text-secondary-dark dark:text-ink transition-colors duration-150"
-                                            :class="selected?.kind === 'exp' && selected.option === '{{ $option }}' ? 'bg-selection' : 'bg-white'">
+                                            :class="selected?.kind === 'exp' && selected.option === '{{ $option }}' ? 'bg-selection' : 'bg-white dark:bg-surface-1'">
                                             <span class="block leading-tight">{{ $rangeLabel($option) }}</span>
                                             <span class="mt-1 flex items-center gap-1 font-normal sm:gap-1.5">
                                                 <label class="sr-only" for="min-{{ $option }}">{{ $rangeLabel($option) }}: {{ $t('min_years') }}</label>
@@ -448,7 +448,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
                                 </tr>
                                 <tr>
                                     <th scope="row" class="sticky start-0 z-[1] rounded-inset px-2 py-1.5 text-start align-middle font-medium text-secondary-dark dark:text-ink"
-                                        :class="selected?.kind === 'cv' ? 'bg-selection' : 'bg-white'">
+                                        :class="selected?.kind === 'cv' ? 'bg-selection' : 'bg-white dark:bg-surface-1'">
                                         <label for="cvYears" class="sr-only">{{ $t('cv_years_label') }}</label>
                                         <span class="flex items-center gap-1">
                                             <button type="button" @click="cvYears = Math.max(0, cvYears - 1)"
@@ -604,7 +604,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
                                 @foreach (array_reverse($levels) as $found)
                                     <tr wire:key="qual-row-{{ $found }}">
                                         <th scope="row" class="sticky start-0 z-[1] rounded-inset px-2 text-start font-medium text-secondary-dark dark:text-ink transition-colors duration-150"
-                                            :class="testMode === 'cv' && testResult?.level === '{{ $found }}' ? 'bg-selection' : 'bg-white'">
+                                            :class="testMode === 'cv' && testResult?.level === '{{ $found }}' ? 'bg-selection' : 'bg-white dark:bg-surface-1'">
                                             {{ $levelLabel($found) }}
                                         </th>
                                         @foreach ([...$levels, 'no_text', 'no_level'] as $col)
