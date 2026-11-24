@@ -15,7 +15,6 @@ use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\Indicator;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -227,24 +226,22 @@ test('a pending tranche whose scheduled date has passed puts the money reading i
     $component->assertSeeText('Overdue');
 });
 
-test('the work reading counts finished tasks and the plan tab lists the funded projects\' milestone work', function () {
+test('the work reading counts finished tasks and the plan tab lists the funded projects\' work', function () {
     $user = User::factory()->role('General Manager')->create();
     $proposal = Proposal::factory()->create();
 
     $project = Project::factory()->create(['name' => 'Aleppo Water Response']);
     $proposal->projects()->attach($project);
 
-    $milestone = Milestone::factory()->create(['project_id' => $project->id]);
-
     Task::factory()->completed()->create([
-        'source_type' => 'milestone',
-        'source_id' => $milestone->id,
+        'source_type' => 'project',
+        'source_id' => $project->id,
         'title' => 'Verify beneficiary list',
         'due_date' => null,
     ]);
     Task::factory()->create([
-        'source_type' => 'milestone',
-        'source_id' => $milestone->id,
+        'source_type' => 'project',
+        'source_id' => $project->id,
         'title' => 'Procure water pumps',
         'due_date' => null,
         'progress_percentage' => 0,
@@ -265,40 +262,17 @@ test('the work reading counts finished tasks and the plan tab lists the funded p
         ->assertSeeText('be placed on the schedule');
 });
 
-test('a task sourced from a milestone whose project this proposal does not fund is not shown', function () {
-    // A task now has exactly one source, so a task sourced from a milestone can no
-    // longer also carry an independent link to this proposal — it belongs to
-    // whichever proposal funds its milestone's project, or to no proposal at all.
-    $user = User::factory()->role('Financial')->create();
-    $proposal = Proposal::factory()->create();
-
-    $unfunded = Project::factory()->create(['name' => 'Someone Elses Project']);
-    $milestone = Milestone::factory()->create(['project_id' => $unfunded->id]);
-
-    Task::factory()->create([
-        'source_type' => 'milestone',
-        'source_id' => $milestone->id,
-        'title' => 'Stranded task',
-    ]);
-
-    Livewire::actingAs($user)
-        ->test('tracking::proposals.show', ['proposal' => $proposal])
-        ->set('tab', 'plan')
-        ->assertDontSeeText('Stranded task');
-});
-
 test('a task sourced directly from the proposal is listed apart from funded-project work', function () {
     $user = User::factory()->role('General Manager')->create();
     $proposal = Proposal::factory()->create();
 
     $funded = Project::factory()->create(['name' => 'Aleppo Water Response']);
     $proposal->projects()->attach($funded);
-    $milestone = Milestone::factory()->create(['project_id' => $funded->id]);
 
     Task::factory()->create([
-        'source_type' => 'milestone',
-        'source_id' => $milestone->id,
-        'title' => 'Milestone task',
+        'source_type' => 'project',
+        'source_id' => $funded->id,
+        'title' => 'Funded project task',
     ]);
     Task::factory()->create([
         'source_type' => 'proposal',
@@ -310,7 +284,7 @@ test('a task sourced directly from the proposal is listed apart from funded-proj
         ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->assertSeeHtml('data-plan-group="other"')
-        ->assertSeeText('Milestone task')
+        ->assertSeeText('Funded project task')
         ->assertSeeText('Proposal-level task');
 });
 
@@ -710,7 +684,7 @@ test('the tab labels read in Arabic', function () {
         ->assertSeeText('الإطار المنطقي')
         ->assertSeeText('المؤشرات والمستهدفات')
         ->set('tab', 'plan')
-        ->assertSeeText('المراحل')
+        ->assertSeeText('أقسام أخرى')
         ->assertDontSeeHtml('data-under-construction="plan"');
 });
 
@@ -1081,4 +1055,17 @@ test('a change request reason under ten characters is refused in the form', func
         ->assertSet('changeSummary', null);
 
     expect(ProposalChangeRequest::query()->where('proposal_id', $proposal->id)->exists())->toBeFalse();
+});
+
+test('the activity log under the tabs stays closed until asked for', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $proposal = Proposal::factory()->create();
+    $user = User::factory()->role('General Manager')->create();
+
+    Livewire::actingAs($user)
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->assertSeeHtml('data-record-activity')
+        ->assertDontSeeLivewire('activity.timeline')
+        ->toggle('showActivity')
+        ->assertSeeLivewire('activity.timeline');
 });

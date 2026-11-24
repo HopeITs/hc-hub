@@ -12,7 +12,7 @@
     $cellTone = fn (?\Modules\Tracking\Models\PlanUpdate $update, \Carbon\CarbonImmutable $month): array => match (true) {
         $update === null || $update->status === \Modules\Tracking\Enums\PlanUpdateStatus::Draft => $today->gt(\Modules\Tracking\Support\PlanCalendar::dueDateOf($month)) ? ['dk-bad', __('annual_plans.up.late')] : ($today->gte($month->addMonth()) ? ['dk-warn', __('annual_plans.grid.due')] : ['', '·']),
         $update->status === \Modules\Tracking\Enums\PlanUpdateStatus::Sent => ['dk-warn', __('annual_plans.grid.officer')],
-        $update->status === \Modules\Tracking\Enums\PlanUpdateStatus::OfficerApproved => ['dk-warn', $update->seen_at !== null ? __('annual_plans.grid.meal') : __('annual_plans.grid.meal_pm')],
+        $update->status === \Modules\Tracking\Enums\PlanUpdateStatus::OfficerApproved => ['dk-warn', __('annual_plans.grid.meal')],
         $update->status === \Modules\Tracking\Enums\PlanUpdateStatus::Reviewed => ['dk-act', __('annual_plans.grid.pm')],
         $update->status === \Modules\Tracking\Enums\PlanUpdateStatus::Seen => ['dk-good', '✓'],
         $update->status === \Modules\Tracking\Enums\PlanUpdateStatus::Returned => ['dk-bad', __('annual_plans.grid.returned')],

@@ -71,7 +71,6 @@ use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\LibraryIndicator;
 use Modules\Tracking\Models\MealCoverageAssignment;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
@@ -417,8 +416,8 @@ class AppServiceProvider extends ServiceProvider
      * enforceMorphMap() is global: any model on either side of ANY morph must
      * appear here or getMorphClass() throws ClassMorphViolationException.
      * `annual_plan` and `proposal` are the sources a target can be committed
-     * in; `project` and `milestone` are also owners a file can be attached to;
-     * `milestone`, `proposal`, `project`, `program` and `department` are the
+     * in; `project` is also an owner a file can be attached to;
+     * `proposal`, `project`, `program` and `department` are the
      * sources a task can be raised against; `user` is the model side of
      * spatie/laravel-permission's `model_has_roles`/`model_has_permissions`
      * polymorphic pivots and the notifiable side of the inbox; `role` is the
@@ -438,7 +437,6 @@ class AppServiceProvider extends ServiceProvider
             'proposal' => Proposal::class,
             'proposal_status_note' => ProposalStatusNote::class,
             'project' => Project::class,
-            'milestone' => Milestone::class,
             'program' => Program::class,
             'department' => Department::class,
             'user' => User::class,

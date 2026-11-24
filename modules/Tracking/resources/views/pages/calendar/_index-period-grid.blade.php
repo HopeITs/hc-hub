@@ -41,7 +41,7 @@
                                 'flex min-h-10 flex-col gap-1 border-e border-secondary-soft p-1.5 text-start last:border-e-0 dark:border-line transition-opacity',
                                 'cursor-pointer hover:bg-secondary-soft/40 dark:hover:bg-surface-2' => $canAdd,
                                 'opacity-50' => $focusedType !== null && $dayFocusedCount === 0,
-                                'ring-2 ring-inset '.$typeRingClasses[$focusedType ?? 'milestone'] => $focusedType !== null && $dayFocusedCount > 0,
+                                'ring-2 ring-inset '.$typeRingClasses[$focusedType ?? 'task'] => $focusedType !== null && $dayFocusedCount > 0,
                             ])
                             data-test="calendar-allday-{{ $day->toDateString() }}"
                         >
@@ -56,7 +56,7 @@
                                 @endif
                             >
                                 @include('tracking::pages.calendar._layer-chips', ['day' => $day, 'items' => $layerItems, 'leads' => true])
-                                @include('tracking::pages.calendar._item-chips', ['day' => $day, 'calendar' => $calendar, 'markerTone' => $this->markerTone(...), 'taskTone' => $this->taskTone(...), 'reportTone' => $this->reportTone(...), 'monthlyReportTone' => $this->monthlyReportTone(...), 'isMonthlyReportLate' => $this->isMonthlyReportLate(...), 'proposalTone' => $proposalTone, 'transferTone' => $this->transferTone(...), 'donorFollowUpTone' => $this->donorFollowUpTone(...), 'donorReportTone' => $this->donorReportTone(...), 'projectTone' => $projectTone, 'projectEndTone' => $this->projectEndTone(...), 'isLate' => $this->isLate(...), 'typeDotClasses' => $typeDotClasses])
+                                @include('tracking::pages.calendar._item-chips', ['day' => $day, 'calendar' => $calendar, 'taskTone' => $this->taskTone(...), 'reportTone' => $this->reportTone(...), 'monthlyReportTone' => $this->monthlyReportTone(...), 'isMonthlyReportLate' => $this->isMonthlyReportLate(...), 'proposalTone' => $proposalTone, 'transferTone' => $this->transferTone(...), 'donorFollowUpTone' => $this->donorFollowUpTone(...), 'donorReportTone' => $this->donorReportTone(...), 'projectTone' => $projectTone, 'projectEndTone' => $this->projectEndTone(...), 'isLate' => $this->isLate(...), 'typeDotClasses' => $typeDotClasses])
                                 @include('tracking::pages.calendar._layer-chips', ['day' => $day, 'items' => $layerItems, 'leads' => false])
                             </div>
                         </div>

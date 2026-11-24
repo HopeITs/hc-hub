@@ -3,14 +3,12 @@
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\Indicator;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -129,19 +127,14 @@ test('Media Team cannot edit or delete framework records (MD-03)', function (Clo
     'target' => [fn (): array => ['tracking::targets.index', PlanIndicator::factory()->create()->id]],
 ]);
 
-test('Media Team cannot edit, archive or delete projects and milestones (MD-03)', function () {
+test('Media Team cannot edit, archive or delete projects (MD-03)', function () {
     $project = Project::factory()->create();
-    $milestone = Milestone::factory()->create();
     $projects = fn () => Livewire::actingAs(userWithRole('Media Team'))->test('tracking::projects.index');
-    $milestones = fn () => Livewire::actingAs(userWithRole('Media Team'))->test('tracking::milestones.index');
 
     $projects()->call('openEditModal', $project->id)->assertForbidden();
     $projects()->call('confirmArchive', $project->id)->assertForbidden();
-    $milestones()->call('quickSetStatus', $milestone->id, MilestoneStatus::Ongoing->value)->assertForbidden();
-    $milestones()->call('confirmDelete', $milestone->id)->assertForbidden();
 
-    expect(Project::query()->find($project->id))->not->toBeNull()
-        ->and(Milestone::query()->find($milestone->id))->not->toBeNull();
+    expect(Project::query()->find($project->id))->not->toBeNull();
 });
 
 test('Media Team cannot acknowledge a report for MEAL or hold the reopen and aggregate rights (MD-03)', function () {

@@ -145,7 +145,6 @@ test('each role holds every view permission plus exactly its approved write perm
         'programs.create', 'programs.update', 'centers.create',
         'annual-plans.create', 'annual-plans.update', 'annual-plans.delete',
         'projects.update', 'projects.delete',
-        'milestones.create', 'milestones.update', 'milestones.delete',
         'risks.create', 'risks.update', 'risks.delete',
         'indicators.record',
         'attendance.view',

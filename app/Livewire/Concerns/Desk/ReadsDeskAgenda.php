@@ -9,16 +9,13 @@ use App\Support\Modules\ModuleRegistry;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 use Modules\Tracking\Enums\ArStatus;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Task;
@@ -29,8 +26,7 @@ use Modules\Tracking\Support\TrackingDuties;
 /**
  * My agenda (user decision 2026-10-27): every dated item between two days
  * that involves the viewer, soonest first, for the Coming up panel. Tasks
- * assigned to or created by them; milestones of the projects they own or
- * manage, or that they are responsible for; monthly reports still in draft
+ * assigned to or created by them; monthly reports still in draft
  * on their projects or prepared by them, on their due date; indicator
  * reports still in draft (reports viewers); pending tranches (transfers
  * viewers; once sent, one past its date is in transit, not overdue); and the donor reports they are responsible for. Upcoming
@@ -51,26 +47,9 @@ trait ReadsDeskAgenda
         $projectIds = TrackingDuties::for($user)->ownedProjectIds();
         $window = [$from->toDateString(), $to->toDateString()];
 
-        $milestones = $this->visible(Milestone::query(), 'milestones')
-            ->select(['id', 'slug', 'project_id', 'proposal_id', 'name', 'planned_end_date'])
-            ->with(['project:id,name', 'proposal:id,name'])
-            ->whereIn('status', [MilestoneStatus::Planned, MilestoneStatus::Ongoing])
-            ->where(fn (Builder $query) => $query->whereIn('project_id', $projectIds === [] ? [0] : $projectIds)->orWhere('responsible_employee_id', $employeeId))
-            ->whereBetween('planned_end_date', $window)
-            ->get()
-            ->map(fn (Milestone $milestone): array => [
-                'key' => 'milestone-'.$milestone->id,
-                'kind' => 'milestone',
-                'date' => $milestone->planned_end_date,
-                'title' => $milestone->name,
-                'context' => $milestone->ownerName(),
-                'project' => $milestone->ownerName(),
-                'href' => route('milestones.show', $milestone),
-            ]);
-
         $tasks = $this->visible(Task::query(), 'tasks')
             ->select(['id', 'source_type', 'source_id', 'title', 'slug', 'due_date'])
-            ->with(['source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id,name', 'proposal:id,name']])])
+            ->with('source')
             ->where('status', '!=', TaskStatus::Done)
             ->involving($user)
             ->whereBetween('due_date', $window)
@@ -158,8 +137,7 @@ trait ReadsDeskAgenda
                 'href' => route('donor-reports.show', $report),
             ]);
 
-        return $milestones
-            ->concat($tasks)
+        return $tasks
             ->concat($monthlyReports)
             ->concat($reports)
             ->concat($transfers)

@@ -3,7 +3,6 @@
 use Modules\Tracking\Livewire\Concerns\Calendar\BuildsCalendarGrid;
 use Modules\Tracking\Livewire\Concerns\Calendar\FiltersCalendarTypes;
 use Modules\Tracking\Livewire\Concerns\Calendar\FindsFocusedTypeDates;
-use Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarMilestones;
 use Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarTasks;
 use Modules\Tracking\Livewire\Concerns\Calendar\PresentsCalendarItems;
 use Modules\Tracking\Livewire\Concerns\Calendar\ScopesCalendarPeople;
@@ -24,7 +23,6 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     use ChecksFinanceVisibility;
     use FiltersCalendarTypes;
     use FindsFocusedTypeDates;
-    use ManagesCalendarMilestones;
     use ManagesCalendarTasks;
     use NavigatesCalendarPeriods;
     use PresentsCalendarItems;
@@ -65,11 +63,10 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     $calendar = $this->calendar;
     $today = \Carbon\CarbonImmutable::today();
     $hasEmployee = auth()->user()->employee_id !== null;
-    $canAddMilestone = auth()->user()->can('create', Modules\Tracking\Models\Milestone::class);
     $canAddTask = auth()->user()->can('create', Modules\Tracking\Models\Task::class);
-    // Someone who may add neither gets no Add button and no click-a-day menu,
-    // instead of an empty dropdown.
-    $canAdd = $canAddMilestone || $canAddTask;
+    // Someone who may not add a task gets no Add button and no click-a-day
+    // menu, instead of an empty dropdown.
+    $canAdd = $canAddTask;
 
     $proposalTone = function (\Modules\Tracking\Models\Proposal $proposal) use ($today): string {
         if ($proposal->actual_date_end !== null) {
@@ -86,10 +83,9 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     $projectTone = 'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink';
 
     // A dot in front of each chip carries the item TYPE, independent of the
-    // tone above (which carries its STATUS) — so a Reached milestone and a
-    // Done task both render green fills but stay visually distinguishable.
+    // tone above (which carries its STATUS) — so a Done task and a
+    // received transfer both render green fills but stay visually distinguishable.
     $typeDotClasses = [
-        'milestone' => 'bg-funding',
         'task' => 'bg-status-warn',
         'report' => 'bg-primary dark:bg-status-critical',
         'monthly_report' => 'bg-transparent ring-1 ring-inset ring-primary dark:ring-status-critical',
@@ -105,7 +101,6 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     // generates a class it can find as a literal token while scanning this
     // file — a runtime-built "ring-status-active" string would never compile.
     $typeRingClasses = [
-        'milestone' => 'ring-funding',
         'task' => 'ring-status-warn',
         'report' => 'ring-primary',
         'monthly_report' => 'ring-primary',
@@ -116,7 +111,6 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     ];
 
     $typeTextClasses = [
-        'milestone' => 'text-funding',
         'task' => 'text-status-warn',
         'report' => 'text-primary dark:text-brand-text',
         'monthly_report' => 'text-primary dark:text-brand-text',
@@ -127,7 +121,6 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     ];
 
     $typeLabels = [
-        'milestone' => __('tasks.milestone'),
         'task' => __('tasks.task'),
         'report' => __('calendar.report_deadline'),
         'monthly_report' => __('calendar.monthly_report_due'),
@@ -144,7 +137,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     // Every per-day grouping, regardless of type — used to tell whether a
     // day has anything on it at all, so its content area can open the
     // day-detail list instead of the "add" menu.
-    $allGroupKeys = ['milestonesByDay', 'tasksByDay', 'reportsByDay', 'monthlyReportsByDay', 'proposalsByDay', 'transfersByDay', 'donorFollowUpsByDay', 'donorReportsByDay', 'projectStartsByDay', 'projectEndsByDay', 'reviewMeetingsByDay'];
+    $allGroupKeys = ['tasksByDay', 'reportsByDay', 'monthlyReportsByDay', 'proposalsByDay', 'transfersByDay', 'donorFollowUpsByDay', 'donorReportsByDay', 'projectStartsByDay', 'projectEndsByDay', 'reviewMeetingsByDay'];
 
     // What other modules add to the days on screen (leave, holidays…), per day.
     $layerItems = $this->layerItemsByDay;
@@ -202,17 +195,6 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
                 class="fixed z-50 min-w-40 rounded-md border border-secondary-soft bg-white py-1 shadow-lg dark:border-line dark:bg-surface-3 dark:shadow-raised"
                 data-test="calendar-context-menu"
             >
-                @if ($canAddMilestone)
-                <button
-                    type="button"
-                    x-on:click="menuOpen = false; $wire.openCreateModal(menuDate)"
-                    class="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-start text-sm text-secondary-dark hover:bg-secondary-soft dark:text-ink dark:hover:bg-white/[0.06]"
-                    data-test="calendar-context-add-milestone"
-                >
-                    <flux:icon.flag variant="micro" class="size-4" />
-                    {{ __('milestones.add_milestone') }}
-                </button>
-                @endif
                 @if ($canAddTask)
                     <button
                         type="button"
@@ -232,8 +214,6 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
         @include('tracking::pages.calendar._index-unscheduled')
         </div>
     @endif
-
-    @include('tracking::pages.calendar._index-milestone-modal')
 
     @include('tracking::pages.calendar._index-task-modal')
 

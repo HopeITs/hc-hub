@@ -2,13 +2,10 @@
 
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAttachment;
-
-use function Livewire\invade;
 
 beforeEach(function () {
     $this->mediaDepartment = $media = insertHrDepartment('Media');
@@ -21,12 +18,11 @@ beforeEach(function () {
     $this->member = userWithRole('Team Member', $this->mediaEmployee);
 
     $this->project = Project::factory()->create();
-    $this->milestone = Milestone::factory()->create(['project_id' => $this->project->id]);
 
     $this->financeTask = Task::factory()->create([
         'title' => 'Finance-only task',
-        'source_type' => 'milestone',
-        'source_id' => $this->milestone->id,
+        'source_type' => 'project',
+        'source_id' => $this->project->id,
         'due_date' => now()->subDays(2),
     ]);
     $this->financeTask->taskAssignees()->delete();
@@ -98,12 +94,6 @@ test('proposal progress counts every task, including hidden ones', function () {
     $row = Livewire::actingAs($this->member->syncRoles(['Public Relations Manager']))->test('tracking::proposals.index')->instance()->proposals->firstWhere('id', $proposal->id);
 
     expect($row->tasks_count)->toBe(1);
-});
-
-test('a milestone whose only task is hidden still cannot be deleted', function () {
-    $page = invade(Livewire::actingAs($this->member)->test('tracking::milestones.index')->instance());
-
-    expect($page->canDelete($this->milestone->id))->toBeFalse();
 });
 
 test('a Media Team editor moves status on department tasks but cannot edit them, and only views owned-project tasks', function () {

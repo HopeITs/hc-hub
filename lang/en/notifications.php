@@ -135,7 +135,6 @@ return [
 
     'modules' => [
         'tasks' => 'Tasks',
-        'milestones' => 'Milestones',
         'projects' => 'Projects',
         'programs' => 'Programs',
         'annual-plans' => 'Annual plans',
@@ -195,7 +194,6 @@ return [
             'project' => '“:subject” is still owned by :person, who has left — reassign it',
         ],
         'data_gap' => [
-            'no_milestones' => 'The active project “:subject” has no milestones',
             'no_indicators' => 'The active project “:subject” has no indicators',
             'past_end' => 'The project “:subject” is past its end date but still active',
             'report_without_files' => 'The approved report on “:subject” has no files attached',
@@ -204,6 +202,7 @@ return [
         'project_ended' => 'The project “:subject” ended on :date',
         'on_hold_reminder' => 'The proposal “:subject” is on hold and its review date (:date) has come',
         'ending_with_funds' => 'The proposal “:subject” ends on :date and its agreement still has funds',
+        'logframe_confirmed' => 'The logical framework of “:subject” is complete — you can continue with its targets and plan',
         'logframe_missing' => [
             'single' => 'The program “:subject” has no program framework yet — create it',
             'grouped' => 'Programs without a program framework yet: :count — create them',
@@ -363,16 +362,6 @@ return [
             'subtask_completed' => ':actor completed the subtask “:subtask” of “:subject”',
             'deleted' => ':actor deleted the task “:subject”',
         ],
-        'milestone' => [
-            'created' => ':actor created the milestone “:subject”',
-            'created_you' => ':actor made you responsible for the new milestone “:subject”',
-            'responsible_changed' => ':actor made :to responsible for “:subject”',
-            'responsible_changed_you' => ':actor made you responsible for “:subject”',
-            'status_changed' => ':actor moved “:subject” from :from to :to',
-            'dates_changed' => ':actor changed the dates of “:subject”',
-            'updated' => ':actor updated the milestone “:subject”',
-            'deleted' => ':actor deleted the milestone “:subject”',
-        ],
         'project' => [
             'created' => [
                 'title' => 'Project created',
@@ -461,6 +450,9 @@ return [
             ],
         ],
         'annual_plan' => [
+            'milestone_week' => ['title' => 'Milestone due in one week', 'body' => ':milestone is due on :date.'],
+            'milestone_three_days' => ['title' => 'Milestone due in three days', 'body' => ':milestone is due on :date.'],
+            'milestone_missed' => ['title' => 'Milestone missed', 'body' => ':milestone was due on :date.'],
             'plan_submitted' => [
                 'title' => 'New annual plan to review',
                 'body' => ':actor sent the :plan plan to MEAL for review.',
@@ -776,7 +768,7 @@ return [
             ],
             'plan_rebased' => [
                 'title' => 'Plan moved to the grant period',
-                'body' => 'The plan of “:subject” moved to the grant period; milestones and tasks cut at the grant end: :value',
+                'body' => 'The plan of “:subject” moved to the grant period; tasks cut at the grant end: :value',
             ],
         ],
         'donor_proposal' => [

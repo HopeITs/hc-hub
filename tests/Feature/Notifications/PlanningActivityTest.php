@@ -4,55 +4,11 @@ use App\Enums\NotificationPriority;
 use App\Models\Activity;
 use App\Models\UserNotification;
 use Modules\Core\Models\Program;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Models\AnnualPlan;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\ScheduleBaseline;
 use Modules\Tracking\Models\Strategy;
-
-test('a new responsible person is told they are responsible, managers watch', function () {
-    $ownerEmployee = insertHrEmployee();
-    $owner = userWithRole('Managers', $ownerEmployee);
-    $newEmployee = insertHrEmployee(firstNameEn: 'Nour', lastNameEn: 'Ali');
-    $newResponsible = userWithRole('MEAL', $newEmployee);
-    $watcher = userWithRole('Managers');
-    $actor = userWithRole('Managers');
-    $milestone = Activity::withoutRecording(fn () => Milestone::factory()->create([
-        'project_id' => Project::factory()->create(['user_id' => $ownerEmployee])->id,
-        'name' => 'Baseline survey',
-    ]));
-
-    $this->actingAs($actor);
-    $milestone->update(['responsible_user_id' => $newEmployee]);
-
-    expect(sentencesFor($newResponsible))->toBe([$actor->name.' made you responsible for “Baseline survey”'])
-        ->and(UserNotification::query()->forUser($newResponsible)->sole()->priority)->toBe(NotificationPriority::Important)
-        ->and(sentencesFor($owner))->toBe([$actor->name.' made Nour Ali responsible for “Baseline survey”'])
-        ->and(sentencesFor($watcher))->toHaveCount(1)
-        ->and(sentencesFor($actor))->toBe([]);
-});
-
-test('a postponed milestone reaches the general manager as important', function () {
-    $generalManager = userWithRole('General Manager');
-    $milestone = Activity::withoutRecording(fn () => Milestone::factory()->create());
-
-    $this->actingAs(userWithRole('Managers'));
-    $milestone->update(['status' => MilestoneStatus::Postponed]);
-
-    expect(UserNotification::query()->forUser($generalManager)->sole()->priority)->toBe(NotificationPriority::Important);
-});
-
-test('a routine milestone edit does not reach the general manager', function () {
-    $generalManager = userWithRole('General Manager');
-    $milestone = Activity::withoutRecording(fn () => Milestone::factory()->create());
-
-    $this->actingAs(userWithRole('Managers'));
-    $milestone->update(['name' => 'Renamed']);
-
-    expect(sentencesFor($generalManager))->toBe([]);
-});
 
 test('approving a project is key, deleting it is critical', function () {
     $generalManager = userWithRole('General Manager');

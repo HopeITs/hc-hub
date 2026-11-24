@@ -16,7 +16,6 @@ use Modules\Tracking\Actions\Tasks\RescheduleTask;
 use Modules\Tracking\Actions\Tasks\SaveTask;
 use Modules\Tracking\Enums\TaskPriority;
 use Modules\Tracking\Enums\TaskStatus;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Task;
@@ -25,7 +24,7 @@ use Modules\Tracking\Models\Task;
  * Saving and rescheduling a task from the task form, shared by the tasks
  * directory drawer and the calendar's task dialog so both accept exactly the
  * same input and enforce the same rules (a done task is closed; only its
- * creator moves its due date).
+ * creator moves its due date or decides whether it needs proof).
  *
  * The page closes its own form in taskFormSaved() and refreshes whatever it
  * memoised in taskRescheduled().
@@ -42,12 +41,12 @@ use Modules\Tracking\Models\Task;
  * @property array<int, string> $assignedTo
  * @property string $taskSourceType
  * @property string $taskSourceId
+ * @property bool $evidenceRequired
  */
 trait SavesTaskForm
 {
     /** The model behind each task source type. */
     protected const TASK_SOURCE_MODELS = [
-        'milestone' => Milestone::class,
         'proposal' => Proposal::class,
         'project' => Project::class,
         'program' => Program::class,
@@ -69,6 +68,7 @@ trait SavesTaskForm
             'progressPercentage' => ['required', 'integer', 'min:0', 'max:100'],
             'assignedTo' => ['array'],
             'assignedTo.*' => ['integer', Rule::exists(Employee::class, 'id')],
+            'evidenceRequired' => ['boolean'],
             'taskSourceType' => ['required', 'string', Rule::in(array_keys(self::TASK_SOURCE_MODELS))],
             'taskSourceId' => [
                 'required',

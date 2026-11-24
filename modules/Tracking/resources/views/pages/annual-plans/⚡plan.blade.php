@@ -92,7 +92,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plan')] class extends Compon
         </div>
 
         @if ($mode === 'plan')
-            @include('tracking::pages.annual-plans._plan-step-'.['proposal', 'activities', 'dates', 'send'][$plan->step])
+            @include('tracking::pages.annual-plans._plan-sections')
         @elseif ($mode === 'review')
             @include('tracking::pages.annual-plans._plan-review')
         @elseif ($plan->status === ActivityPlanStatus::Approved)

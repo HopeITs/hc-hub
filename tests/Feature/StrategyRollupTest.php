@@ -4,12 +4,10 @@ use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\IndicatorProgress;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -64,7 +62,6 @@ test('each current strategy adds up its targets on pace, high risks and late wor
     strategyIndicator($this->program, 0);
     Risk::factory()->rated(3, 3)->create(['project_id' => $this->project->id]);
     Risk::factory()->rated(1, 2)->create(['project_id' => $this->project->id]);
-    Milestone::factory()->create(['project_id' => $this->project->id, 'status' => MilestoneStatus::Planned, 'planned_start_date' => '2026-05-01', 'planned_end_date' => '2026-06-01']);
     Report::factory()->create([
         'plan_indicator_id' => PlanIndicator::factory()->create(['project_id' => $this->project->id])->id,
         'planned_date' => '2026-05-31',
@@ -83,9 +80,7 @@ test('each current strategy adds up its targets on pace, high risks and late wor
         ->toContain('class="text-status-critical" data-test="strategy-high-risks">1</dd>')
         ->toContain('class="text-status-critical" data-test="strategy-late-reports">1</dd>')
         ->toContain(trans_choice('strategies.attention_high_risks', 1, ['count' => '<bdi>1</bdi>']))
-        ->toContain(trans_choice('strategies.attention_missed_milestones', 1, ['count' => '<bdi>1</bdi>']))
-        ->toContain(e(route('risks.index', ['strategy' => $this->strategy->id, 'high' => 1])))
-        ->toContain(e(route('milestones.index', ['strategy' => $this->strategy->id, 'status' => 'missed', 'view' => 'list'])));
+        ->toContain(e(route('risks.index', ['strategy' => $this->strategy->id, 'high' => 1])));
 });
 
 /*

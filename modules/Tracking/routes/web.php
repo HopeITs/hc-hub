@@ -107,14 +107,6 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
         ->can('risks.view')
         ->name('risks.index');
 
-    Route::livewire('milestones', 'tracking::milestones.index')
-        ->can('milestones.view')
-        ->name('milestones.index');
-
-    Route::livewire('milestones/{milestone}', 'tracking::milestones.show')
-        ->can('milestones.view')
-        ->name('milestones.show');
-
     Route::livewire('results', 'tracking::results.index')
         ->can('results.view')
         ->name('results.index');

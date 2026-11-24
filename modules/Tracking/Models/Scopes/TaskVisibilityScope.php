@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\TaskKind;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Support\TrackingDuties;
 
@@ -114,8 +113,7 @@ class TaskVisibilityScope implements Scope
             }
 
             if ($ownedProjectIds !== []) {
-                $query->orWhere(fn (Builder $query) => $query->where($sourceType, 'project')->whereIn($sourceId, $ownedProjectIds))
-                    ->orWhere(fn (Builder $query) => $query->where($sourceType, 'milestone')->whereIn($sourceId, Milestone::query()->select('id')->whereIn('project_id', $ownedProjectIds)));
+                $query->orWhere(fn (Builder $query) => $query->where($sourceType, 'project')->whereIn($sourceId, $ownedProjectIds));
             }
 
             if ($managedProgramIds !== []) {

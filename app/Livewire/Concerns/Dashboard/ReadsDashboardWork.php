@@ -6,17 +6,14 @@ namespace App\Livewire\Concerns\Dashboard;
 
 use App\Support\Desk\TeamScope;
 use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Computed;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ArStatus;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Enums\TaskStatus;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAssignee;
@@ -91,24 +88,6 @@ trait ReadsDashboardWork
         $today = CarbonImmutable::today();
         $horizon = [$today->toDateString(), $today->addDays(30)->toDateString()];
 
-        $milestones = $this->visible(Milestone::query(), 'milestones')
-            ->select(['id', 'project_id', 'proposal_id', 'name', 'planned_end_date'])
-            ->with(['project:id,name', 'proposal:id,name'])
-            ->where('status', MilestoneStatus::Planned)
-            ->whereBetween('planned_end_date', $horizon)
-            ->oldest('planned_end_date')
-            ->limit(8)
-            ->get()
-            ->map(fn (Milestone $milestone): array => [
-                'key' => 'milestone-'.$milestone->id,
-                'date' => $milestone->planned_end_date,
-                'icon' => 'flag',
-                'tone' => 'neutral',
-                'title' => $milestone->name,
-                'context' => __('dashboard.milestone_in', ['project' => $milestone->ownerName()]),
-                'href' => route('milestones.index', ['project' => $milestone->project_id]),
-            ]);
-
         $transfers = ! $this->canView('transfers') ? new Collection : TransfersTracking::query()
             ->select(['id', 'donor_proposal_id', 'payment_amount', 'amount_transfered_currency', 'scheduled_date'])
             ->with(['donorProposal:id,donor_id', 'donorProposal.donor:id,name'])
@@ -133,7 +112,7 @@ trait ReadsDashboardWork
 
         $tasks = $this->visible(Task::query(), 'tasks')
             ->select(['id', 'source_type', 'source_id', 'title', 'due_date'])
-            ->with(['source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id,name', 'proposal:id,name']])])
+            ->with('source')
             ->where('status', '!=', TaskStatus::Done)
             ->whereBetween('due_date', $horizon)
             ->oldest('due_date')
@@ -167,8 +146,7 @@ trait ReadsDashboardWork
                 'href' => route('reports.show', $report),
             ]);
 
-        return $milestones
-            ->concat($transfers)
+        return $transfers
             ->concat($tasks)
             ->concat($reports)
             ->sortBy(fn (array $item): string => $item['date']->toDateString())

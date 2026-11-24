@@ -6,7 +6,6 @@ use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Task;
@@ -28,7 +27,6 @@ test('every record opens as its own full page, not a sheet over its register', f
     'donor report compose' => fn () => route('donor-reports.compose'),
     'donor' => fn () => route('donors.show', Donor::factory()->create()),
     'funding agreement' => fn () => route('funding-agreements.show', DonorProposal::factory()->create()),
-    'milestone' => fn () => route('milestones.show', Milestone::factory()->create()),
     'monthly report' => fn () => route('monthly-reports.show', MonthlyReport::factory()->create()),
     'report' => fn () => route('reports.show', Report::factory()->create()),
     'task' => fn () => route('tasks.show', Task::factory()->create()),

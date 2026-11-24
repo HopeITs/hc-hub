@@ -107,6 +107,12 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     public bool $embedded = false;
 
     /**
+     * The activity log under the tabs is closed until asked for, so no tab
+     * opens onto a long list.
+     */
+    public bool $showActivity = false;
+
+    /**
      * Embedded on the project's Funding tab: only the lifecycle, the
      * attention list and the vitals in a grid. Picking a tab (from a warning,
      * a vital or "Show all details") opens the full proposal in place.
@@ -219,7 +225,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             ['key' => 'projects', 'label' => __('common.projects'), 'count' => $this->projects->count()],
             ['key' => 'logframe', 'label' => __('proposals.tab_logframe'), 'count' => null],
             ['key' => 'targets', 'label' => __('proposals.tab_targets'), 'count' => $this->targets->count()],
-            ['key' => 'plan', 'label' => __('proposals.tab_plan'), 'count' => count($this->planMilestones) + $this->planTaskRows->count()],
+            ['key' => 'plan', 'label' => __('proposals.tab_plan'), 'count' => $this->planTaskRows->count()],
             ['key' => 'reports', 'label' => __('proposals.donor_reports'), 'count' => $this->reports->count()],
             ['key' => 'documents', 'label' => __('proposals.documents'), 'count' => $this->proposalFiles->count() + $this->projectFiles->count()],
         ];
@@ -283,8 +289,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     }
 
     /**
-     * The Plan tab's read-only Gantt of this proposal's milestones, tasks
-     * and activities.
+     * The Plan tab's read-only Gantt of this proposal's tasks and activities.
      *
      * @return array{rows: list<array<string, mixed>>, links: list<array<string, mixed>>, from: string, to: string, today: string}
      */
@@ -363,7 +368,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
         unset(
             $this->proposal, $this->canRecordAgreement, $this->statusNotes, $this->agreements, $this->agreementRows, $this->fundingTranches, $this->donorReports, $this->agreementMoney, $this->moneyByCurrency,
             $this->projects, $this->locationRows, $this->linkableProjects, $this->tasks, $this->targets, $this->reports,
-            $this->planMilestones, $this->planTaskRows, $this->planGroups, $this->planGanttPayload, $this->planWindow, $this->planProjectOptions,
+            $this->planTaskRows, $this->planGroups, $this->planGanttPayload, $this->planWindow,
             $this->projectFiles, $this->conceptNoteFiles, $this->documents, $this->deadlines, $this->warnings, $this->lifecycle, $this->chronology,
             $this->arrivals, $this->vitals, $this->term, $this->tabs, $this->proposalFiles, $this->reviewStages, $this->needAssessments, $this->approvalSubject, $this->approvalPreview, $this->approvalLocations,
             $this->canRecordFinalReportAcceptance, $this->finalReportAcceptance,
@@ -498,8 +503,13 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
         <x-notes.record :subject="$this->proposal" class="mt-10" />
 
         <section aria-labelledby="record-activity-heading" class="grid gap-3 mt-10" data-record-activity>
-            <h2 id="record-activity-heading" class="text-base font-bold">{{ __('activity.title') }}</h2>
-            <livewire:activity.timeline :subjects="['proposal' => [$this->proposal->id]]" :key="'proposal-activity-'.$this->proposal->id" />
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <h2 id="record-activity-heading" class="text-base font-bold">{{ __('activity.title') }}</h2>
+                <button type="button" class="dk-btn dk-sm" wire:click="$toggle('showActivity')" aria-expanded="{{ $showActivity ? 'true' : 'false' }}" data-test="toggle-activity-log">{{ $showActivity ? __('activity.hide_log') : __('activity.show_log') }}</button>
+            </div>
+            @if ($showActivity)
+                <livewire:activity.timeline :subjects="['proposal' => [$this->proposal->id]]" :key="'proposal-activity-'.$this->proposal->id" />
+            @endif
         </section>
     @endif
 

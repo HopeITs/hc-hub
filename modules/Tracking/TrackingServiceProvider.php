@@ -29,6 +29,7 @@ use Modules\Tracking\Console\Commands\PrefillActiveReportTemplates;
 use Modules\Tracking\Console\Commands\PrepareMonthlyReports;
 use Modules\Tracking\Console\Commands\RemindAnnualPlanUpdates;
 use Modules\Tracking\Console\Commands\RemindProposalOwners;
+use Modules\Tracking\Console\Commands\ScanPlanMilestones;
 use Modules\Tracking\Console\Commands\SeedIndicatorLibrary;
 use Modules\Tracking\Console\Commands\SendMonthlyDigest;
 use Modules\Tracking\Console\TrackingSchedule;
@@ -44,7 +45,6 @@ use Modules\Tracking\Listeners\RebaseProposalPlanOnApproval;
 use Modules\Tracking\Listeners\ShiftActivitySchedulesOnApproval;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\IndicatorProgress;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\ProjectMember;
 use Modules\Tracking\Models\Report;
@@ -115,6 +115,7 @@ class TrackingServiceProvider extends ServiceProvider
             PrepareMonthlyReports::class,
             RemindAnnualPlanUpdates::class,
             RemindProposalOwners::class,
+            ScanPlanMilestones::class,
             SeedIndicatorLibrary::class,
             SendMonthlyDigest::class,
         ]);
@@ -149,7 +150,6 @@ class TrackingServiceProvider extends ServiceProvider
         Employee::resolveRelationUsing('projects', fn (Employee $employee): HasMany => $employee->hasMany(Project::class, 'owner_employee_id'));
         ProjectMember::resolveRelationUsing('employee', fn (ProjectMember $member): BelongsTo => $member->belongsTo(Employee::class, 'employee_id', 'id', 'employee'));
         Employee::resolveRelationUsing('projectMemberships', fn (Employee $employee): HasMany => $employee->hasMany(ProjectMember::class));
-        Employee::resolveRelationUsing('responsibleMilestones', fn (Employee $employee): HasMany => $employee->hasMany(Milestone::class, 'responsible_employee_id'));
         Employee::resolveRelationUsing('assignedTasks', fn (Employee $employee): HasManyThrough => $employee->hasManyThrough(Task::class, TaskAssignee::class, 'employee_id', 'id', 'id', 'task_id'));
     }
 

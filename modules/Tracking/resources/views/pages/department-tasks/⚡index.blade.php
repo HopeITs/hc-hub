@@ -7,7 +7,6 @@ use Modules\Tracking\Enums\DeliveryState;
 use Modules\Tracking\Enums\TaskKind;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Hr\Models\Department;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Task;
@@ -130,9 +129,7 @@ new #[Layout('layouts::desk'), Title('titles.department_tasks')] class extends C
                 'source' => fn (MorphTo $morphTo) => $morphTo
                     ->constrain([
                         Proposal::class => fn ($query) => $query->select(['id', 'slug', 'name', 'status']),
-                        Milestone::class => fn ($query) => $query->select(['id', 'slug', 'name', 'proposal_id', 'project_id']),
-                    ])
-                    ->morphWith([Milestone::class => ['proposal:id,slug,name,status']]),
+                    ]),
             ])
             ->orderByRaw('due_date is null, due_date')
             ->orderBy('title')
@@ -266,11 +263,7 @@ new #[Layout('layouts::desk'), Title('titles.department_tasks')] class extends C
     {
         $source = $task->source;
 
-        return match (true) {
-            $source instanceof Proposal => $source,
-            $source instanceof Milestone => $source->proposal,
-            default => null,
-        };
+        return $source instanceof Proposal ? $source : null;
     }
 
     public function updated(string $property): void

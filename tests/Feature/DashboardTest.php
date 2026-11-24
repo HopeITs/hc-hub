@@ -8,7 +8,6 @@ use Modules\Tracking\Enums\Currency;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\DonorProposal;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Risk;
 use Modules\Tracking\Models\Task;
@@ -62,12 +61,10 @@ test('needs you leaves late work and materialised risks to other cards', functio
     $task = Task::factory()->create(['title' => 'Submit the water survey', 'due_date' => '2026-09-10']);
     Task::factory()->create(['title' => 'Finished task', 'due_date' => '2026-09-01', 'status' => TaskStatus::Done]);
     Task::factory()->create(['title' => 'Future task', 'due_date' => '2026-11-20']);
-    Milestone::factory()->create(['name' => 'Handover of wells', 'planned_start_date' => '2026-08-16', 'planned_end_date' => '2026-08-16']);
     Risk::factory()->happened()->create(['name' => 'Road closure']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
         ->test('desk.panels.needs', ['size' => 'L'])
-        ->assertDontSee('Handover of wells')
         ->assertDontSee('Submit the water survey')
         ->assertDontSee(route('tasks.show', $task), false)
         ->assertDontSee('Road closure');

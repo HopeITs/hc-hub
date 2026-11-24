@@ -6,10 +6,16 @@ use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\SyncLogframeTask;
+use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
 use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -281,4 +287,68 @@ test('the tab holds a flat query count whatever the framework size', function ()
 
     expect(count($large))->toBe(count($small))
         ->and(collect($large)->filter(fn (string $sql): bool => str_contains($sql, 'amount'))->all())->toBe([]);
+});
+
+test('a project proposal gets one logframe task for the MEAL Manager', function () {
+    $employeeId = holdMealManagerSlot();
+    $actor = User::factory()->role('Financial')->create();
+    $this->actingAs($actor);
+
+    $task = app(SyncLogframeTask::class)->ensure($this->proposal);
+    app(SyncLogframeTask::class)->ensure($this->proposal);
+
+    expect($task->kind)->toBe(TaskKind::Logframe)
+        ->and($task->taskAssignees()->pluck('employee_id')->all())->toBe([$employeeId])
+        ->and(Task::query()->withoutGlobalScopes()->where('kind', 'logframe')->count())->toBe(1);
+});
+
+test('confirming the framework needs a result, then closes the task', function () {
+    $meal = mealManager();
+    $this->actingAs($meal);
+    $task = app(SyncLogframeTask::class)->ensure($this->proposal);
+
+    logframeTab($meal, $this->proposal)
+        ->call('confirmLogframe')
+        ->assertHasErrors('logframe')
+        ->assertDontSeeHtml('data-test="logframe-confirmed"');
+
+    logframeNode($this->proposal, ResultType::Impact, programId: $this->program->id);
+
+    logframeTab($meal, $this->proposal)
+        ->call('confirmLogframe')
+        ->assertHasNoErrors()
+        ->assertSeeHtml('data-test="logframe-confirmed"');
+
+    expect($task->fresh()->status)->toBe(TaskStatus::Done);
+});
+
+test('confirming the framework tells the person who opened the proposal', function () {
+    $meal = mealManager();
+    $creator = User::factory()->role('Financial')->create();
+    ProposalStatusNote::query()->create([
+        'proposal_id' => $this->proposal->id,
+        'status' => ProposalStatus::ConceptNote,
+        'context' => 'Recorded',
+        'date' => today()->toDateString(),
+        'changed_by' => $creator->id,
+        'is_correction' => false,
+    ]);
+    logframeNode($this->proposal, ResultType::Impact, programId: $this->program->id);
+
+    logframeTab($meal, $this->proposal)->call('confirmLogframe');
+
+    $confirmed = fn (User $user): int => $user->notifications->filter(fn ($note): bool => str_contains(json_encode($note->data), 'logframe_confirmed'))->count();
+
+    expect($confirmed($creator))->toBe(1)
+        ->and($confirmed($meal))->toBe(0);
+});
+
+test('the logframe tab starts with every branch and indicator list collapsed', function () {
+    $meal = mealManager();
+    $impact = logframeNode($this->proposal, ResultType::Impact, programId: $this->program->id);
+    logframeNode($this->proposal, ResultType::Outcome, $impact);
+
+    logframeTab($meal, $this->proposal)
+        ->assertSeeHtml('branchOpen: false')
+        ->assertDontSeeHtml('branchOpen: true');
 });

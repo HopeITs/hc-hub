@@ -38,11 +38,16 @@ return new class extends Migration
     }
 
     /**
-     * Copy every old value into its new column. Safe to run again.
+     * Copy every old value into its new column. Safe to run again; a table
+     * that no longer exists (milestones, dropped later) is skipped.
      */
     public function backfill(): void
     {
         foreach (self::Columns as $table => [$old, $new]) {
+            if (! Schema::hasTable($table)) {
+                continue;
+            }
+
             DB::table($table)->update([$new => DB::raw($old)]);
         }
     }

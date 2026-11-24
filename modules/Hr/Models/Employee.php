@@ -86,7 +86,7 @@ use Modules\Hr\Observers\HrStatisticsObserver;
  * @property int|null $last_saved_by
  *
  * Tracking's relations on an employee (managedAnnualPlans, projects,
- * responsibleMilestones, assignedTasks) are registered by
+ * assignedTasks) are registered by
  * TrackingServiceProvider, so HR does not depend on Tracking.
  */
 #[ObservedBy(HrStatisticsObserver::class)]
@@ -711,7 +711,7 @@ class Employee extends Model implements TracksActivity
      * Completed years of service, by default over the person's whole service
      * span. Pass $asOf to get the seniority they had on a given day.
      *
-     * Drives the annual leave entitlement — @see \App\Services\LeaveBalanceService
+     * Drives the annual leave entitlement — @see \Modules\Tracking\Services\LeaveBalanceService
      */
     public function yearsOfServiceOn(CarbonInterface|string|null $asOf = null): int
     {

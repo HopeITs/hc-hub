@@ -28,6 +28,7 @@ test('the schedule is exactly these jobs at these times', function () {
 
     expect($scheduled)->toBe([
         'annual-plans:remind | 0 7 * * * | no overlap | one server',
+        'annual-plans:scan-milestones | * * * * * | no overlap | every server',
         'attendance:send-reminders | 15 8 * * * | no overlap | one server',
         'birthday:notify-conflicts | 25 8 * * * | no overlap | one server',
         'cache:prune-expired | 0 * * * * | no overlap | every server',

@@ -12,7 +12,6 @@ use Modules\Tracking\Actions\FundingAgreements\SaveFundingAgreement;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\DonorProposal;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 
@@ -130,15 +129,6 @@ test('donors default to not internal and the internal donor is seeded once', fun
     expect($internal)->toHaveCount(1)
         ->and($internal->first()->name)->toBe('تمويل ذاتي — Hope')
         ->and($internal->first()->isInternal())->toBeTrue();
-});
-
-test('milestones carry a nullable proposal and a final report flag', function () {
-    expect(Schema::hasColumns('milestones', ['proposal_id', 'is_final_report']))->toBeTrue();
-
-    $milestone = DB::table('milestones')->find(Milestone::factory()->create()->id);
-
-    expect($milestone->proposal_id)->toBeNull()
-        ->and((int) $milestone->is_final_report)->toBe(0);
 });
 
 test('working days is a nullable JSON list that casts to an array', function () {

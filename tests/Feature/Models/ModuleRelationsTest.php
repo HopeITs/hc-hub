@@ -8,7 +8,6 @@ use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\IndicatorProgress;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Report;
@@ -29,21 +28,19 @@ test('tracking relations on an employee eager load and filter', function () {
 
     AnnualPlan::factory()->create(['manager_id' => $employee->id]);
     Project::factory()->create(['user_id' => $employee->id]);
-    Milestone::factory()->create(['responsible_user_id' => $employee->id]);
     $task = Task::factory()->create();
     $task->taskAssignees()->delete();
     $task->taskAssignees()->create(['employee_id' => $employee->id]);
 
     $loaded = Employee::query()
-        ->with(['managedAnnualPlans', 'projects', 'responsibleMilestones', 'assignedTasks'])
+        ->with(['managedAnnualPlans', 'projects', 'assignedTasks'])
         ->findOrFail($employee->id);
 
     expect($loaded->managedAnnualPlans)->toHaveCount(1)
         ->and($loaded->projects)->toHaveCount(1)
-        ->and($loaded->responsibleMilestones)->toHaveCount(1)
         ->and($loaded->assignedTasks->modelKeys())->toBe([$task->id]);
 
-    foreach (['managedAnnualPlans', 'projects', 'responsibleMilestones', 'assignedTasks'] as $relation) {
+    foreach (['managedAnnualPlans', 'projects', 'assignedTasks'] as $relation) {
         expect(Employee::query()->whereKey([$employee->id, $other->id])->whereHas($relation)->pluck('id')->all())
             ->toBe([$employee->id]);
     }

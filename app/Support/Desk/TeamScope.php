@@ -7,7 +7,6 @@ namespace App\Support\Desk;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\TaskStatus;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Scopes\TaskVisibilityScope;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAssignee;
@@ -18,7 +17,7 @@ use Modules\Tracking\Support\TrackingDuties;
  * Who belongs to someone's team on the Desk (user decision 2026-10-27): the
  * people they supervise (SupervisionMap: HR direct reports plus local
  * supervisions), the people on their projects (assignees of open tasks on
- * projects they own or manage, milestone tasks included, and of open tasks
+ * projects they own or manage, and of open tasks
  * they created) and their HR department. Each person is listed once, under
  * the closest tie: report, then project, then department. An administrator's
  * team is every linked employee. The viewer is never on their own team.
@@ -93,8 +92,7 @@ final class TeamScope
             ->where(fn (Builder $query) => $query
                 ->where('created_by', $user->id)
                 ->when($projectIds !== [], fn (Builder $query) => $query
-                    ->orWhere(fn (Builder $query) => $query->where('source_type', 'project')->whereIn('source_id', $projectIds))
-                    ->orWhere(fn (Builder $query) => $query->where('source_type', 'milestone')->whereIn('source_id', Milestone::query()->select('id')->whereIn('project_id', $projectIds)))));
+                    ->orWhere(fn (Builder $query) => $query->where('source_type', 'project')->whereIn('source_id', $projectIds))));
 
         return array_values(array_unique(TaskAssignee::query()
             ->whereIn('task_id', $tasks)

@@ -50,7 +50,7 @@
     'kind' => 'project',
     /* Y-09: the form asks for a change to an approved proposal: a reason first, then a summary step. */
     'changeRequest' => false,
-    /* The summary step's lines (App\Support\ProposalChangeLines), null while the form is shown. */
+    /* The summary step's lines (Modules\Tracking\Support\ProposalChangeLines), null while the form is shown. */
     'changeSummary' => null,
 ])
 
@@ -198,7 +198,7 @@
                                 <ul class="mt-1 list-disc space-y-0.5 ps-5 {{ $mutedText }}">
                                     <li>{{ __('proposals.renewal_copy_basics') }}</li>
                                     <li>{{ __('proposals.renewal_copy_framework') }} ({{ $renewal['results'] }})</li>
-                                    <li>{{ __('proposals.renewal_copy_plan') }} ({{ $renewal['milestones'] }} / {{ $renewal['tasks'] }})</li>
+                                    <li>{{ __('proposals.renewal_copy_plan') }} ({{ $renewal['tasks'] }})</li>
                                 </ul>
                             </div>
                             <div>

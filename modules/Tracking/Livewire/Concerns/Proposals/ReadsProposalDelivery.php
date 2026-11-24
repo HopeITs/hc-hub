@@ -6,16 +6,10 @@ namespace Modules\Tracking\Livewire\Concerns\Proposals;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Livewire\Attributes\Computed;
-use Modules\Core\Models\Center;
-use Modules\Core\Models\City;
-use Modules\Hr\Models\Employee;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -91,11 +85,6 @@ trait ReadsProposalDelivery
     /**
      * The projects this proposal funds.
      *
-     * `reached_milestones_count` rides along as a second subquery on the same
-     * statement rather than a loaded relation: the header needs the reached
-     * share, not the milestone rows, and counting in SQL keeps a project list
-     * at one query however many milestones hang off it.
-     *
      * @return Collection<int, Project>
      */
     #[Computed]
@@ -104,11 +93,7 @@ trait ReadsProposalDelivery
         return $this->proposal->projects()
             ->select(['projects.id', 'projects.slug', 'projects.name', 'projects.city_id', 'projects.program_id', 'projects.status', 'projects.start_date', 'projects.end_date'])
             ->with(['city:id,name_en,name_ar', 'program:id'])
-            ->withCount([
-                'milestones',
-                'risks',
-                'milestones as reached_milestones_count' => fn (Builder $query) => $query->where('status', MilestoneStatus::Reached),
-            ])
+            ->withCount('risks')
             ->orderBy('projects.name')
             ->get();
     }
@@ -116,13 +101,9 @@ trait ReadsProposalDelivery
     /**
      * Tasks delivering this proposal, carrying the project they reach through.
      *
-     * A task has one source: either this proposal directly, or a milestone
-     * belonging to one of the proposal's funded projects. A task has no
-     * project column, so a milestone-sourced task reaches its project
-     * through its milestone, and the milestone's project is loaded to group
-     * the work under the project it actually lands on. Tasks with no
-     * milestone (sourced straight from the proposal) are a real state and
-     * get their own group rather than being dropped.
+     * A task has one source: either this proposal directly, or one of the
+     * proposal's funded projects. Tasks sourced straight from the proposal
+     * are a real state and get their own group rather than being dropped.
      *
      * @return Collection<int, Task>
      */
@@ -130,17 +111,13 @@ trait ReadsProposalDelivery
     public function tasks(): Collection
     {
         $fundedProjectIds = $this->projects->modelKeys();
-        $milestoneIds = Milestone::query()->whereIn('project_id', $fundedProjectIds)->pluck('id');
 
         return Task::query()
             ->select(['id', 'slug', 'source_type', 'source_id', 'parent_task_id', 'department_id', 'kind', 'media_kinds', 'delivery_state', 'title', 'status', 'priority', 'start_date', 'due_date', 'progress_percentage'])
-            ->with([
-                'taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
-                'source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id']]),
-            ])
+            ->with(['taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar', 'source'])
             ->where(fn (Builder $query) => $query
                 ->where(fn (Builder $query) => $query->where('source_type', 'proposal')->where('source_id', $this->proposalId))
-                ->orWhere(fn (Builder $query) => $query->where('source_type', 'milestone')->whereIn('source_id', $milestoneIds)))
+                ->orWhere(fn (Builder $query) => $query->where('source_type', 'project')->whereIn('source_id', $fundedProjectIds)))
             ->orderByRaw('due_date is null, due_date')
             ->orderBy('id')
             ->get();

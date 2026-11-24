@@ -13,7 +13,6 @@ use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -63,7 +62,6 @@ final class SubjectLinks
     {
         return match ($type) {
             'task' => $this->showRoute('tasks.show', Task::class, $id),
-            'milestone' => $this->showRoute('milestones.show', Milestone::class, $id),
             'project' => $this->showRoute('projects.show', Project::class, $id),
             'program' => $this->showRoute('programs.show', Program::class, $id),
             'annual_plan' => $this->showRoute('annual-plans.show', AnnualPlan::class, $id),

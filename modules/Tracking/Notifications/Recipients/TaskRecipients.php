@@ -8,7 +8,6 @@ use App\Models\Activity;
 use App\Notifications\Recipients\ModuleRecipients;
 use App\Support\EmployeeProfile;
 use Modules\Hr\Models\Department;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAssignee;
@@ -71,11 +70,7 @@ final class TaskRecipients extends ModuleRecipients
             return EmployeeProfile::employeeIdsInDepartment((int) $task->department_id);
         }
 
-        $proposalId = match ($task->source_type) {
-            'proposal' => (int) $task->source_id,
-            'milestone' => (int) Milestone::query()->whereKey($task->source_id)->value('proposal_id'),
-            default => 0,
-        };
+        $proposalId = $task->source_type === 'proposal' ? (int) $task->source_id : 0;
 
         return Proposal::ownerEmployeeIdsFor($proposalId === 0 ? [] : [$proposalId])[$proposalId] ?? [];
     }

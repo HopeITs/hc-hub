@@ -17,7 +17,7 @@ function deskPanelIds(User $user): array
 }
 
 test('each role starts from its own layout, and a Super Admin from the General Manager one', function () {
-    expect(deskPanelIds(User::factory()->role('Team Member')->create()))->toBe(['needs', 'overdue', 'hr-attention', 'hr-clock', 'flow', 'tasks', 'coming', 'milestones', 'projects', 'hr-news'])
+    expect(deskPanelIds(User::factory()->role('Team Member')->create()))->toBe(['needs', 'overdue', 'hr-attention', 'hr-clock', 'flow', 'tasks', 'coming', 'projects', 'hr-news'])
         ->and(deskPanelIds(User::factory()->role('Super Admin')->create()))->toContain('glance', 'money', 'pipeline')
         /* A department manager, so the deliverables panel is still offered (W-14, D-65). */
         ->and(deskPanelIds(User::factory()->role('Financial')->create(['employee_id' => insertHrDepartmentManager()])))->toBe(['needs', 'overdue', 'hr-attention', 'hr-clock', 'flow', 'money', 'transfers', 'deliverables', 'duties', 'projects', 'hr-news']);
@@ -105,8 +105,7 @@ test('a card dropped into a full row is saved there, and the card it pushed open
         ['panel' => 'overdue', 'cols' => 3, 'rows' => 4],
         ['panel' => 'tasks', 'cols' => 3, 'rows' => 4],
         ['panel' => 'flow', 'cols' => 3, 'rows' => 4],
-        ['panel' => 'coming', 'cols' => 6, 'rows' => 5],
-        ['panel' => 'milestones', 'cols' => 6, 'rows' => 5],
+        ['panel' => 'coming', 'cols' => 12, 'rows' => 5],
         ['panel' => 'projects', 'cols' => 12, 'rows' => 4],
         ['panel' => 'hr-news', 'cols' => 12, 'rows' => 4],
     ];
@@ -125,8 +124,7 @@ test('a card grown past its neighbours is saved wider, with them wrapped to the 
         ['panel' => 'flow', 'cols' => 4, 'rows' => 4],
         ['panel' => 'tasks', 'cols' => 4, 'rows' => 4],
         ['panel' => 'coming', 'cols' => 4, 'rows' => 4],
-        ['panel' => 'milestones', 'cols' => 6, 'rows' => 4],
-        ['panel' => 'projects', 'cols' => 6, 'rows' => 4],
+        ['panel' => 'projects', 'cols' => 12, 'rows' => 4],
         ['panel' => 'hr-news', 'cols' => 12, 'rows' => 4],
     ];
 
@@ -324,6 +322,6 @@ test('each role starts with every HR card its layout names, and each of them dra
 })->with('desk roles');
 
 test('someone holding a Tracking role and an HR role starts from one Desk with both apps on it', function () {
-    expect(deskPanelIds(deskHrStaff('Team Member', 'employee')))->toBe(['needs', 'overdue', 'hr-attention', 'hr-clock', 'hr-decisions', 'hr-late', 'flow', 'tasks', 'coming', 'milestones', 'projects', 'hr-leave-balance', 'hr-news'])
+    expect(deskPanelIds(deskHrStaff('Team Member', 'employee')))->toBe(['needs', 'overdue', 'hr-attention', 'hr-clock', 'hr-decisions', 'hr-late', 'flow', 'tasks', 'coming', 'projects', 'hr-leave-balance', 'hr-news'])
         ->and(deskPanelIds(deskHrStaff('Managers', 'manager')))->toContain('myteam', 'hr-who-is-out', 'hr-upcoming-leaves', 'hr-attention');
 });

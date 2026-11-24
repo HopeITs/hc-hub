@@ -9,11 +9,9 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\User;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Report;
@@ -39,7 +37,6 @@ test('the catalog lists open dated items with their direct people and closes the
         TransfersTracking::factory()->create(['scheduled_date' => '2026-09-28', 'payment_amount' => '4321.00']);
 
         return [
-            'milestone' => Milestone::factory()->create(['planned_end_date' => '2026-09-29', 'status' => MilestoneStatus::Cancelled])->id,
             'report' => Report::factory()->reviewed()->create(['planned_date' => '2026-09-29'])->id,
             'project' => Project::factory()->status(ProjectStatus::Closed)->create(['end_date' => '2026-09-28'])->id,
         ];

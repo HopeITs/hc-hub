@@ -29,4 +29,8 @@
 
 @include('tracking::pages.annual-plans._plan-live')
 
+@if (app(\Modules\Tracking\Actions\AnnualPlans\ManagePlanMilestones::class)->mayView(auth()->user(), $plan))
+    @include('tracking::pages.annual-plans._plan-milestones')
+@endif
+
 @include('tracking::pages.annual-plans._plan-updates')

@@ -27,6 +27,7 @@ use Modules\Tracking\Models\ActivityPlanBatch;
 use Modules\Tracking\Models\ActivityPlanFollowUp;
 use Modules\Tracking\Models\ActivityPlanItem;
 use Modules\Tracking\Models\ActivityPlanItemCity;
+use Modules\Tracking\Models\ActivityPlanMilestone;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\FundingAgreementInstallment;
 use Modules\Tracking\Models\Indicator;
@@ -56,6 +57,8 @@ use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\ScheduleBaseline;
 use Modules\Tracking\Models\ScheduleBaselineItem;
 use Modules\Tracking\Models\ScheduleDependency;
+use Modules\Tracking\Models\StrategicPlanTarget;
+use Modules\Tracking\Models\StrategicPlanYear;
 use Modules\Tracking\Models\TaskAssignee;
 use Modules\Tracking\Models\TaskAttachment;
 use Modules\Tracking\Models\TransfersTracking;
@@ -78,6 +81,7 @@ function modelsGuardedWithoutPolicy(): array
     return [
         AccessGrant::class => ['access-management', 'Scoped grants: written only by GrantScopedAccess and RevokeScopedAccess under access-management.manage-permissions, read by AccessScope.'],
         ActivityPlanBatch::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::update); written only by SaveActivityPlanItem and CopyActivityPlanItemSettings.'],
+        ActivityPlanMilestone::class => ['annual-plans', 'A checkpoint of a live annual plan: read under ManagePlanMilestones::mayView, written only by ManagePlanMilestones under mayManage.'],
         ActivityPlanFollowUp::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::review); written only by ManageActivityPlanFollowUps.'],
         ActivityPlanItem::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::update); written only by the Modules\Tracking\Actions\AnnualPlans actions.'],
         ActivityPlanItemCity::class => ['annual-plans', 'Part of its annual plan item (ActivityPlanPolicy::update); written only by SaveActivityPlanItem.'],
@@ -98,7 +102,7 @@ function modelsGuardedWithoutPolicy(): array
         Indicator::class => ['indicators', 'indicators.* permissions on the indicators page.'],
         IndicatorProgress::class => ['indicators', 'Readings are recorded under indicators.* permissions.'],
         KnownDevice::class => [null, 'The signed-in user\'s own sign-in devices only.'],
-        Media::class => [null, 'Files follow their owner\'s policy (project, proposal, milestone) and the download controllers check it.'],
+        Media::class => [null, 'Files follow their owner\'s policy (project, proposal) and the download controllers check it.'],
         MonthlyReportActivityEntry::class => ['reports', 'Part of its monthly report (MonthlyReportPolicy::update); written only by SaveMonthlyReportActivities.'],
         MonthlyReportAnswer::class => ['reports', 'Part of its monthly report (MonthlyReportPolicy::update); written only by SaveMonthlyReportAnswers.'],
         MonthlyReportFile::class => ['reports', 'Part of its monthly report (MonthlyReportPolicy::update, fillMealLines); loaded through the report and downloaded through T17B\'s protected route.'],
@@ -126,6 +130,8 @@ function modelsGuardedWithoutPolicy(): array
         ScheduleBaseline::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
         ScheduleBaselineItem::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
         ScheduleDependency::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
+        StrategicPlanTarget::class => ['strategies', 'Part of its strategic plan year: written only by SaveStrategicPlan under StrategicPlanPolicy::write.'],
+        StrategicPlanYear::class => ['strategies', 'Part of its strategic plan: written only by SaveStrategicPlan under StrategicPlanPolicy::write.'],
         ProposalLocationCenter::class => ['proposals', 'A center of a proposal location row: written only through SaveProposal and the link wrappers under ProposalLocationPolicy (W-34a).'],
         TaskAssignee::class => ['tasks', 'Follows its task (TaskPolicy).'],
         TaskAttachment::class => ['tasks', 'Follows its task (TaskPolicy); the download controllers check it.'],

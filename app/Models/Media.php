@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
 use Modules\Core\Models\User;
 
 /**
- * A file attached to a project or a milestone.
+ * A file attached to a proposal or a project.
  *
  * @property int $id
  * @property string $mediable_type
@@ -82,10 +82,10 @@ class Media extends Model
     ];
 
     /**
-     * The proposal, project or milestone this file is attached to.
+     * The proposal or project this file is attached to.
      *
      * Resolves through the morph map, so `mediable_type` holds 'proposal',
-     * 'project' or 'milestone', never a class name. It can resolve to NULL: `mediable_id`
+     * 'project', never a class name. It can resolve to NULL: `mediable_id`
      * carries no foreign key, because a polymorphic column cannot.
      *
      * @return MorphTo<Model, $this>

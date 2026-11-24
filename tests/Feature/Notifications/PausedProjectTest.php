@@ -8,12 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Center as HrCenter;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
-use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\IndicatorProgress;
-use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\MonthlyReportLine;
 use Modules\Tracking\Models\PlanIndicator;
@@ -89,12 +87,10 @@ test('a center HR reactivates brings the project back', function () {
     expect($this->paused->fresh()->isPaused())->toBeFalse();
 });
 
-test('the deadline catalog drops the tasks, milestones and end dates of a paused project but keeps its reports', function () {
+test('the deadline catalog drops the tasks and end dates of a paused project but keeps its reports', function () {
     Activity::withoutRecording(function (): void {
         foreach (['paused' => $this->paused, 'live' => $this->live, 'hosted' => $this->hosted] as $name => $project) {
             Task::factory()->create(['title' => "Task {$name}", 'due_date' => '2026-11-18', 'source_type' => 'project', 'source_id' => $project->id]);
-            $milestone = Milestone::factory()->create(['name' => "Milestone {$name}", 'project_id' => $project->id, 'planned_end_date' => '2026-11-18', 'status' => MilestoneStatus::Planned]);
-            Task::factory()->create(['title' => "Milestone task {$name}", 'due_date' => '2026-11-18', 'source_type' => 'milestone', 'source_id' => $milestone->id]);
         }
 
         $planIndicator = PlanIndicator::factory()->create(['project_id' => $this->paused->id]);
@@ -109,8 +105,8 @@ test('the deadline catalog drops the tasks, milestones and end dates of a paused
     $items = pausedCatalogItems();
     $labels = $items->pluck('label')->all();
 
-    expect($labels)->toContain('Task live', 'Task hosted', 'Milestone task live', 'Milestone task hosted', 'Milestone live', 'Milestone hosted', 'Live Wells', 'Hosted Wells')
-        ->not->toContain('Task paused', 'Milestone task paused', 'Milestone paused', 'Paused Wells')
+    expect($labels)->toContain('Task live', 'Task hosted', 'Live Wells', 'Hosted Wells')
+        ->not->toContain('Task paused', 'Paused Wells')
         ->and($items->where('subjectType', 'report')->count())->toBe(1)
         ->and($items->where('subjectType', 'monthly_report')->pluck('projectId')->all())->toContain($this->paused->id)
         ->and($labels)->toContain('Interim donor report');
