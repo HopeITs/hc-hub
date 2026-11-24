@@ -32,6 +32,7 @@ final class SampleServiceProvider extends ServiceProvider
         $modules->addDeskPanels(SamplePanels::class);
         $modules->addDeskAgenda(SampleAgenda::class);
         $modules->addSubjectLinks(SampleSubjectLinks::class);
+        $modules->addPickerScopes(SamplePickerScopes::class);
         $modules->addEmployeeTabs(SampleEmployeeTab::class);
         $modules->addCalendarLayer(SampleCalendarLayer::class);
         $modules->addTimeline(SampleTimeline::class);

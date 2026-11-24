@@ -11,13 +11,14 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Modules\Hr\Models\DefaultDeliverable;
+use Modules\Hr\Support\Checklists\ChecklistPeople;
 use Modules\Hr\Support\Settings\HrAccess;
 
 /**
  * Create or change who hands a checklist item out in a governorate.
  *
- * The governorate must be one the actor may write to, the employee must live
- * in it, and the same employee cannot be set twice for the same item there.
+ * The governorate must be one the actor may write to, the employee must be
+ * service-department staff living in it, and the same employee cannot be set twice for the same item there.
  */
 final class SaveDefaultDeliverable
 {
@@ -54,7 +55,7 @@ final class SaveDefaultDeliverable
         }
 
         $validated = Validator::make($input, [
-            'employee_id' => ['required', 'integer', Rule::exists('employees', 'id')->where(fn (Builder $query) => $query->where('city_id', $cityId))],
+            'employee_id' => ['required', 'integer', Rule::exists('employees', 'id')->where(fn (Builder $query) => $query->whereIn('id', ChecklistPeople::defaultDeliverersIn($cityId)->select('employees.id')))],
             'city_id' => ['required', 'integer', 'exists:cities,id'],
             'item_id' => ['required', 'integer', 'exists:checklist_items,id', $unique],
         ], [

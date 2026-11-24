@@ -38,17 +38,12 @@
                 @endforeach
             </x-ui.form-select>
             <x-ui.form-input wire:model="form.max_emp" :label="__('hr_positions.fields.max_emp')" type="number" min="1" max="500" step="1" required />
-            <x-ui.form-select wire:model="form.direct_manager_id" :label="__('hr_positions.fields.direct_manager_id')" :placeholder="__('hr_positions.form.no_manager')">
+            {{-- The active positions but this one (HrPickerScopes::PositionManagers), fetched when the menu opens. --}}
+            <x-ui.form-select wire:model="form.direct_manager_id" wire:key="position-direct_manager_id-{{ $editingPositionId ?? 'new' }}" picker-scope="hr.position-managers" :picker-parameters="['position' => $editingPositionId]" :label="__('hr_positions.fields.direct_manager_id')" :placeholder="__('hr_positions.form.no_manager')">
                 <option value="">{{ __('hr_positions.form.no_manager') }}</option>
-                @foreach ($this->managerOptions as $managerId => $managerLabel)
-                    <option value="{{ $managerId }}">{{ $managerLabel }}</option>
-                @endforeach
             </x-ui.form-select>
-            <x-ui.form-select wire:model="form.tech_manager_id" :label="__('hr_positions.fields.tech_manager_id')" :placeholder="__('hr_positions.form.no_manager')">
+            <x-ui.form-select wire:model="form.tech_manager_id" wire:key="position-tech_manager_id-{{ $editingPositionId ?? 'new' }}" picker-scope="hr.position-managers" :picker-parameters="['position' => $editingPositionId]" :label="__('hr_positions.fields.tech_manager_id')" :placeholder="__('hr_positions.form.no_manager')">
                 <option value="">{{ __('hr_positions.form.no_manager') }}</option>
-                @foreach ($this->managerOptions as $managerId => $managerLabel)
-                    <option value="{{ $managerId }}">{{ $managerLabel }}</option>
-                @endforeach
             </x-ui.form-select>
             <x-ui.form-textarea wire:model="form.qualifications" :label="__('hr_positions.fields.qualifications')" rows="4" required class="sm:col-span-2" />
             <x-ui.form-textarea wire:model="form.responsibilities" :label="__('hr_positions.fields.responsibilities')" rows="4" required class="sm:col-span-2" />

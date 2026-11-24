@@ -71,7 +71,7 @@ return [
         'choose_employee' => 'Choose an employee',
         'choose_item' => 'Choose an item',
         'employee_help' => 'IT, Communication and HR staff living in the chosen city.',
-        'employee_not_in_city' => 'Choose an employee who lives in the selected city.',
+        'employee_not_in_city' => 'Choose an IT, Communication or HR employee who lives in the selected city.',
         'already_set' => 'This employee is already set for this item in this city.',
         'created' => 'Default deliverable added.',
         'updated' => 'Default deliverable updated.',

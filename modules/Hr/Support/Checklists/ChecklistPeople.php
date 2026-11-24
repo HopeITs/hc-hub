@@ -41,6 +41,17 @@ final class ChecklistPeople
     }
 
     /**
+     * Who may be a governorate's default deliverer: service-department staff
+     * living in it. The picker lists these and SaveDefaultDeliverable accepts only these.
+     *
+     * @return Builder<Employee>
+     */
+    public static function defaultDeliverersIn(int $cityId): Builder
+    {
+        return self::inServiceDepartments()->where('city_id', $cityId);
+    }
+
+    /**
      * The people offered as deliverer or receiver on an employee's checklist:
      * everyone set as a default deliverer, or the service departments' staff
      * when no default exists yet.

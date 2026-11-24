@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Actions\Positions;
 
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
@@ -37,8 +39,8 @@ class SavePosition
             'program_id' => ['required', 'integer', Rule::exists('programs', 'id')],
             'city_id' => ['required', 'integer', Rule::exists('cities', 'id')],
             'center_id' => ['nullable', 'integer', Rule::exists('centers', 'id')],
-            'direct_manager_id' => ['nullable', 'integer', Rule::exists('positions', 'id'), Rule::notIn(array_filter([$position?->id]))],
-            'tech_manager_id' => ['nullable', 'integer', Rule::exists('positions', 'id'), Rule::notIn(array_filter([$position?->id]))],
+            'direct_manager_id' => ['nullable', 'integer', $this->managerRule($position?->direct_manager_id), Rule::notIn(array_filter([$position?->id]))],
+            'tech_manager_id' => ['nullable', 'integer', $this->managerRule($position?->tech_manager_id), Rule::notIn(array_filter([$position?->id]))],
             'job_level_id' => ['required', 'integer', Rule::exists('job_levels', 'id')],
             'department_id' => ['required', 'integer', Rule::exists('departments', 'id')],
             'qualifications' => ['required', 'string', 'max:10000'],
@@ -105,5 +107,17 @@ class SavePosition
         }
 
         return $names;
+    }
+
+    /**
+     * A manager is an active position, as the picker offers
+     * (HrPickerScopes::PositionManagers); the position's current manager is
+     * kept even after it was closed, so an unrelated edit still saves.
+     */
+    private function managerRule(?int $currentManagerId): Exists
+    {
+        return Rule::exists('positions', 'id')->where(fn (Builder $query) => $query->where(
+            fn (Builder $manager) => $manager->where('is_active', true)->when($currentManagerId !== null, fn (Builder $kept) => $kept->orWhere('id', $currentManagerId)),
+        ));
     }
 }
