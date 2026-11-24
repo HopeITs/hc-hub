@@ -25,6 +25,11 @@ final class LeaveRequestDraft
     /** Longest single request, in days (a guard for the day-by-day pricing loop). */
     public const MAX_SPAN_DAYS = 366;
 
+    /** The earliest and the latest time an hourly request may name (09:00, 21:00). */
+    public const HOURLY_FROM_MINUTE = 540;
+
+    public const HOURLY_UNTIL_MINUTE = 1260;
+
     public function __construct(
         public readonly string $type = LeaveWindow::DAY,
         public readonly mixed $leaveBalanceId = null,
@@ -109,10 +114,11 @@ final class LeaveRequestDraft
 
         if ($this->isHourly()) {
             $rules['leave_date'] = ['required', 'date'];
-            $rules['start_hour'] = ['required', 'date_format:H:i'];
+            $rules['start_hour'] = ['required', 'date_format:H:i', $this->withinHourlyWindow()];
             $rules['end_hour'] = [
                 'required',
                 'date_format:H:i',
+                $this->withinHourlyWindow(),
                 function (string $attribute, mixed $value, \Closure $fail): void {
                     if (self::isTime($this->startHour) && self::isTime($value)
                         && LeaveWindow::minuteOfDay((string) $value) <= LeaveWindow::minuteOfDay((string) $this->startHour)) {
@@ -135,6 +141,25 @@ final class LeaveRequestDraft
         }
 
         return $rules;
+    }
+
+    /**
+     * Hourly leave is asked for between 09:00 and 21:00, whatever the centre's own
+     * hours (those are priced separately). The dialog's time pickers stop there too.
+     */
+    private function withinHourlyWindow(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            if (! self::isTime($value)) {
+                return;
+            }
+
+            $minute = LeaveWindow::minuteOfDay((string) $value);
+
+            if ($minute < self::HOURLY_FROM_MINUTE || $minute > self::HOURLY_UNTIL_MINUTE) {
+                $fail(__('hr_leave.validation.hour-between'));
+            }
+        };
     }
 
     /**

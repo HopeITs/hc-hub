@@ -28,7 +28,8 @@ use Throwable;
  *  - a decision: the requester, then that city's HR;
  *  - "seen by HR": the requester, then the managers;
  *  - an objection: the managers (to decide again), then the requester;
- *  - a balance change: the requester and the direct managers.
+ *  - a balance change: the requester and the direct managers;
+ *  - a changed covering colleague on acceptance: the requester.
  *
  * The actor never notifies themself. A failed send is reported, never thrown:
  * it must not undo the write it describes.
@@ -112,6 +113,28 @@ class LeaveNotificationService
 
         $this->send($managers, $leaveRequest, 'objected', $actor, NotificationPriority::Important, ['note' => $note], $this->ids($managers));
         $this->send($requester, $leaveRequest, 'objected_you', $actor, NotificationPriority::Important, ['note' => $note], $this->ids($requester));
+    }
+
+    /**
+     * The decider named another covering colleague when accepting (the old
+     * sendAlternativeChanged): the requester is told who was replaced and by
+     * whom. Nothing when nothing changed.
+     */
+    public function sendAlternativeChanged(LeaveRequest $leaveRequest, ?int $fromId, ?int $toId, ?User $actor = null): void
+    {
+        if ($fromId === $toId) {
+            return;
+        }
+
+        $leaveRequest = $this->loadContext($leaveRequest);
+        $names = Employee::query()->whereKey(array_values(array_filter([$fromId, $toId])))->get()->keyBy('id');
+        $none = ['en' => __('hr_leave.notifications.alternative_none', [], 'en'), 'ar' => __('hr_leave.notifications.alternative_none', [], 'ar')];
+        $nameOf = fn (?int $id): array => ['localized' => $id !== null && $names->has($id)
+            ? ['en' => (string) $names->get($id)->nameForLocale('en'), 'ar' => (string) $names->get($id)->nameForLocale('ar')]
+            : $none];
+        $requester = $this->unique(collect([$this->requesterAccount($leaveRequest)]), [$actor?->id]);
+
+        $this->send($requester, $leaveRequest, 'alternative_changed', $actor, NotificationPriority::Info, ['previous' => $nameOf($fromId), 'current' => $nameOf($toId)], $this->ids($requester));
     }
 
     /**

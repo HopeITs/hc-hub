@@ -6,18 +6,22 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Modules\Hr\Actions\Leave\DecideLeaveRequest;
 use Modules\Hr\Actions\Leave\DeleteLeaveRequest;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Livewire\Concerns\Leave\ManagesLeaveRequestForm;
+use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Support\Leave\LeaveAlternativeEmployees;
 use Modules\Hr\Support\Leave\LeaveContext;
 use Modules\Hr\Support\Leave\LeaveDecisionAlreadyMade;
 use Modules\Hr\Support\Leave\LeaveRequestNextStep;
 use Modules\Hr\Support\Leave\LeaveRequestPricing;
 use Modules\Hr\Support\Leave\LeaveRequestReview;
+use Modules\Hr\Support\Leave\LeaveWindow;
 
 /*
  * One leave request: who, what, when, how much, where it stands and HR's
@@ -36,6 +40,9 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
     public string $decision = '';
 
     public string $rejectReason = '';
+
+    /** The covering colleague the decider keeps or names when accepting ('' = no one). */
+    public string $decisionAlternative = '';
 
     public bool $showReviewModal = false;
 
@@ -100,6 +107,34 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         ];
     }
 
+    /**
+     * Who may cover while the requester is away, for the request's own
+     * period, plus the colleague it already names (kept so the decider sees
+     * who it was even if they have since become busy).
+     *
+     * @return array<int, string> id => name
+     */
+    #[Computed]
+    public function decisionAlternativeOptions(): array
+    {
+        $leaveRequest = $this->leaveRequest;
+        $requester = $leaveRequest->leaveBalance?->contract?->employee;
+
+        if ($requester === null) {
+            return [];
+        }
+
+        $options = app(LeaveAlternativeEmployees::class)->for($requester, LeaveWindow::fromRequest($leaveRequest))
+            ->mapWithKeys(fn (Employee $candidate): array => [(int) $candidate->id => (string) $candidate->name])
+            ->all();
+
+        if ($leaveRequest->alternative_employee_id !== null && ! array_key_exists((int) $leaveRequest->alternative_employee_id, $options)) {
+            $options[(int) $leaveRequest->alternative_employee_id] = (string) $leaveRequest->alternativeEmployee?->name;
+        }
+
+        return $options;
+    }
+
     public function openDecide(string $decision): void
     {
         Gate::authorize('decide', $this->leaveRequest);
@@ -107,6 +142,7 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         $this->resetValidation();
         $this->decision = $decision === 'reject' ? 'reject' : 'accept';
         $this->rejectReason = '';
+        $this->decisionAlternative = (string) $this->leaveRequest->alternative_employee_id;
         $this->showDecideModal = true;
     }
 
@@ -115,7 +151,17 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         $status = $this->decision === 'reject' ? LeaveRequestStatus::Rejected->value : LeaveRequestStatus::Accepted->value;
 
         try {
-            app(DecideLeaveRequest::class)->handle(Auth::user(), $this->leaveRequestId, $status, $this->rejectReason);
+            app(DecideLeaveRequest::class)->handle(
+                Auth::user(),
+                $this->leaveRequestId,
+                $status,
+                $this->rejectReason,
+                $status === LeaveRequestStatus::Accepted->value ? $this->decisionAlternative : null,
+            );
+        } catch (ValidationException $exception) {
+            throw ValidationException::withMessages(collect($exception->errors())->mapWithKeys(
+                fn (array $messages, string $key): array => [$key === 'alternative_employee' ? 'decisionAlternative' : $key => $messages],
+            )->all());
         } catch (LeaveDecisionAlreadyMade $exception) {
             $this->closeDecide();
             unset($this->leaveRequest);
@@ -135,6 +181,7 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         $this->showDecideModal = false;
         $this->decision = '';
         $this->rejectReason = '';
+        $this->decisionAlternative = '';
     }
 
     public function openReview(string $kind): void
@@ -352,6 +399,14 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
                 @endif
                 @if ($decision === 'reject')
                     <x-ui.form-textarea wire:model="rejectReason" :label="__('hr_leave.fields.reject_reason')" required maxlength="255" />
+                @else
+                    {{-- The decider may name another covering colleague (meeting 19/11); the requester is told. --}}
+                    <x-ui.form-select wire:model="decisionAlternative" :label="__('hr_leave.fields.alternative_employee')" :placeholder="__('hr_leave.ui.no_alternative')" searchable>
+                        <option value="">{{ __('hr_leave.ui.no_alternative') }}</option>
+                        @foreach ($this->decisionAlternativeOptions as $optionId => $optionName)
+                            <option value="{{ $optionId }}">{{ $optionName }}</option>
+                        @endforeach
+                    </x-ui.form-select>
                 @endif
                 @error('status')
                     <p class="form-error">{{ $message }}</p>
