@@ -113,7 +113,7 @@
     .dk-side-pin { position: absolute; top: 50%; inset-inline-end: 6px; transform: translateY(-50%); width: 24px; height: 24px; border: 0; border-radius: var(--radius-control); background: none; color: var(--faint); display: grid; place-items: center; cursor: pointer; opacity: 0; }
     .dk-side-li:hover .dk-side-pin, .dk-side-pin:focus-visible, .dk-side-pin.dk-pinned { opacity: 1; }
     .dk-side-pin:hover { background: var(--sunk); color: var(--ink); }
-    .dk-side-pin.dk-pinned { color: var(--brand); }
+    .dk-side-pin.dk-pinned { color: var(--brand-ink); }
     .dk-side-pin.dk-pinned svg { fill: currentColor; }
     .dk-side-pin svg.dk-pin-ic { width: 14px; height: 14px; stroke-width: 2; }
     .dk-side-pin.dk-pinned svg.dk-pin-ic { fill: color-mix(in srgb, currentColor 30%, transparent); }

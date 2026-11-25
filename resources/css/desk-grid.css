@@ -236,7 +236,7 @@
     .dk-pmenu-pop :is(.dk-pmenu-group > button, > button) { display: flex; align-items: center; gap: 10px; width: 100%; height: 38px; padding-inline: 10px; border: 0; border-radius: var(--radius-control); background: none; color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; text-align: start; cursor: pointer; }
     .dk-pmenu-pop :is(.dk-pmenu-group > button, > button):hover, .dk-pmenu-pop :is(.dk-pmenu-group > button, > button):focus-visible { background: var(--sunk); }
     .dk-pmenu-pop button svg.dk-i { flex: none; width: 16px; height: 16px; color: var(--ink-3); }
-    .dk-pmenu-pop > button.dk-danger, .dk-pmenu-pop > button.dk-danger svg.dk-i { color: var(--brand); }
+    .dk-pmenu-pop > button.dk-danger, .dk-pmenu-pop > button.dk-danger svg.dk-i { color: var(--bad-ink); }
     /* D2: the danger label reads in ink in dark; the red stays on the icon. */
     .dark .dk-pmenu-pop > button.dk-danger { color: var(--ink); }
     .dk-tile .dk-pmenu-pop > button[data-panel-pin] { margin-block-end: 4px; }

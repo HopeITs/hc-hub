@@ -96,6 +96,11 @@
     --color-zinc-900: var(--color-grey-ink);
     --color-zinc-950: var(--color-grey-ink);
 
+    /* Tailwind's gray-200 / gray-300 are what base.css gives every border and the scrollbar when nothing sets a colour:
+       they are the brand hairline and its stronger step, never Tailwind's blue-grey. */
+    --color-gray-200: var(--color-grey-line);
+    --color-gray-300: var(--color-grey-line-strong);
+
     /* Flux's accent (primary buttons, checked controls): the ink grey, white text on it at 10 : 1. */
     --color-accent: var(--color-grey-ink);
     --color-accent-content: var(--color-grey-ink);
@@ -285,6 +290,9 @@
         --color-zinc-800: var(--color-surface-2);
         --color-zinc-900: var(--color-surface-1);
         --color-zinc-950: var(--color-surface-0);
+        /* The default border and scrollbar (base.css) follow the Graphite hairlines. */
+        --color-gray-200: var(--color-graphite-line);
+        --color-gray-300: var(--color-graphite-line-strong);
 
         --color-ink: var(--color-graphite-ink);
         --color-ink-muted: var(--color-graphite-ink-muted);

@@ -34,8 +34,8 @@
         'bar' => [
             'neutral' => 'bg-secondary-medium dark:bg-ink-muted',
             'good' => 'bg-status-good',
-            // Greys plus one red (D1): warn and funding share a grey, so each carries its own pattern.
-            'warn' => 'bg-status-warn mark-dots',
+            // Greys plus one red (D1): neutral, warn and funding share a grey: neutral stays plain, warn is dotted, funding is hatched.
+            'warn' => 'bg-status-warn mark-dots-bold',
             'critical' => 'bg-status-critical',
             'funding' => 'bg-funding mark-hatch',
             'muted' => 'bg-secondary-light/70 dark:bg-ink-faint',
@@ -226,7 +226,7 @@
             <div class="flex flex-wrap items-center gap-2" role="group" aria-label="{{ __('gantt.signals.label') }}">
                 <button type="button" x-on:click="lateOnly = ! lateOnly" x-bind:aria-pressed="lateOnly" class="{{ $chip }}" x-bind:class="lateOnly ? @js($chipOn) : @js($chipOff)">
                     <span class="size-2 rounded-full bg-status-critical" aria-hidden="true"></span>
-                    <span class="tabular-nums" x-bind:class="signals.late > 0 && ! lateOnly ? 'text-status-critical' : ''" x-text="signals.late"></span>
+                    <span class="tabular-nums" x-bind:class="signals.late > 0 && ! lateOnly ? 'text-status-critical-text' : ''" x-text="signals.late"></span>
                     {{ __('gantt.signals.late') }}
                 </button>
                 <button type="button" x-on:click="criticalOnly = ! criticalOnly" x-bind:aria-pressed="criticalOnly" class="{{ $chip }}" x-bind:class="criticalOnly ? @js($chipOn) : @js($chipOff)">
@@ -725,11 +725,11 @@
                                     <span x-show="!isEditing(item.row, 'progress')" x-text="item.row.kind === 'group' ? '' : item.row.progress"></span>
                                 </span>
                                 <span x-show="shown.predecessors" class="truncate tabular-nums text-secondary-medium dark:text-ink-muted" x-text="item.row.predecessors ?? ''" x-bind:title="item.row.predecessors ?? ''"></span>
-                                <span x-show="shown.float" class="text-end tabular-nums" x-bind:class="item.row.float !== null && item.row.float <= 0 ? 'font-semibold text-status-critical' : 'text-secondary-medium dark:text-ink-muted'" x-text="item.row.float === null || item.row.float === undefined ? '' : item.row.float + 'd'"></span>
+                                <span x-show="shown.float" class="text-end tabular-nums" x-bind:class="item.row.float !== null && item.row.float <= 0 ? 'font-semibold text-status-critical-text' : 'text-secondary-medium dark:text-ink-muted'" x-text="item.row.float === null || item.row.float === undefined ? '' : item.row.float + 'd'"></span>
                                 <span
                                     x-show="hasBaseline"
                                     class="text-end tabular-nums font-semibold"
-                                    x-bind:class="variance(item.row) > 0 ? 'text-status-critical' : (variance(item.row) < 0 ? 'text-status-good' : 'text-secondary-medium dark:text-ink-muted')"
+                                    x-bind:class="variance(item.row) > 0 ? 'text-status-critical-text' : (variance(item.row) < 0 ? 'text-status-good' : 'text-secondary-medium dark:text-ink-muted')"
                                     x-text="variance(item.row) === null ? '' : (variance(item.row) > 0 ? '+' : '') + variance(item.row)"
                                 ></span>
                             </div>
@@ -819,7 +819,7 @@
 
                                 {{-- Label beside the bar, after any slip --}}
                                 <span class="pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center whitespace-nowrap text-xs leading-4" x-bind:style="labelStyle(item.row)">
-                                    <span x-show="isSlipping(item.row)" class="me-1.5 rounded bg-status-critical-soft px-1 font-bold tabular-nums text-status-critical" x-text="'+' + daysLate(item.row) + 'd'"></span>
+                                    <span x-show="isSlipping(item.row)" class="me-1.5 rounded bg-status-critical-soft px-1 font-bold tabular-nums text-status-critical-text" x-text="'+' + daysLate(item.row) + 'd'"></span>
                                     <span dir="auto" x-bind:class="item.row.summary ? 'font-semibold text-secondary-dark dark:text-ink' : 'text-secondary-medium dark:text-ink-muted'" x-text="barLabel(item.row)"></span>
                                 </span>
                             </div>
@@ -917,10 +917,10 @@
                                     <span class="tabular-nums text-secondary-medium dark:text-ink-faint" x-text="inspected.row.wbs"></span>
                                 </span>
                                 <span x-show="inspected.row.statusLabel" class="gantt-pill inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset" x-bind:class="tones.pill[inspected.row.tone]" x-bind:data-tone="inspected.row.tone" x-text="inspected.row.statusLabel"></span>
-                                <span x-show="inspected.row.critical" class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold text-status-critical">
+                                <span x-show="inspected.row.critical" class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold text-status-critical-text">
                                     <span class="size-1.5 rotate-45 bg-status-critical" aria-hidden="true"></span>{{ __('gantt.critical') }}
                                 </span>
-                                <span x-show="isSlipping(inspected.row)" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold tabular-nums text-status-critical" x-text="@js(__('gantt.inspector.days_late')).replace(':days', daysLate(inspected.row))"></span>
+                                <span x-show="isSlipping(inspected.row)" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold tabular-nums text-status-critical-text" x-text="@js(__('gantt.inspector.days_late')).replace(':days', daysLate(inspected.row))"></span>
                             </div>
                         </div>
 
@@ -961,7 +961,7 @@
                                 </div>
                                 <div x-show="inspected.row.float !== null && inspected.row.float !== undefined">
                                     <dt class="{{ $inspectorLabel }}">{{ __('gantt.total_float') }}</dt>
-                                    <dd class="mt-0.5 font-semibold tabular-nums" x-bind:class="inspected.row.float <= 0 ? 'text-status-critical' : 'text-secondary-dark dark:text-ink'" x-text="inspected.row.float + ' ' + @js(__('gantt.days'))"></dd>
+                                    <dd class="mt-0.5 font-semibold tabular-nums" x-bind:class="inspected.row.float <= 0 ? 'text-status-critical-text' : 'text-secondary-dark dark:text-ink'" x-text="inspected.row.float + ' ' + @js(__('gantt.days'))"></dd>
                                 </div>
                                 <div x-show="inspected.row.owner" class="col-span-2">
                                     <dt class="{{ $inspectorLabel }}" x-text="inspected.row.kind === 'proposal' ? @js(__('gantt.inspector.donors')) : @js(__('gantt.owner'))"></dt>
@@ -989,7 +989,7 @@
                                     <p class="text-xs tabular-nums text-secondary-medium dark:text-ink-muted">
                                         <span x-text="inspected.parts.done"></span>/<span x-text="inspected.parts.total"></span> {{ __('gantt.inspector.done') }}
                                         <template x-if="inspected.parts.late > 0">
-                                            <span class="font-semibold text-status-critical"> · <span x-text="inspected.parts.late"></span> {{ __('gantt.signals.late') }}</span>
+                                            <span class="font-semibold text-status-critical-text"> · <span x-text="inspected.parts.late"></span> {{ __('gantt.signals.late') }}</span>
                                         </template>
                                     </p>
                                 </div>
@@ -1172,7 +1172,7 @@
                             <input type="number" min="-365" max="365" step="1" x-model="linkMenu.lag" class="{{ $control }}" x-on:keydown.enter.prevent="saveLinkMenu()">
                         </label>
                         <div class="flex items-center justify-between gap-2 pt-1">
-                            <button type="button" x-on:click="deleteLinkMenu()" class="font-semibold text-status-critical hover:underline">{{ __('gantt.delete_link') }}</button>
+                            <button type="button" x-on:click="deleteLinkMenu()" class="font-semibold text-status-critical-text hover:underline">{{ __('gantt.delete_link') }}</button>
                             <div class="flex items-center gap-2">
                                 <button type="button" x-on:click="linkMenu = null" class="font-semibold text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink">{{ __('gantt.cancel') }}</button>
                                 <button type="button" x-on:click="saveLinkMenu()" class="rounded-lg bg-secondary-dark px-2.5 py-1 font-semibold text-white hover:bg-primary dark:hover:bg-ink/85 dark:bg-ink dark:text-surface-0">{{ __('gantt.save') }}</button>
@@ -1202,7 +1202,7 @@
                     <p class="text-sm leading-snug font-bold text-secondary-dark dark:text-ink" dir="auto" x-text="hover.row.name"></p>
                     <div class="flex flex-wrap items-center gap-1.5">
                         <span x-show="hover.row.statusLabel" class="gantt-pill inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset" x-bind:class="tones.pill[hover.row.tone]" x-bind:data-tone="hover.row.tone" x-text="hover.row.statusLabel"></span>
-                        <span x-show="hover.row.critical" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold text-status-critical">{{ __('gantt.critical') }}</span>
+                        <span x-show="hover.row.critical" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold text-status-critical-text">{{ __('gantt.critical') }}</span>
                     </div>
                     <div class="relative h-1.5 rounded-full" x-bind:class="tones.track[hover.row.tone]" aria-hidden="true">
                         <div class="absolute inset-y-0 start-0 rounded-full" x-bind:class="tones.bar[hover.row.tone]" x-bind:style="`width:${hover.row.progress}%`"></div>
@@ -1239,10 +1239,10 @@
                             <dd class="text-secondary-dark dark:text-ink" x-text="hover.row.predecessors"></dd>
                         </template>
                         <template x-if="slip(hover.row) > 0">
-                            <dt class="text-status-critical">{{ __('gantt.slip') }}</dt>
+                            <dt class="text-status-critical-text">{{ __('gantt.slip') }}</dt>
                         </template>
                         <template x-if="slip(hover.row) > 0">
-                            <dd class="font-semibold text-status-critical" x-text="slip(hover.row) + ' ' + @js(__('gantt.days'))"></dd>
+                            <dd class="font-semibold text-status-critical-text" x-text="slip(hover.row) + ' ' + @js(__('gantt.days'))"></dd>
                         </template>
                         <template x-if="hover.row.owner">
                             <dt class="text-secondary-medium dark:text-ink-muted" x-text="hover.row.kind === 'proposal' ? @js(__('gantt.inspector.donors')) : @js(__('gantt.owner'))"></dt>

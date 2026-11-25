@@ -527,3 +527,36 @@ test('annual plan weeks in progress and done differ by shape, not only by colour
     expect($ongoing[1] ?? '')->toContain('box-shadow: inset')->toContain('50%')
         ->and($completed[1] ?? '')->not->toContain('box-shadow')->not->toContain('gradient');
 });
+
+test('the default border and scrollbar greys are brand greys, in light and in dark', function () {
+    [$light, $dark] = explode('.dark {', file_get_contents(dirname(__DIR__, 2).'/resources/css/tokens.css'), 2);
+
+    expect($light)->toMatch('/^\s*--color-gray-200: var\(--color-grey-line\);$/m')
+        ->and($light)->toMatch('/^\s*--color-gray-300: var\(--color-grey-line-strong\);$/m')
+        ->and($dark)->toMatch('/^\s*--color-gray-200: var\(--color-graphite-line\);$/m');
+});
+
+test('the Gantt neutral, warn and funding bars share greys but each has its own pattern', function () {
+    $source = file_get_contents(dirname(__DIR__, 2).'/resources/views/components/ui/gantt.blade.php');
+
+    preg_match("/'bar' => \[(.*?)\],/s", $source, $bars);
+    preg_match_all("/'(neutral|warn|funding)' => '([^']*)'/", $bars[1] ?? '', $matches, PREG_SET_ORDER);
+    $classes = array_column($matches, 2, 1);
+
+    expect($classes['neutral'])->not->toContain('mark-')
+        ->and($classes['warn'])->toContain('mark-dots-bold')
+        ->and($classes['funding'])->toContain('mark-hatch')
+        ->and(file_get_contents(dirname(__DIR__, 2).'/resources/css/data-viz.css'))->toContain('.mark-dots-bold {');
+});
+
+test('red icons on the Desk read in the ink tokens, and the toast badge ring is not a thin red line in dark', function () {
+    foreach (glob(dirname(__DIR__, 2).'/resources/css/desk*.css') as $file) {
+        // A Desk icon or its button drawn in the red fill is 2.7 : 1 on dark; icons use --brand-ink / --bad-ink.
+        expect(preg_match('/(?:\.dk-side-pin\.dk-pinned|\.dk-tab-x:hover|\.dk-quick-ic|\.dk-quick-x:hover[^{]*|svg\.dk-i)\s*\{[^}]*(?<![-\w])color:\s*var\(--brand\)/', file_get_contents($file)))->toBe(0, basename($file));
+    }
+
+    $flux = file_get_contents(dirname(__DIR__, 2).'/resources/css/flux-overrides.css');
+
+    expect($flux)->toContain('box-shadow: inset 0 0 0 2px var(--color-brand-text);')
+        ->and($flux)->not->toContain('color: #fff;');
+});

@@ -441,7 +441,7 @@
     .dk-tab-x { position: relative; flex: none; width: 24px; height: 24px; margin-inline-end: 7px; border: 0; border-radius: var(--radius-control); background: none; color: var(--ink-3); display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .12s, background-color .12s, color .12s; }
     .dk-tab-x svg.dk-i { width: 13px; height: 13px; }
     .dk-tab:hover .dk-tab-x, .dk-tab.dk-on .dk-tab-x, .dk-tab-x:focus-visible { opacity: 1; }
-    .dk-tab-x:hover { background: var(--sunk); color: var(--brand); }
+    .dk-tab-x:hover { background: var(--sunk); color: var(--brand-ink); }
     .dk-tab.dk-asleep .dk-tab-t { opacity: .75; }
     .dk-tab.dk-dragging { opacity: .55; cursor: grabbing; }
     .dk-tab:not(.dk-tab-desk) { animation: dk-tab-in .18s cubic-bezier(.2, .8, .2, 1); }
@@ -492,7 +492,7 @@
     .dk-quick-b:hover, .dk-quick-open .dk-quick-b { background: var(--tint); }
     .dk-quick-b:focus-visible { background: var(--sunk); }
     .dk-quick-ic, .dk-quick-rI { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: var(--radius-control); background: var(--sunk); }
-    .dk-quick-ic { color: var(--brand); }
+    .dk-quick-ic { color: var(--brand-ink); }
     .dk-quick-ic svg.dk-i { width: 16px; height: 16px; fill: currentColor; stroke-width: 1.5; }
     .dk-quick-l, .dk-quick-rT { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; }
     .dk-quick-n, .dk-quick-key { flex: none; width: 24px; height: 22px; display: grid; place-items: center; border-radius: var(--radius-control); font-family: inherit; font-size: 12px; font-weight: 800; }
@@ -520,7 +520,7 @@
     .dk-quick-x svg.dk-i { width: 10px; height: 10px; stroke-width: 2.4; }
     .dk-quick-row:is(:hover, :focus-within) .dk-quick-key { display: none; }
     .dk-quick-row:is(:hover, :focus-within) .dk-quick-x { display: grid; }
-    .dk-quick-x:hover, .dk-quick-x:focus-visible { border-color: var(--brand); color: var(--brand); }
+    .dk-quick-x:hover, .dk-quick-x:focus-visible { border-color: var(--brand-ink); color: var(--brand-ink); }
     .dk-quick-row { cursor: grab; }
     .dk-quick-row:active { cursor: grabbing; }
     @media (hover: none) { .dk-quick-key { display: none; } .dk-quick-x { display: grid; } }

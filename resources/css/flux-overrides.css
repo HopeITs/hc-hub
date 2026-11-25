@@ -517,7 +517,7 @@ ui-toast-group {
 .hc-toast[data-variant='danger'] {
     .hc-toast-badge {
         background-color: var(--color-brand);
-        color: #fff;
+        color: var(--color-on-brand);
     }
 
     [data-icon='alert'] {
@@ -527,7 +527,7 @@ ui-toast-group {
 
 .hc-toast[data-variant='warning'] {
     .hc-toast-badge {
-        box-shadow: inset 0 0 0 2px var(--color-brand);
+        box-shadow: inset 0 0 0 2px var(--color-brand-text);
         color: var(--color-brand-text);
     }
 
@@ -619,7 +619,7 @@ ui-toast-group {
 
     .hc-toast[data-variant='danger'] & {
         background-color: var(--color-brand);
-        color: #fff;
+        color: var(--color-on-brand);
 
         &:hover {
             background-color: var(--color-brand-hover);

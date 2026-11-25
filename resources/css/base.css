@@ -38,7 +38,7 @@
     }
 
     html {
-        scrollbar-color: var(--color-gray-300, #d4d4d4) transparent;
+        scrollbar-color: var(--color-gray-300, currentColor) transparent;
     }
 
     .dark {

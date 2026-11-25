@@ -186,6 +186,13 @@
         background-size: 3px 3px;
     }
 
+    /* Bigger, denser dots for a bar the neutral tone shares its grey with (Gantt warn vs neutral): the fine dots above
+       vanish on a thin bar, these stay readable at 8px. */
+    .mark-dots-bold {
+        background-image: radial-gradient(color-mix(in srgb, var(--color-board) 90%, transparent) 1.25px, transparent 1.6px);
+        background-size: 5px 5px;
+    }
+
     .flow-ribbon {
         fill: var(--color-funding);
         fill-opacity: 0.32;
