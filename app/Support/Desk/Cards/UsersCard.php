@@ -29,7 +29,8 @@ final class UsersCard extends PageCard
 
     public function breakdown(User $user): array
     {
-        $tones = ['active', 'good', 'warn', 'neutral'];
+        // active and good share one grey in both themes, so neighbouring segments step through distinct greys instead.
+        $tones = ['active', 'warn', 'neutral', 'active'];
 
         return $this->parts(Role::query()->withCount('users')->orderByDesc('users_count')->limit(4)->get()
             ->values()
@@ -39,7 +40,7 @@ final class UsersCard extends PageCard
 
     public function hero(User $user): ?array
     {
-        $tones = ['active', 'good', 'warn', 'neutral'];
+        $tones = ['active', 'warn', 'neutral'];
         $faces = User::query()->orderByName()->limit(5)->get()->map(fn (User $person): array => [
             'label' => $this->initials($person->name !== '' ? $person->name : $person->email),
             'tone' => 'tone-'.($person->id % 6),

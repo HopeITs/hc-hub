@@ -81,8 +81,9 @@
     --color-red-900: #be1f24;
     --color-red-950: #be1f24;
 
-    /* Flux's zinc greys on the ramp. The steps darker than the ink grey (Flux's own dark: surfaces) are the
-       ink grey mixed with black, at the depth of the Tailwind step they replace. */
+    /* Flux's zinc greys on the ramp (D3: the five brand greys only). The ink grey is the darkest grey in light, so
+       the steps past it (Flux's light text-zinc-800 and its dark: surfaces) stay the ink grey here; dark mode maps
+       those dark: surfaces onto the Graphite surfaces below. */
     --color-zinc-50: color-mix(in srgb, var(--color-grey-line) 20%, white);
     --color-zinc-100: color-mix(in srgb, var(--color-grey-line) 40%, white);
     --color-zinc-200: var(--color-grey-line);
@@ -91,12 +92,13 @@
     --color-zinc-500: var(--color-grey-ink-muted);
     --color-zinc-600: var(--color-grey-ink);
     --color-zinc-700: var(--color-grey-ink);
-    --color-zinc-800: color-mix(in srgb, var(--color-grey-ink) 58%, black);
-    --color-zinc-900: color-mix(in srgb, var(--color-grey-ink) 35%, black);
-    --color-zinc-950: color-mix(in srgb, var(--color-grey-ink) 15%, black);
+    --color-zinc-800: var(--color-grey-ink);
+    --color-zinc-900: var(--color-grey-ink);
+    --color-zinc-950: var(--color-grey-ink);
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    /* Flux's accent (primary buttons, checked controls): the ink grey, white text on it at 10 : 1. */
+    --color-accent: var(--color-grey-ink);
+    --color-accent-content: var(--color-grey-ink);
     --color-accent-foreground: var(--color-white);
 
     /* Status, funding and board surface tokens — data-viz and record status only, never brand/nav/buttons. */
@@ -278,6 +280,11 @@
            and Flux uses both for readable text (descriptions, hints, modal close). The ink-muted step is 7.3 : 1 on surface-3. */
         --color-zinc-400: var(--color-graphite-ink-muted);
         --color-zinc-500: var(--color-graphite-ink-muted);
+        /* Flux's own dark: surfaces (dark:bg-zinc-800 / 900 / 950 on menus, modals, cards) land on the Graphite
+           layers. They are darker than any brand grey by necessity: they are the dark page, not a grey on it. */
+        --color-zinc-800: var(--color-surface-2);
+        --color-zinc-900: var(--color-surface-1);
+        --color-zinc-950: var(--color-surface-0);
 
         --color-ink: var(--color-graphite-ink);
         --color-ink-muted: var(--color-graphite-ink-muted);
