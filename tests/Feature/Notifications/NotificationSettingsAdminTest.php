@@ -12,12 +12,14 @@ use Spatie\Permission\PermissionRegistrar;
 
 use function Livewire\invade;
 
-test('only administrators see the rules tab and its form', function (string $role, bool $manages) {
-    $page = $this->actingAs(userWithRole($role))->get(route('notification-settings.edit', ['tab' => 'rules']))->assertOk();
+test('only administrators see the organization rules section', function (string $role, bool $manages) {
+    $page = $this->actingAs(userWithRole($role))->get(route('notification-settings.edit'))->assertOk();
+
+    $page->assertDontSee('data-settings-tabs', false)->assertSee('data-module-mutes', false);
 
     $manages
-        ? $page->assertSee('data-settings-tabs', false)->assertSee('data-notification-rules', false)
-        : $page->assertDontSee('data-settings-tabs', false)->assertDontSee('data-notification-rules', false)->assertSee('data-module-mutes', false);
+        ? $page->assertSee('id="organization-rules"', false)
+        : $page->assertDontSee('id="organization-rules"', false);
 })->with([
     ['Super Admin', true],
     ['General Manager', false],
@@ -28,21 +30,21 @@ test('the rules form is forbidden to people without the permission', function (s
     Livewire::actingAs(userWithRole($role))->test('notifications.rules')->assertForbidden();
 })->with(['General Manager', 'Managers']);
 
-test('a general manager who is given the permission directly gets the rules tab', function () {
+test('a general manager who is given the permission directly gets the organization rules section', function () {
     $generalManager = userWithRole('General Manager');
 
-    $this->actingAs($generalManager)->get(route('notification-settings.edit', ['tab' => 'rules']))->assertDontSee('data-notification-rules', false);
+    $this->actingAs($generalManager)->get(route('notification-settings.edit'))->assertDontSee('id="organization-rules"', false);
 
     $generalManager->givePermissionTo('notification-settings.manage');
 
-    $this->actingAs($generalManager->fresh())->get(route('notification-settings.edit', ['tab' => 'rules']))->assertSee('data-notification-rules', false)->assertSee('data-settings-tab="rules"', false);
+    $this->actingAs($generalManager->fresh())->get(route('notification-settings.edit'))->assertSee('id="organization-rules"', false);
 });
 
-test('the personal tab is the default and the old rules address redirects to the rules tab', function () {
+test('the rules load only when their section is opened, and the old rules address redirects to it', function () {
     $admin = userWithRole('Super Admin');
 
-    $this->actingAs($admin)->get(route('notification-settings.edit'))->assertOk()->assertSee('data-module-mutes', false)->assertDontSee('data-notification-rules', false);
-    $this->actingAs($admin)->get('/admin/notification-settings')->assertRedirect('/notifications-settings?tab=rules');
+    $this->actingAs($admin)->get(route('notification-settings.edit'))->assertOk()->assertSee('id="organization-rules"', false)->assertDontSee('data-notification-rules', false);
+    $this->actingAs($admin)->get('/admin/notification-settings')->assertRedirect('/notifications-settings#organization-rules');
 });
 
 test('an administrator changes thresholds and working days and they take effect', function () {

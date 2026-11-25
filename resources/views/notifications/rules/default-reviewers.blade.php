@@ -7,11 +7,14 @@
     $positionOptions = $this->positionOptions();
 @endphp
 
-<section id="rules-default-reviewers" aria-labelledby="rules-default-reviewers-heading" class="rules-group mt-12 border-t border-secondary-soft pt-10 dark:border-line" data-default-reviewers>
-    <h2 id="rules-default-reviewers-heading" class="rules-group-title">{{ __('notifications.admin.default_reviewers.title') }}</h2>
+<details id="rules-default-reviewers" aria-labelledby="rules-default-reviewers-heading" class="rules-group group/rule border-t border-secondary-soft dark:border-line border-b" wire:ignore.self data-default-reviewers>
+    <summary class="flex min-h-12 cursor-pointer touch-manipulation list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
+        <flux:icon.chevron-right variant="micro" class="shrink-0 transition-transform group-open/rule:rotate-90 rtl:-scale-x-100" />
+        <h2 id="rules-default-reviewers-heading" class="rules-group-title">{{ __('notifications.admin.default_reviewers.title') }}</h2>
+    </summary>
     <p class="rules-group-hint">{{ __('notifications.admin.default_reviewers.hint') }}</p>
 
-    <form wire:submit="saveDefaultReviewers" class="mt-4 grid gap-4" novalidate>
+    <form wire:submit="saveDefaultReviewers" class="mt-4 grid gap-4 pb-6" novalidate>
         <div class="grid gap-4 @3xl/rules:grid-cols-2">
             @foreach (\Modules\Tracking\Enums\ReviewerSlot::defaultSlots() as $slot)
                 <x-ui.form-select wire:model="reviewerPositions.{{ $slot->value }}" :label="$slot->label()" :placeholder="__('notifications.admin.default_reviewers.none')" wire:key="reviewer-slot-{{ $slot->value }}" data-reviewer-slot="{{ $slot->value }}">
@@ -27,4 +30,4 @@
             <x-ui.button type="submit" tone="primary" icon="check" class="min-h-10 touch-manipulation" wire:loading.attr="disabled" wire:target="saveDefaultReviewers" data-test="save-default-reviewers">{{ __('notifications.admin.default_reviewers.save') }}</x-ui.button>
         </div>
     </form>
-</section>
+</details>

@@ -46,6 +46,8 @@ abstract class CalendarIndexPageHost extends Component
     /** @var array<int, string> */
     public array $filterEmployeeIds = [];
 
+    public string $peopleScope = '';
+
     /** @var array<int, string> */
     public array $hiddenLayers = [];
 }

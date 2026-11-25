@@ -1,38 +1,9 @@
 {{--
-    The toolbar of calendar/index: today, the view-mode picker, previous and
-    next, the period heading, the type and responsible filters, and the add
-    menu. Included by ⚡index.blade.php, whose top PHP block defines
-    $periodHeading, $typeDotClasses and $selectedFilterCount.
+    The type and responsible filters of calendar/index, placed in the
+    register's filters slot by ⚡index.blade.php, whose top PHP block defines
+    $typeDotClasses and $selectedFilterCount. The view buttons, the period
+    row and the Add menu live in ⚡index.blade.php.
 --}}
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex flex-wrap items-center gap-3">
-            <x-ui.button size="sm" wire:click="goToToday" data-test="calendar-today-button">{{ __('common.today') }}</x-ui.button>
-
-            <flux:dropdown position="bottom-start" class="filter-picker">
-                <x-ui.button size="sm" icon:trailing="chevron-down" data-test="calendar-view-mode-button">{{ __('calendar.'.$viewMode) }}</x-ui.button>
-                <flux:menu class="filter-menu">
-                    <div class="px-2 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-secondary-medium dark:text-ink-muted">{{ __('calendar.time_period') }}</div>
-                    @foreach (['day', 'four_days', 'week', 'month'] as $periodKey)
-                        <flux:menu.item wire:click="setViewMode('{{ $periodKey }}')" data-test="calendar-view-mode-{{ $periodKey }}">
-                            <span class="min-w-0 flex-1 truncate">{{ __('calendar.'.$periodKey) }}</span>
-                            @if ($viewMode === $periodKey)<flux:icon.check class="size-4 shrink-0 text-primary dark:text-brand-text" />@endif
-                        </flux:menu.item>
-                    @endforeach
-                </flux:menu>
-            </flux:dropdown>
-
-            <div class="flex items-center gap-1">
-                <x-ui.button size="sm" wire:click="{{ $viewMode === 'month' ? 'previousMonth' : 'previousPeriod' }}" :aria-label="__('common.previous')">
-                    <flux:icon.chevron-left variant="micro" class="size-4 rtl:-scale-x-100" />
-                </x-ui.button>
-                <x-ui.button size="sm" wire:click="{{ $viewMode === 'month' ? 'nextMonth' : 'nextPeriod' }}" :aria-label="__('common.next')">
-                    <flux:icon.chevron-right variant="micro" class="size-4 rtl:-scale-x-100" />
-                </x-ui.button>
-            </div>
-            <flux:heading size="lg">{{ $periodHeading }}</flux:heading>
-        </div>
-
-        <div class="flex items-center gap-3">
             <div class="inline-flex items-center rounded-lg border border-secondary-light bg-white dark:border-field-line dark:bg-surface-1">
             <div class="filter-picker relative">
                 <button
@@ -59,6 +30,7 @@
                         class="filter-menu absolute end-0 z-30 mt-1 min-w-44 rounded-lg border p-[.3125rem] shadow-xs"
                     >
                         @foreach ([
+                            ['milestone', 'showMilestones', 'tasks.milestone', 'calendar-filter-milestones'],
                             ['task', 'showTasks', 'tasks.task', 'calendar-filter-tasks'],
                             ['report', 'showReports', 'calendar.report_deadline', 'calendar-filter-reports'],
                             ['monthly_report', 'showMonthlyReports', 'calendar.monthly_report_due', 'calendar-filter-monthly-reports'],
@@ -130,9 +102,13 @@
                     @endif
                 </x-slot:trigger>
 
-                <button type="button" wire:click="$set('filterEmployeeIds', [])" class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-start text-sm hover:bg-secondary-soft dark:hover:bg-white/[0.06]" data-test="calendar-responsible-filter-me">
+                <button type="button" wire:click="showOnlyMe" class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-start text-sm hover:bg-secondary-soft dark:hover:bg-white/[0.06]" data-test="calendar-responsible-filter-me">
                     <span class="min-w-0 flex-1 truncate">{{ __('calendar.me') }}</span>
-                    @if ($filterEmployeeIds === [])<flux:icon.check class="ms-auto size-4 shrink-0 text-primary dark:text-brand-text" />@endif
+                    @if ($filterEmployeeIds === [] && ! $this->showsAllStaff())<flux:icon.check class="ms-auto size-4 shrink-0 text-primary dark:text-brand-text" />@endif
+                </button>
+                <button type="button" wire:click="showAllStaff" class="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-start text-sm hover:bg-secondary-soft dark:hover:bg-white/[0.06]" data-test="calendar-responsible-filter-all">
+                    <span class="min-w-0 flex-1 truncate">{{ __('calendar.all_staff') }}</span>
+                    @if ($this->showsAllStaff())<flux:icon.check class="ms-auto size-4 shrink-0 text-primary dark:text-brand-text" />@endif
                 </button>
                 <div class="my-1 border-t border-secondary-soft dark:border-line"></div>
                 <div
@@ -149,19 +125,3 @@
                 ></div>
             </x-ui.multi-select-popover>
             </div>
-
-            @if ($canAdd)
-            <flux:dropdown position="bottom-end" class="filter-picker">
-                <x-ui.button tone="primary" icon="plus" icon:trailing="chevron-down" data-test="calendar-add-button">{{ __('common.add') }}</x-ui.button>
-                <flux:menu class="filter-menu">
-                    @if ($canAddTask)
-                        <flux:menu.item wire:click="openCreateTaskModal" data-test="calendar-add-task-button">
-                            <flux:icon.clipboard-document-check variant="micro" class="size-4" />
-                            {{ __('tasks.add_task') }}
-                        </flux:menu.item>
-                    @endif
-                </flux:menu>
-            </flux:dropdown>
-            @endif
-        </div>
-    </div>

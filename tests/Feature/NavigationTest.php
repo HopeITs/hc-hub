@@ -78,7 +78,8 @@ test('HR pages sit in groups named by the work, leave management with the people
 
     expect($routesOf('people'))->toBe(['hr.employees.index', 'hr.contracts.index', 'hr.positions.index', 'hr.positions.team', 'hr.badges.index', 'hr.leave.team', 'hr.leave.balances', 'hr.leave.holidays', 'hr.statistics.general', 'hr.reports.index'])
         ->and($routesOf('recruitment'))->toContain('hr.recruitment.requests.index', 'hr.recruitment.campaigns.index', 'hr.recruitment.applicants.index')
-        ->and($routesOf('workspace'))->toContain('tasks.index', 'calendar.index', 'hr.leave.team-calendar', 'hr.checklists.index', 'hr.news.index')
+        ->and($routesOf('workspace'))->toContain('tasks.index', 'calendar.index', 'hr.checklists.index', 'hr.news.index')
+        ->and($routesOf('workspace'))->not->toContain('hr.leave.team-calendar')
         ->and($routesOf('administration'))->toContain('activity.index', 'hr.settings.index')
         ->and(array_filter(Destinations::Groups, fn (string $group): bool => str_starts_with($group, 'hr_')))->toBe([]);
 });
@@ -103,7 +104,7 @@ test('no page a viewer may open falls out of the sidebar, whatever their role', 
     $this->seed(RolesAndPermissionsSeeder::class);
 
     $destinations = app(Destinations::class);
-    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index', 'hr.attendance.upload', 'hr.reports.leaving-reasons', 'hr.reports.recruitment-funnel', 'hr.reports.leave', 'hr.reports.vacancies', 'hr.reports.training', 'hr.reports.profile-completeness'];
+    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index', 'hr.attendance.upload', 'hr.leave.team-calendar', 'hr.reports.leaving-reasons', 'hr.reports.recruitment-funnel', 'hr.reports.leave', 'hr.reports.vacancies', 'hr.reports.training', 'hr.reports.profile-completeness'];
 
     foreach ($destinations->routes() as $route) {
         expect(Destinations::Groups)->toContain($destinations->find($route)['group']);
@@ -119,6 +120,15 @@ test('no page a viewer may open falls out of the sidebar, whatever their role', 
 
         expect($linked)->toBe($expected, $role);
     }
+});
+
+test('the team calendar has no sidebar link of its own, stays a destination and lights the Calendar link', function () {
+    $user = User::factory()->role('Super Admin')->create();
+    $destinations = app(Destinations::class);
+
+    expect($destinations->allows($user, 'hr.leave.team-calendar'))->toBeTrue()
+        ->and($destinations->currentFor($user, 'hr.leave.team-calendar')['route'])->toBe('calendar.index')
+        ->and($destinations->find('calendar.index')['label'])->toBe(__('common.calendar'));
 });
 
 test('the three HR statistics pages share one sidebar link and stay open to the Ask bar', function () {

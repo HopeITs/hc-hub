@@ -83,10 +83,10 @@ return [
             ['id' => 'feed', 'targets' => ['[data-inbox-feed]']],
         ],
         'notification-settings.edit' => [
-            ['id' => 'popups', 'targets' => ['[data-popup-preference]']],
-            ['id' => 'mutes', 'targets' => ['[data-module-mutes]']],
-            ['id' => 'savebar', 'targets' => ['[data-rules-savebar]']],
-            ['id' => 'default_reviewers', 'targets' => ['[data-default-reviewers]']],
+            ['id' => 'popups', 'targets' => ['[data-popup-preference]', '#more-options']],
+            ['id' => 'mutes', 'targets' => ['[data-module-mutes]', '#by-topic']],
+            ['id' => 'savebar', 'targets' => ['[data-rules-savebar]', '[data-org-rules]']],
+            ['id' => 'default_reviewers', 'targets' => ['[data-default-reviewers]', '[data-org-rules]']],
         ],
         'indicator-library.index' => [
             ['id' => 'filters', 'targets' => ['[data-library-filters]']],

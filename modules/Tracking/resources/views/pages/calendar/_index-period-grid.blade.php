@@ -3,7 +3,7 @@
     row with each day's chips, and the hourly rows with the "now" line.
     Included by ⚡index.blade.php, whose top PHP block defines $calendar,
     $today, $focusedType, $focusedGroupKeys, $allGroupKeys,
-    $typeRingClasses, $typeDotClasses, $layerItems, $proposalTone and $projectTone.
+    $typeRingClasses, $typeDotClasses, $weekendDays, $layerItems, $proposalTone and $projectTone.
 --}}
                 @php
                     $periodDays = $calendar['days'];
@@ -15,17 +15,19 @@
                 @endphp
 
                 <div class="overflow-x-auto">
-                <div class="grid" style="{{ $gridColumns }}">
-                    <div class="border-b border-e border-secondary-soft dark:border-line"></div>
+                <div class="grid border-b border-board-line bg-board-head" style="{{ $gridColumns }}">
+                    <div class="border-e border-board-line"></div>
                     @foreach ($periodDays as $day)
                         @php $isToday = $day->isSameDay($today); @endphp
-                        <div class="border-b border-e border-secondary-soft p-2 text-center last:border-e-0 dark:border-line">
-                            <div @class(['text-sm font-semibold', 'text-primary dark:text-brand-text' => $isToday, 'text-secondary-dark dark:text-ink' => ! $isToday])>{{ $day->translatedFormat('l') }}</div>
+                        <div @class(['border-e border-board-line p-2 text-center last:border-e-0', 'bg-secondary-soft/40 dark:bg-surface-2/40' => in_array($day->dayOfWeek, $weekendDays, true)])>
+                            <div @class(['type-label', 'text-primary dark:text-brand-text' => $isToday, 'text-secondary-medium dark:text-ink-faint' => ! $isToday])>{{ $day->translatedFormat('l') }}</div>
                             <div @class(['text-xs', 'text-primary dark:text-brand-text' => $isToday, 'text-secondary-medium dark:text-ink-muted' => ! $isToday])>{{ $day->translatedFormat(__('formats.date_short')) }}</div>
                         </div>
                     @endforeach
 
-                    <div class="flex items-center justify-end border-e border-secondary-soft px-2 py-1.5 text-[11px] font-semibold text-secondary-medium dark:border-line dark:text-ink-muted">{{ __('calendar.all_day') }}</div>
+                </div>
+                <div class="grid border-b border-board-line" style="{{ $gridColumns }}">
+                    <div class="flex items-center justify-end border-e border-board-line px-2 py-1.5 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">{{ __('calendar.all_day') }}</div>
                     @foreach ($periodDays as $day)
                         @php
                             $dayFocusedCount = $focusedType === null ? 0 : collect($focusedGroupKeys[$focusedType])->sum(fn (string $key) => $calendar[$key]->get($day->toDateString(), new \Illuminate\Support\Collection)->count());
@@ -38,7 +40,8 @@
                             x-on:contextmenu.prevent="menuOpen = true; menuX = $event.clientX; menuY = $event.clientY; menuDate = '{{ $day->toDateString() }}'"
                             @endif
                             @class([
-                                'flex min-h-10 flex-col gap-1 border-e border-secondary-soft p-1.5 text-start last:border-e-0 dark:border-line transition-opacity',
+                                'flex min-h-10 flex-col gap-1 border-e border-board-line p-1.5 text-start last:border-e-0 transition-opacity',
+                                'bg-secondary-soft/40 dark:bg-surface-2/40' => in_array($day->dayOfWeek, $weekendDays, true),
                                 'cursor-pointer hover:bg-secondary-soft/40 dark:hover:bg-surface-2' => $canAdd,
                                 'opacity-50' => $focusedType !== null && $dayFocusedCount === 0,
                                 'ring-2 ring-inset '.$typeRingClasses[$focusedType ?? 'task'] => $focusedType !== null && $dayFocusedCount > 0,
@@ -63,14 +66,14 @@
                     @endforeach
                 </div>
 
-                <div class="max-h-96 overflow-y-auto border-t border-secondary-soft dark:border-line" x-init="$el.scrollTop = Math.max(0, {{ $currentHour }} * 48 - 160)">
+                <div class="max-h-96 overflow-y-auto border-board-line" x-init="$el.scrollTop = Math.max(0, {{ $currentHour }} * 48 - 160)">
                     <div class="grid" style="{{ $gridColumns }}">
                         @for ($hour = 0; $hour < 24; $hour++)
-                            <div class="h-12 border-b border-e border-secondary-soft px-2 py-1 text-end text-[11px] text-secondary-medium dark:border-line dark:text-ink-muted">
+                            <div class="h-12 border-b border-e border-board-line px-2 py-1 text-end text-[11px] text-secondary-medium dark:text-ink-muted">
                                 {{ $hour === 0 ? '' : \Carbon\CarbonImmutable::today()->addHours($hour)->translatedFormat('ga') }}
                             </div>
                             @foreach ($periodDays as $day)
-                                <div class="relative h-12 border-b border-e border-secondary-soft last:border-e-0 dark:border-line">
+                                <div @class(['relative h-12 border-b border-e border-board-line last:border-e-0', 'bg-secondary-soft/40 dark:bg-surface-2/40' => in_array($day->dayOfWeek, $weekendDays, true)])>
                                     @if ($day->isSameDay($today) && $hour === $currentHour)
                                         <div class="pointer-events-none absolute inset-x-0 h-px bg-primary dark:bg-ink" style="top: {{ $currentMinuteFraction * 100 }}%;"></div>
                                     @endif

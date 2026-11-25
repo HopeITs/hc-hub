@@ -117,7 +117,7 @@ test('the settings page offers the install button and the steps for every platfo
 
     foreach ($platforms as $platform) {
         expect($xpath->query("//*[@data-app-install-hint]//*[@data-install-steps=\"{$platform}\"]")->length)->toBe(1)
-            ->and($xpath->query("//details//*[@data-install-steps=\"{$platform}\"]")->length)->toBe(1)
+            ->and($xpath->query("//details[@data-install-other-devices]//*[@data-install-steps=\"{$platform}\"]")->length)->toBe(1)
             ->and(count(__("notifications.app.platforms.{$platform}.steps")))->toBeGreaterThan(0);
     }
 

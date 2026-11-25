@@ -65,6 +65,7 @@ return [
     'log_out' => 'تسجيل الخروج',
     'materialised' => 'تحقق',
     'mitigation' => 'التخفيف',
+    'calendar' => 'التقويم',
     'my_calendar' => 'تقويمي',
     'name' => 'الاسم',
     'net_received' => 'صافي المستلم',

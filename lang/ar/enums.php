@@ -304,7 +304,7 @@ return [
         'in_app' => 'داخل التطبيق',
         'desktop' => 'الحاسوب',
         'mobile' => 'الهاتف',
-        'email' => 'البريد الإلكتروني',
+        'email' => 'البريد',
     ],
     'notification_kind' => [
         'action' => 'نشاط',

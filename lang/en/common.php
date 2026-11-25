@@ -65,6 +65,7 @@ return [
     'log_out' => 'Log out',
     'materialised' => 'Materialised',
     'mitigation' => 'Mitigation',
+    'calendar' => 'Calendar',
     'my_calendar' => 'My Calendar',
     'name' => 'Name',
     'net_received' => 'Net received',

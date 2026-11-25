@@ -1,5 +1,5 @@
 /**
- * The notification rules tab: a live draft of every rule, held in the
+ * The organization rules section of the notification settings page: a live draft of every rule, held in the
  * Livewire component's own properties through $wire (no request until Save),
  * plus what is drawn from it — the late-item steps, the unsaved-change count
  * and the "use default" links.
@@ -168,7 +168,14 @@ document.addEventListener('alpine:init', () => {
                     this.saving = false;
 
                     this.$nextTick(() => {
-                        this.$root.querySelector('[data-rule-error]')?.closest('[data-rule-field]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        const field = this.$root.querySelector('[data-rule-error]')?.closest('[data-rule-field]');
+
+                        /* The rule may sit in a folded group: open every group around it first. */
+                        for (let fold = field?.closest('details'); fold; fold = fold.parentElement?.closest('details')) {
+                            fold.open = true;
+                        }
+
+                        field?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     });
                 });
             },
