@@ -433,6 +433,65 @@ test('the responsible filter switches the calendar to another employee\'s items,
         ->assertDontSee('data-test="calendar-milestone-'.$theirs->id.'"', false);
 });
 
+test('All staff shows everyone\s milestones, Me brings back only mine, and an unknown people value acts like Me', function () {
+    $myEmployeeId = insertHrEmployee();
+    $otherEmployeeId = insertHrEmployee(firstNameEn: 'Rana', lastNameEn: 'Nassar');
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $myEmployeeId);
+
+    $mine = Milestone::factory()->create([
+        'name' => 'Mine',
+        'responsible_user_id' => $myEmployeeId,
+        'planned_start_date' => Carbon::create(2026, 6, 15),
+    ]);
+    $theirs = Milestone::factory()->create([
+        'name' => 'Theirs',
+        'responsible_user_id' => $otherEmployeeId,
+        'planned_start_date' => Carbon::create(2026, 6, 15),
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('tracking::calendar.index')
+        ->set('month', '2026-06')
+        ->call('showAllStaff')
+        ->assertSet('peopleScope', 'all')
+        ->assertSee('data-test="calendar-milestone-'.$mine->id.'"', false)
+        ->assertSee('data-test="calendar-milestone-'.$theirs->id.'"', false)
+        ->assertSee(__('calendar.calendar_all_staff'))
+        ->set('filterEmployeeIds', [(string) $otherEmployeeId])
+        ->assertSet('peopleScope', '')
+        ->assertDontSee('data-test="calendar-milestone-'.$mine->id.'"', false)
+        ->call('showAllStaff')
+        ->assertSet('filterEmployeeIds', [])
+        ->call('showOnlyMe')
+        ->assertSet('peopleScope', '')
+        ->assertSee('data-test="calendar-milestone-'.$mine->id.'"', false)
+        ->assertDontSee('data-test="calendar-milestone-'.$theirs->id.'"', false);
+
+    Livewire::actingAs($user)
+        ->test('tracking::calendar.index', ['peopleScope' => 'everyone'])
+        ->set('month', '2026-06')
+        ->assertSee('data-test="calendar-milestone-'.$mine->id.'"', false)
+        ->assertDontSee('data-test="calendar-milestone-'.$theirs->id.'"', false);
+});
+
+test('the header view buttons switch the calendar between day, 4 days, week and month', function () {
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), insertHrEmployee());
+
+    $page = Livewire::actingAs($user)
+        ->test('tracking::calendar.index')
+        ->assertSet('viewMode', 'month')
+        ->assertSeeHtml('data-desk-register-view="month"')
+        ->assertSeeHtml('data-test="calendar-view-mode-four_days"')
+        ->assertSeeHtml('data-calendar-toolbar')
+        ->assertDontSeeHtml('data-test="calendar-view-mode-button"');
+
+    foreach (['day', 'four_days', 'week', 'month'] as $mode) {
+        $page->set('viewMode', $mode)->assertSet('viewMode', $mode);
+    }
+
+    $page->call('setViewMode', 'week')->assertSet('viewMode', 'week');
+});
+
 test('adding a milestone while viewing another employee\'s calendar assigns it to them by default', function () {
     $myEmployeeId = insertHrEmployee();
     $otherEmployeeId = insertHrEmployee(firstNameEn: 'Rana', lastNameEn: 'Nassar');

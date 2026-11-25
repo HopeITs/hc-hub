@@ -48,6 +48,9 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     #[Url(as: 'responsible', except: [])]
     public array $filterEmployeeIds = [];
 
+    #[Url(as: 'people', except: '')]
+    public string $peopleScope = '';
+
     /** @var array<int, string> */
     #[Url(as: 'hide', except: [])]
     public array $hiddenLayers = [];
@@ -151,7 +154,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
 
     $focusedType = $this->focusedType();
 
-    $selectedFilterCount = count($filterEmployeeIds);
+    $selectedFilterCount = $this->showsAllStaff() ? 0 : count($filterEmployeeIds);
 
     // Dates name the year only when it is not this year.
     $periodStart = $calendar['days'][0] ?? $calendar['month'];
@@ -162,16 +165,58 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
         'day' => $periodStart->translatedFormat(__($showsOtherYear ? 'formats.date_long' : 'formats.date_long_no_year')),
         default => $periodStart->translatedFormat(__($showsOtherYear ? 'formats.date' : 'formats.date_short')).' – '.$periodEnd->translatedFormat(__($showsOtherYear ? 'formats.date' : 'formats.date_short')),
     };
+
+    $viewOptions = collect(['day', 'four_days', 'week', 'month'])->mapWithKeys(fn (string $key): array => [$key => ['icon' => match ($key) {
+        'month' => 'cal',
+        'week' => 'board',
+        'day' => 'list',
+        default => 'table',
+    }, 'label' => __('calendar.'.$key), 'test' => 'calendar-view-mode-'.$key]])->all();
+
+    // Weekend columns are shaded from the same default the attendance sheet uses.
+    $weekendDays = array_map('intval', explode(',', (string) config('attendance.default_weekends')));
 @endphp
 
 <x-desk.register
     class="admin-directory @container/directory"
     heading-id="calendar-heading"
     :title="$this->calendarTitle()"
+    :views="$viewOptions"
+    :view="$viewMode"
+    view-model="viewMode"
 >
+    @if ($canAdd)
+        <x-slot:actions>
+            <flux:dropdown position="bottom-end" class="filter-picker">
+                <x-ui.button tone="primary" icon="plus" icon:trailing="chevron-down" data-test="calendar-add-button">{{ __('common.add') }}</x-ui.button>
+                <flux:menu class="filter-menu">
+                    @if ($canAddMilestone)
+                        <flux:menu.item wire:click="openCreateModal" data-test="calendar-add-milestone-button">
+                            <flux:icon.flag variant="micro" class="size-4" />
+                            {{ __('milestones.add_milestone') }}
+                        </flux:menu.item>
+                    @endif
+                    @if ($canAddTask)
+                        <flux:menu.item wire:click="openCreateTaskModal" data-test="calendar-add-task-button">
+                            <flux:icon.clipboard-document-check variant="micro" class="size-4" />
+                            {{ __('tasks.add_task') }}
+                        </flux:menu.item>
+                    @endif
+                </flux:menu>
+            </flux:dropdown>
+        </x-slot:actions>
+    @endif
 
+    <x-slot:filters>
+        @include('tracking::pages.calendar._index-toolbar')
+    </x-slot:filters>
 
-    @include('tracking::pages.calendar._index-toolbar')
+    <div class="mb-3 flex flex-wrap items-center gap-2" data-calendar-toolbar>
+        <x-ui.button tone="ghost" size="sm" icon="chevron-left" class="size-9! rtl:rotate-180" wire:click="{{ $viewMode === 'month' ? 'previousMonth' : 'previousPeriod' }}" :aria-label="__('common.previous')" />
+        <x-ui.button tone="secondary" size="sm" wire:click="goToToday" data-test="calendar-today-button">{{ __('common.today') }}</x-ui.button>
+        <x-ui.button tone="ghost" size="sm" icon="chevron-right" class="size-9! rtl:rotate-180" wire:click="{{ $viewMode === 'month' ? 'nextMonth' : 'nextPeriod' }}" :aria-label="__('common.next')" />
+        <h2 class="ms-1 text-base font-bold text-secondary-dark dark:text-ink" aria-live="polite">{{ $periodHeading }}</h2>
+    </div>
 
     @if (! $hasEmployee)
         <x-ui.panel>
@@ -182,7 +227,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
 
         <div class="grid gap-4 @6xl/directory:grid-cols-[minmax(0,1fr)_16rem]">
         <div
-            class="relative overflow-hidden rounded-xl border border-secondary-soft dark:border-line"
+            class="relative overflow-hidden rounded-xl border border-board-line bg-board shadow-card dark:border-transparent dark:shadow-raised"
             x-data="{ menuOpen: false, menuX: 0, menuY: 0, menuDate: '' }"
             x-on:click.away="menuOpen = false"
             x-on:keydown.escape.window="menuOpen = false"

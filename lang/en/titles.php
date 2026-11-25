@@ -4,7 +4,7 @@ return [
     'accounts' => 'Accounts',
     'annual_plan' => 'Annual Plan',
     'annual_plans' => 'Annual Plans',
-    'calendar' => 'My Calendar',
+    'calendar' => 'Calendar',
     'city_directory' => 'City Directory',
     'dashboard' => 'Home',
     'donor' => 'Donor',

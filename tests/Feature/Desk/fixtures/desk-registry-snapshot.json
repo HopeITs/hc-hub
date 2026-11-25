@@ -194,7 +194,7 @@
         },
         {
             "route": "calendar.index",
-            "label": "My Calendar",
+            "label": "Calendar",
             "icon": "cal",
             "hero": "nav-calendar",
             "group": "workspace",
@@ -1475,7 +1475,7 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
                             "group": "workspace",
@@ -1794,7 +1794,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -2335,8 +2335,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -3218,7 +3218,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -3347,7 +3347,7 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
                             "group": "workspace",
@@ -3666,7 +3666,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -4225,8 +4225,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -5114,7 +5114,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -5243,7 +5243,7 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
                             "group": "workspace",
@@ -5601,7 +5601,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -6207,8 +6207,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -7179,7 +7179,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -7308,7 +7308,7 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
                             "group": "workspace",
@@ -7714,7 +7714,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -8404,8 +8404,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -9462,7 +9462,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -9591,7 +9591,7 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
                             "group": "workspace",
@@ -9974,7 +9974,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -10662,8 +10662,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -11653,7 +11653,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -11800,7 +11800,7 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
                             "group": "workspace",
@@ -12222,7 +12222,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -12949,8 +12949,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -14045,7 +14045,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -14174,7 +14174,7 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
                             "group": "workspace",
@@ -14493,7 +14493,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -15088,8 +15088,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -16037,7 +16037,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -16166,7 +16166,7 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
                             "group": "workspace",
@@ -16620,7 +16620,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -17501,8 +17501,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -18716,7 +18716,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -18896,17 +18896,9 @@
                         },
                         {
                             "route": "calendar.index",
-                            "label": "My Calendar",
+                            "label": "Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.leave.team-calendar",
-                            "label": "Team calendar",
-                            "icon": "users",
-                            "hero": "nav-calendar-range",
                             "group": "workspace",
                             "module": null
                         },
@@ -19588,7 +19580,7 @@
                 },
                 {
                     "route": "calendar.index",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "cal",
                     "hero": "nav-calendar",
                     "group": "workspace",
@@ -20931,8 +20923,8 @@
                     },
                     "g-calendar": {
                         "id": "g-calendar",
-                        "title": "My Calendar",
-                        "description": "A button that opens My Calendar.",
+                        "title": "Calendar",
+                        "description": "A button that opens Calendar.",
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "calendar.index",
@@ -22503,7 +22495,7 @@
                     "id": "g-calendar",
                     "key": "calendar",
                     "kind": "page",
-                    "label": "My Calendar",
+                    "label": "Calendar",
                     "icon": "nav-calendar",
                     "route": "calendar.index",
                     "href": "http://hc-hub.test/calendar"
@@ -22901,14 +22893,6 @@
                     "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
-                        {
-                            "route": "hr.leave.team-calendar",
-                            "label": "Team calendar",
-                            "icon": "users",
-                            "hero": "nav-calendar-range",
-                            "group": "workspace",
-                            "module": null
-                        },
                         {
                             "route": "hr.leave.index",
                             "label": "My leaves",
@@ -27383,14 +27367,6 @@
                     "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
-                        {
-                            "route": "hr.leave.team-calendar",
-                            "label": "Team calendar",
-                            "icon": "users",
-                            "hero": "nav-calendar-range",
-                            "group": "workspace",
-                            "module": null
-                        },
                         {
                             "route": "hr.leave.index",
                             "label": "My leaves",

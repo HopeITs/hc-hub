@@ -66,6 +66,7 @@ return [
     'materialised' => 'تحقق',
     'milestones' => 'المراحل الرئيسية',
     'mitigation' => 'التخفيف',
+    'calendar' => 'التقويم',
     'my_calendar' => 'تقويمي',
     'name' => 'الاسم',
     'net_received' => 'صافي المستلم',

@@ -66,6 +66,7 @@ return [
     'materialised' => 'Materialised',
     'milestones' => 'Milestones',
     'mitigation' => 'Mitigation',
+    'calendar' => 'Calendar',
     'my_calendar' => 'My Calendar',
     'name' => 'Name',
     'net_received' => 'Net received',

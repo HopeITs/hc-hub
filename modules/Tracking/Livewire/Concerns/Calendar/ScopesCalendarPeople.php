@@ -15,6 +15,7 @@ use Modules\Hr\Models\Employee;
  * filterEmployeeIds property.
  *
  * @property array<int, string> $filterEmployeeIds
+ * @property string $peopleScope
  */
 trait ScopesCalendarPeople
 {
@@ -29,7 +30,37 @@ trait ScopesCalendarPeople
     }
 
     /**
-     * The employees whose items the calendar shows: everyone checked in the
+     * Whether the "All staff" scope is on: only the value `all` counts, any
+     * other `people` value in the URL is ignored.
+     */
+    public function showsAllStaff(): bool
+    {
+        return $this->peopleScope === 'all';
+    }
+
+    /** Back to the viewer's own calendar. */
+    public function showOnlyMe(): void
+    {
+        $this->peopleScope = '';
+        $this->filterEmployeeIds = [];
+    }
+
+    /** Every employee the responsible checklist offers. */
+    public function showAllStaff(): void
+    {
+        $this->peopleScope = 'all';
+        $this->filterEmployeeIds = [];
+    }
+
+    /** Ticking employees leaves the "All staff" scope. */
+    public function updatedFilterEmployeeIds(): void
+    {
+        $this->peopleScope = '';
+    }
+
+    /**
+     * The employees whose items the calendar shows: everyone in the picker
+     * under "All staff", else everyone checked in the
      * responsible-user filter, defaulting to just the signed-in user's own
      * employee record when nothing is checked.
      *
@@ -37,6 +68,10 @@ trait ScopesCalendarPeople
      */
     protected function scopedEmployeeIds(): array
     {
+        if ($this->showsAllStaff()) {
+            return Employee::pickerOptions()->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        }
+
         if ($this->filterEmployeeIds !== []) {
             return array_map('intval', $this->filterEmployeeIds);
         }
@@ -68,6 +103,10 @@ trait ScopesCalendarPeople
      */
     protected function calendarTitle(): string
     {
+        if ($this->showsAllStaff()) {
+            return __('calendar.calendar_all_staff');
+        }
+
         $picked = array_map('intval', $this->filterEmployeeIds);
 
         if ($picked === [] || $picked === [$this->employeeId()]) {

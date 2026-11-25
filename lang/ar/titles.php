@@ -4,7 +4,7 @@ return [
     'accounts' => 'الحسابات',
     'annual_plan' => 'الخطة السنوية',
     'annual_plans' => 'الخطط السنوية',
-    'calendar' => 'تقويمي',
+    'calendar' => 'التقويم',
     'city_directory' => 'دليل المدن',
     'dashboard' => 'الرئيسية',
     'donor' => 'المانح',

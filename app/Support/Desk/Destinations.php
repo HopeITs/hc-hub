@@ -349,7 +349,7 @@ final class Destinations
 
             $page('tasks.index', 'common.tasks', 'check', 'nav-square-check-big', 'workspace', $can('tasks.view'), 'tasks'),
             $page('department-tasks.index', 'titles.department_tasks', 'board', 'nav-building', 'workspace', fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)),
-            $page('calendar.index', 'common.my_calendar', 'cal', 'nav-calendar', 'workspace', $can('calendar.view')),
+            $page('calendar.index', 'common.calendar', 'cal', 'nav-calendar', 'workspace', $can('calendar.view')),
             $page('notifications.index', 'desk.notifications', 'bell', 'nav-bell', 'overview', $everyone),
 
             $page('admin.users.index', 'navigation.user_directory', 'users', 'nav-users', 'administration', fn (User $user): bool => $user->can('viewAny', User::class), 'access-management'),

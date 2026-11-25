@@ -74,7 +74,7 @@ final class HrDestinations implements DestinationSource
             ['hr.recruitment.indicator-rules', 'indicator_rules', 'grid', 'nav-sliders-horizontal', 'recruitment', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-indicators.manage')],
 
             // The viewer's own HR pages join their tasks and calendar.
-            ['hr.leave.team-calendar', 'team', 'users', 'nav-calendar-range', 'workspace', $can('leaves.view-own', 'leaves.view-all')],
+            ['hr.leave.team-calendar', 'team', 'users', 'nav-calendar-range', 'workspace', $can('leaves.view-own', 'leaves.view-all'), 'under' => 'calendar.index'],
             ['hr.leave.index', 'leave_requests', 'cal', 'nav-tree-palm', 'workspace', fn (User $user): bool => $staff($user) && $user->can('leaves.view-own'), 'own' => true],
             ['hr.attendance.timesheets', 'attendance', 'cal', 'nav-calendar-check', 'workspace', fn (User $user): bool => $user->can('attendance.view') || ($staff($user) && $user->can('attendance.view-own'))],
             ['hr.attendance.upload', 'attendance_upload', 'file', 'nav-file-plus', 'workspace', $can('attendance.manage'), 'under' => 'hr.attendance.timesheets'],

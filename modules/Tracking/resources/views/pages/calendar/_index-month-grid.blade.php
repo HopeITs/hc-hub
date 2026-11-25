@@ -2,12 +2,12 @@
     The month grid of calendar/index: weekday headers and one cell per day
     with that day's chips. Included by ⚡index.blade.php, whose top PHP block
     defines $calendar, $today, $focusedType, $focusedGroupKeys,
-    $allGroupKeys, $layerItems, $typeRingClasses, $typeDotClasses, $proposalTone and
+    $allGroupKeys, $weekendDays, $layerItems, $typeRingClasses, $typeDotClasses, $proposalTone and
     $projectTone.
 --}}
-                <div class="grid grid-cols-7 border-b border-secondary-soft bg-secondary-soft/40 text-center text-xs font-semibold uppercase tracking-wide text-secondary-medium dark:border-line dark:bg-surface-2 dark:text-ink-muted">
+                <div class="grid grid-cols-7 border-b border-board-line bg-board-head text-center">
                     @foreach ($calendar['weeks'][0] as $weekdayHeader)
-                        <div class="py-2">{{ $weekdayHeader->translatedFormat(__('formats.weekday_short')) }}</div>
+                        <div class="px-2 py-2 type-label text-secondary-medium dark:text-ink-faint">{{ $weekdayHeader->translatedFormat(__('formats.weekday_short')) }}</div>
                     @endforeach
                 </div>
 
@@ -27,9 +27,10 @@
                                 x-on:contextmenu.prevent="menuOpen = true; menuX = $event.clientX; menuY = $event.clientY; menuDate = '{{ $day->toDateString() }}'"
                                 @endif
                                 @class([
-                                    'flex min-h-28 flex-col gap-1 border-b border-e border-secondary-soft p-1.5 text-start last:border-e-0 [&:nth-child(7n)]:border-e-0 dark:border-line transition-opacity',
+                                    'flex min-h-28 flex-col gap-1 border-b border-e border-board-line p-1.5 text-start last:border-e-0 [&:nth-child(7n)]:border-e-0 transition-opacity',
+                                    'bg-secondary-soft/40 dark:bg-surface-2/40' => in_array($day->dayOfWeek, $weekendDays, true),
                                     'cursor-pointer hover:bg-secondary-soft/40 dark:hover:bg-surface-2' => $canAdd,
-                                    'opacity-40' => ! $isCurrentMonth,
+                                    'opacity-60' => ! $isCurrentMonth,
                                     'opacity-50' => $focusedType !== null && $dayFocusedCount === 0,
                                     'ring-2 ring-inset '.$typeRingClasses[$focusedType ?? 'milestone'] => $focusedType !== null && $dayFocusedCount > 0,
                                 ])
@@ -38,7 +39,7 @@
                                 @php
                                     $dayNumberClasses = [
                                         'inline-flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums',
-                                        'bg-primary dark:bg-ink dark:text-surface-0 text-white' => $isToday,
+                                        'bg-primary text-white dark:bg-brand' => $isToday,
                                         'text-secondary-dark dark:text-ink' => ! $isToday,
                                     ];
                                 @endphp
