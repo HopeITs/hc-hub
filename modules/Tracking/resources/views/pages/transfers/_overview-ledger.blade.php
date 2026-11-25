@@ -127,7 +127,7 @@
                                 <p class="mt-1.5 text-3xl leading-none font-extrabold tracking-tight tabular-nums @sm/ledger:text-4xl @xl/ledger:text-5xl {{ $inkText }}">
                                     <span x-data="countUp({{ (int) round($line['expected']) }})" x-text="new Intl.NumberFormat('en-US').format(display)">{{ $this->amount($line['expected']) }}</span><span class="ms-2 align-top text-sm font-bold tracking-normal {{ $mutedText }}">{{ $line['currency'] }}</span>
                                 </p>
-                                <p class="mt-1 text-[11px] tabular-nums {{ $mutedText }}">
+                                <p class="mt-1 text-xs tabular-nums {{ $mutedText }}">
                                     {{ __('transfers.of_which_sent', ['amount' => $this->amount($line['sent'])]) }}
                                 </p>
                             </div>
@@ -178,7 +178,7 @@
                                         @if ($line['shrink'] > 0)
                                             {{-- The fees figure beside this one is PART of it, not a second
                                                  loss. Say so here, where the total is read. --}}
-                                            <span class="mt-1.5 block text-[11px] tabular-nums {{ $mutedText }}" data-ledger-shortfall-parts>
+                                            <span class="mt-1.5 block text-xs tabular-nums {{ $mutedText }}" data-ledger-shortfall-parts>
                                                 {{ __('transfers.shortfall_parts', ['fees' => $this->amountAtLeast($line['fees']), 'gap' => $this->amountAtLeast($line['exchangeGap'])]) }}
                                             </span>
                                         @endif
@@ -205,7 +205,7 @@
                                                     <span class="size-2 shrink-0 rounded-full {{ $figure['dot'] }}" aria-hidden="true"></span>{{ $figure['label'] }}
                                                 </span>
                                                 <span class="mt-1.5 block text-xl leading-none font-extrabold tracking-tight tabular-nums @sm/ledger:text-2xl {{ $figure['tone'] }}">{{ $this->amountAtLeast($figure['value']) }}</span>
-                                                <span class="mt-1 block text-[11px] tabular-nums {{ $mutedText }}">{{ $figure['note'] }}</span>
+                                                <span class="mt-1 block text-xs tabular-nums {{ $mutedText }}">{{ $figure['note'] }}</span>
                                             </div>
                                         @else
                                             <button
@@ -223,7 +223,7 @@
                                                     <span class="size-2 shrink-0 rounded-full {{ $figure['dot'] }}" aria-hidden="true"></span>{{ $figure['label'] }}
                                                 </span>
                                                 <span @class(['mt-1.5 block text-xl leading-none font-extrabold tracking-tight tabular-nums @sm/ledger:text-2xl', $figure['tone'] => $figure['value'] > 0, $mutedText.' opacity-60' => $figure['value'] <= 0])>{{ $this->amountAtLeast($figure['value']) }}</span>
-                                                <span class="mt-1 block text-[11px] tabular-nums {{ $mutedText }} group-enabled:group-hover:underline group-aria-pressed:underline">{{ $figure['note'] }}</span>
+                                                <span class="mt-1 block text-xs tabular-nums {{ $mutedText }} group-enabled:group-hover:underline group-aria-pressed:underline">{{ $figure['note'] }}</span>
                                             </button>
                                         @endif
                                     </li>

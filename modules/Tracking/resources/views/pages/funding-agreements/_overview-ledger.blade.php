@@ -87,7 +87,7 @@
                                             {{ $figure['label'] }}
                                         </span>
                                         <span @class(['mt-1 block text-2xl leading-none font-extrabold tracking-tight tabular-nums', $figure['tone'] => ! $isEmpty, $mutedText.' opacity-60' => $isEmpty])>{{ $amount($figure['value']) }}</span>
-                                        <span class="mt-1 block text-[11px] tabular-nums {{ $mutedText }} group-enabled:group-hover:underline group-aria-pressed:underline">{{ $figure['note'] }}</span>
+                                        <span class="mt-1 block text-xs tabular-nums {{ $mutedText }} group-enabled:group-hover:underline group-aria-pressed:underline">{{ $figure['note'] }}</span>
                                     </button>
                                 </li>
                             @endforeach

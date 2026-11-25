@@ -25,7 +25,7 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <p class="font-semibold" dir="auto">{{ $storedAnswer->question_text }}</p>
                         @if ($storedAnswer->question?->frequency === \Modules\Tracking\Enums\NarrativeQuestionFrequency::QuarterEnd)
-                            <span class="rounded-md border border-secondary-light px-1.5 py-0.5 text-[11px] font-semibold dark:border-line-strong">{{ __('monthly_reports.quarter_end_question') }}</span>
+                            <span class="rounded-md border border-secondary-light px-1.5 py-0.5 text-xs font-semibold dark:border-line-strong">{{ __('monthly_reports.quarter_end_question') }}</span>
                         @endif
                     </div>
 
@@ -46,7 +46,7 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <label for="answer-{{ $question->id }}" class="font-semibold" dir="auto">{{ $question->localizedText() }}</label>
                         @if ($question->frequency === \Modules\Tracking\Enums\NarrativeQuestionFrequency::QuarterEnd)
-                            <span class="rounded-md border border-secondary-light px-1.5 py-0.5 text-[11px] font-semibold dark:border-line-strong">{{ __('monthly_reports.quarter_end_question') }}</span>
+                            <span class="rounded-md border border-secondary-light px-1.5 py-0.5 text-xs font-semibold dark:border-line-strong">{{ __('monthly_reports.quarter_end_question') }}</span>
                         @endif
                     </div>
 

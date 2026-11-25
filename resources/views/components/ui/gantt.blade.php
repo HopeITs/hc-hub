@@ -279,7 +279,7 @@
                     <div class="pointer-events-none absolute bottom-0 h-2 border-s border-secondary-soft dark:border-white/15" x-bind:style="`left:${cell.left}px`" aria-hidden="true"></div>
                 </template>
                 <template x-for="year in horizon.years" :key="year.key">
-                    <div class="pointer-events-none absolute inset-y-0 border-s border-secondary-soft ps-1.5 pt-1 text-[10px] font-bold tabular-nums text-secondary-medium dark:border-white/15 dark:text-ink-muted" x-bind:style="`left:${year.left}px`" x-text="year.label" aria-hidden="true"></div>
+                    <div class="pointer-events-none absolute inset-y-0 border-s border-secondary-soft ps-1.5 pt-1 text-xs font-bold tabular-nums text-secondary-medium dark:border-white/15 dark:text-ink-muted" x-bind:style="`left:${year.left}px`" x-text="year.label" aria-hidden="true"></div>
                 </template>
 
                 {{-- Records packed into lanes --}}
@@ -425,7 +425,7 @@
                     placeholder="{{ __('gantt.search') }}"
                     class="h-8 w-full ps-8 pe-7 sm:w-48 {{ $control }} placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:border-secondary-light focus:outline-none"
                 >
-                <kbd class="pointer-events-none absolute end-2 rounded border border-secondary-soft px-1 font-sans text-[10px] font-semibold text-secondary-medium dark:text-ink-faint dark:border-white/15" x-show="search === ''" aria-hidden="true">/</kbd>
+                <kbd class="pointer-events-none absolute end-2 rounded border border-secondary-soft px-1 font-sans text-xs font-semibold text-secondary-medium dark:text-ink-faint dark:border-white/15" x-show="search === ''" aria-hidden="true">/</kbd>
             </label>
 
             {{-- Display settings --}}
@@ -510,11 +510,11 @@
                     <p class="{{ $menuHeading }}">{{ __('gantt.shortcuts.heading') }}</p>
                     <dl class="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5 px-2.5 pb-2 text-xs">
                         @foreach ($shortcuts as $keys => $shortcutLabel)
-                            <dt><kbd class="inline-block min-w-6 rounded-md border border-secondary-soft bg-board-head px-1.5 py-0.5 text-center font-sans text-[11px] font-semibold text-secondary-dark dark:border-white/15 dark:bg-white/10 dark:text-ink">{{ $keys }}</kbd></dt>
+                            <dt><kbd class="inline-block min-w-6 rounded-md border border-secondary-soft bg-board-head px-1.5 py-0.5 text-center font-sans text-xs font-semibold text-secondary-dark dark:border-white/15 dark:bg-white/10 dark:text-ink">{{ $keys }}</kbd></dt>
                             <dd class="text-secondary-medium dark:text-ink-muted">{{ $shortcutLabel }}</dd>
                         @endforeach
                     </dl>
-                    <p class="border-t border-board-line px-2.5 pt-2 pb-1 text-[11px] text-secondary-medium dark:text-ink-muted">{{ $editable ? __('gantt.hint') : __('gantt.hint_readonly') }}</p>
+                    <p class="border-t border-board-line px-2.5 pt-2 pb-1 text-xs text-secondary-medium dark:text-ink-muted">{{ $editable ? __('gantt.hint') : __('gantt.hint_readonly') }}</p>
                 </div>
             </div>
         </div>
@@ -598,13 +598,13 @@
                         </template>
                         <template x-for="cell in bottomTier" :key="cell.key">
                             <div
-                                class="absolute bottom-0 h-7 truncate border-s border-t border-board-line pt-1.5 text-center text-[11px] font-medium tabular-nums text-secondary-medium dark:text-ink-muted"
+                                class="absolute bottom-0 h-7 truncate border-s border-t border-board-line pt-1.5 text-center text-xs font-medium tabular-nums text-secondary-medium dark:text-ink-muted"
                                 x-bind:class="zoom === 'year' ? 'top-0 h-14 pt-5' : ''"
                                 x-bind:style="`left:${x(cell.start)}px;width:${cell.days * ppd}px`"
                                 x-text="cell.days * ppd >= 18 ? cell.label : ''"
                             ></div>
                         </template>
-                        <div class="absolute bottom-1 z-10 -translate-x-1/2 rounded-full bg-secondary-dark px-2 py-px text-[10px] font-bold text-white shadow-sm dark:bg-ink dark:text-surface-0" x-bind:style="`left:${x(todayDay) + ppd / 2}px`">{{ __('ui.today') }}</div>
+                        <div class="absolute bottom-1 z-10 -translate-x-1/2 rounded-full bg-secondary-dark px-2 py-px text-xs font-bold text-white shadow-sm dark:bg-ink dark:text-surface-0" x-bind:style="`left:${x(todayDay) + ppd / 2}px`">{{ __('ui.today') }}</div>
                     </div>
                 </div>
 
@@ -667,7 +667,7 @@
                                         x-show="!isEditing(item.row, 'name')"
                                         dir="auto"
                                         class="truncate"
-                                        x-bind:class="item.row.kind === 'group' ? 'text-[11px] font-bold tracking-wide text-secondary-dark uppercase dark:text-ink' : (item.row.summary ? 'font-semibold text-secondary-dark dark:text-ink' : 'text-secondary-dark dark:text-ink-muted')"
+                                        x-bind:class="item.row.kind === 'group' ? 'text-xs font-bold tracking-wide text-secondary-dark uppercase dark:text-ink' : (item.row.summary ? 'font-semibold text-secondary-dark dark:text-ink' : 'text-secondary-dark dark:text-ink-muted')"
                                         x-text="item.row.name"
                                         x-bind:title="item.row.name"
                                         x-on:dblclick.stop="canEditCell(item.row, 'name') ? startEdit(item.row, 'name') : open(item.row)"
@@ -675,7 +675,7 @@
                                     @if ($explorer)
                                         <span
                                             x-show="routeTag(item.row) !== ''"
-                                            class="shrink-0 rounded-full px-1.5 py-px text-[10px] leading-4 font-bold"
+                                            class="shrink-0 rounded-full px-1.5 py-px text-xs leading-4 font-bold"
                                             x-bind:class="roleOf(item.row) === 'money' ? 'bg-funding-soft text-funding' : 'bg-status-active-soft text-status-active'"
                                             x-text="routeTag(item.row)"
                                         ></span>
@@ -691,7 +691,7 @@
                                 <span x-show="shown.status" class="min-w-0">
                                     <span
                                         x-show="item.row.statusLabel"
-                                        class="gantt-pill inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-[10.5px] leading-4 font-semibold ring-1 ring-inset"
+                                        class="gantt-pill inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-xs leading-4 font-semibold ring-1 ring-inset"
                                         x-bind:class="tones.pill[item.row.tone]"
                                         x-bind:data-tone="item.row.tone"
                                         x-text="item.row.statusLabel"
@@ -820,7 +820,7 @@
                                 <div class="absolute bottom-[3px] h-[3px] rounded-full bg-secondary-dark/70 dark:bg-white/70" x-bind:style="actualStyle(item.row)" aria-hidden="true"></div>
 
                                 {{-- Label beside the bar, after any slip --}}
-                                <span class="pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center whitespace-nowrap text-[11px] leading-4" x-bind:style="labelStyle(item.row)">
+                                <span class="pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center whitespace-nowrap text-xs leading-4" x-bind:style="labelStyle(item.row)">
                                     <span x-show="isSlipping(item.row)" class="me-1.5 rounded bg-status-critical-soft px-1 font-bold tabular-nums text-status-critical" x-text="'+' + daysLate(item.row) + 'd'"></span>
                                     <span dir="auto" x-bind:class="item.row.summary ? 'font-semibold text-secondary-dark dark:text-ink' : 'text-secondary-medium dark:text-ink-muted'" x-text="barLabel(item.row)"></span>
                                 </span>
@@ -895,7 +895,7 @@
                         {{-- Identity --}}
                         <div class="sticky top-0 z-10 flex flex-col gap-2.5 border-b border-board-line bg-white px-4 pt-3.5 pb-3.5 dark:bg-surface-1">
                             <div class="flex items-start gap-2">
-                                <nav class="flex min-h-7 min-w-0 flex-1 flex-wrap items-center gap-x-1 gap-y-0.5 text-[11px] text-secondary-medium dark:text-ink-muted" aria-label="{{ __('gantt.inspector.breadcrumb') }}">
+                                <nav class="flex min-h-7 min-w-0 flex-1 flex-wrap items-center gap-x-1 gap-y-0.5 text-xs text-secondary-medium dark:text-ink-muted" aria-label="{{ __('gantt.inspector.breadcrumb') }}">
                                     <template x-for="ancestor in inspected.ancestors" :key="ancestor.id">
                                         <span class="flex min-w-0 items-center gap-1">
                                             <button type="button" x-on:click="selectRow(ancestor.id)" class="max-w-40 truncate hover:text-secondary-dark hover:underline dark:hover:text-ink" dir="auto" x-text="ancestor.name"></button>
@@ -911,18 +911,18 @@
                             <h3 class="text-lg leading-snug font-bold text-balance text-secondary-dark dark:text-ink" dir="auto" x-text="inspected.row.name"></h3>
 
                             <div class="flex flex-wrap items-center gap-1.5">
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-board-head px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:bg-white/10 dark:text-ink-muted">
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-board-head px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:bg-white/10 dark:text-ink-muted">
                                     @foreach ($icons as $iconKey => [$iconName, $iconTint])
                                         <flux:icon :name="$iconName" variant="micro" class="size-3 {{ $iconTint }}" x-show="iconKey(inspected.row) === '{{ $iconKey }}'" />
                                     @endforeach
                                     <span x-text="labels.kinds[inspected.row.kind] ?? inspected.row.kind"></span>
                                     <span class="tabular-nums text-secondary-medium dark:text-ink-faint" x-text="inspected.row.wbs"></span>
                                 </span>
-                                <span x-show="inspected.row.statusLabel" class="gantt-pill inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset" x-bind:class="tones.pill[inspected.row.tone]" x-bind:data-tone="inspected.row.tone" x-text="inspected.row.statusLabel"></span>
-                                <span x-show="inspected.row.critical" class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-[11px] font-semibold text-status-critical">
+                                <span x-show="inspected.row.statusLabel" class="gantt-pill inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset" x-bind:class="tones.pill[inspected.row.tone]" x-bind:data-tone="inspected.row.tone" x-text="inspected.row.statusLabel"></span>
+                                <span x-show="inspected.row.critical" class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold text-status-critical">
                                     <span class="size-1.5 rotate-45 bg-status-critical" aria-hidden="true"></span>{{ __('gantt.critical') }}
                                 </span>
-                                <span x-show="isSlipping(inspected.row)" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-[11px] font-semibold tabular-nums text-status-critical" x-text="@js(__('gantt.inspector.days_late')).replace(':days', daysLate(inspected.row))"></span>
+                                <span x-show="isSlipping(inspected.row)" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold tabular-nums text-status-critical" x-text="@js(__('gantt.inspector.days_late')).replace(':days', daysLate(inspected.row))"></span>
                             </div>
                         </div>
 
@@ -988,7 +988,7 @@
                             <section class="border-b border-board-line px-4 py-3.5" aria-label="{{ __('gantt.inspector.contains') }}">
                                 <div class="flex items-baseline justify-between gap-2">
                                     <h4 class="{{ $inspectorLabel }}">{{ __('gantt.inspector.contains') }}</h4>
-                                    <p class="text-[11px] tabular-nums text-secondary-medium dark:text-ink-muted">
+                                    <p class="text-xs tabular-nums text-secondary-medium dark:text-ink-muted">
                                         <span x-text="inspected.parts.done"></span>/<span x-text="inspected.parts.total"></span> {{ __('gantt.inspector.done') }}
                                         <template x-if="inspected.parts.late > 0">
                                             <span class="font-semibold text-status-critical"> · <span x-text="inspected.parts.late"></span> {{ __('gantt.signals.late') }}</span>
@@ -1006,7 +1006,7 @@
                                         </li>
                                     </template>
                                 </ul>
-                                <p x-show="inspected.moreChildren > 0" class="mt-1 px-1.5 text-[11px] text-secondary-medium dark:text-ink-muted" x-text="@js(__('gantt.inspector.more')).replace(':count', inspected.moreChildren)"></p>
+                                <p x-show="inspected.moreChildren > 0" class="mt-1 px-1.5 text-xs text-secondary-medium dark:text-ink-muted" x-text="@js(__('gantt.inspector.more')).replace(':count', inspected.moreChildren)"></p>
                             </section>
                         </template>
 
@@ -1014,7 +1014,7 @@
                         <section class="border-b border-board-line px-4 py-3.5" aria-label="{{ __('gantt.inspector.route') }}">
                             <div class="flex items-baseline justify-between gap-2">
                                 <h4 class="{{ $inspectorLabel }}">{{ __('gantt.inspector.route') }}</h4>
-                                <button type="button" x-on:click="trace = ! trace" class="text-[11px] font-semibold text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink" x-bind:aria-pressed="trace" x-text="trace ? @js(__('gantt.inspector.tracing_on')) : @js(__('gantt.inspector.tracing_off'))"></button>
+                                <button type="button" x-on:click="trace = ! trace" class="text-xs font-semibold text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink" x-bind:aria-pressed="trace" x-text="trace ? @js(__('gantt.inspector.tracing_on')) : @js(__('gantt.inspector.tracing_off'))"></button>
                             </div>
                             <p class="mt-1 text-xs text-secondary-medium dark:text-ink-muted" x-show="inspected.upstream + inspected.downstream > 0">
                                 <span class="font-semibold tabular-nums text-status-active" x-text="inspected.upstream"></span> {{ __('gantt.inspector.upstream') }}
@@ -1024,14 +1024,14 @@
 
                             <template x-if="inspected.drivers.length > 0">
                                 <div class="mt-2.5">
-                                    <p class="text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">{{ __('gantt.inspector.driven_by') }}</p>
+                                    <p class="text-xs font-semibold text-secondary-medium dark:text-ink-muted">{{ __('gantt.inspector.driven_by') }}</p>
                                     <ul class="mt-1 flex flex-col">
                                         <template x-for="entry in inspected.drivers" :key="'driver-' + entry.row.id">
                                             <li>
                                                 <button type="button" x-on:click="selectRow(entry.row.id)" class="flex w-full items-center gap-2 rounded-lg px-1.5 py-1 text-start text-xs hover:bg-board-head dark:hover:bg-white/10">
                                                     <flux:icon.arrow-long-left variant="micro" class="size-3.5 shrink-0 text-status-active rtl:rotate-180" />
                                                     <span class="min-w-0 flex-1 truncate text-secondary-dark dark:text-ink" dir="auto" x-text="entry.row.name"></span>
-                                                    <span class="shrink-0 rounded bg-status-active-soft px-1 text-[10px] font-bold tabular-nums text-status-active" x-text="entry.code" x-bind:title="entry.label"></span>
+                                                    <span class="shrink-0 rounded bg-status-active-soft px-1 text-xs font-bold tabular-nums text-status-active" x-text="entry.code" x-bind:title="entry.label"></span>
                                                 </button>
                                             </li>
                                         </template>
@@ -1041,14 +1041,14 @@
 
                             <template x-if="inspected.dependents.length > 0">
                                 <div class="mt-2.5">
-                                    <p class="text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">{{ __('gantt.inspector.drives') }}</p>
+                                    <p class="text-xs font-semibold text-secondary-medium dark:text-ink-muted">{{ __('gantt.inspector.drives') }}</p>
                                     <ul class="mt-1 flex flex-col">
                                         <template x-for="entry in inspected.dependents" :key="'dependent-' + entry.row.id">
                                             <li>
                                                 <button type="button" x-on:click="selectRow(entry.row.id)" class="flex w-full items-center gap-2 rounded-lg px-1.5 py-1 text-start text-xs hover:bg-board-head dark:hover:bg-white/10">
                                                     <flux:icon.arrow-long-right variant="micro" class="size-3.5 shrink-0 text-status-active rtl:rotate-180" />
                                                     <span class="min-w-0 flex-1 truncate text-secondary-dark dark:text-ink" dir="auto" x-text="entry.row.name"></span>
-                                                    <span class="shrink-0 rounded bg-status-active-soft px-1 text-[10px] font-bold tabular-nums text-status-active" x-text="entry.code" x-bind:title="entry.label"></span>
+                                                    <span class="shrink-0 rounded bg-status-active-soft px-1 text-xs font-bold tabular-nums text-status-active" x-text="entry.code" x-bind:title="entry.label"></span>
                                                 </button>
                                             </li>
                                         </template>
@@ -1066,7 +1066,7 @@
                                 @foreach (['proposals' => __('gantt.inspector.funded_by'), 'funded' => __('gantt.inspector.funds_projects'), 'obligations' => __('gantt.inspector.obligations')] as $list => $listLabel)
                                     <template x-if="inspected.{{ $list }}.length > 0">
                                         <div class="mt-2.5">
-                                            <p class="text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">{{ $listLabel }}</p>
+                                            <p class="text-xs font-semibold text-secondary-medium dark:text-ink-muted">{{ $listLabel }}</p>
                                             <ul class="mt-1 flex flex-col">
                                                 <template x-for="entry in inspected.{{ $list }}" :key="'{{ $list }}-' + entry.id">
                                                     <li>
@@ -1075,7 +1075,7 @@
                                                             <span class="min-w-0 flex-1 truncate text-secondary-dark dark:text-ink" dir="auto" x-text="entry.name"></span>
                                                             <span class="shrink-0 text-end tabular-nums">
                                                                 <span x-show="entry.money" class="block font-semibold text-funding" x-text="entry.money"></span>
-                                                                <span class="block text-[11px] text-secondary-medium dark:text-ink-muted" x-text="entry.diamond ? formatDay(entry.startDay) : formatShort(entry.startDay) + ' – ' + formatShort(entry.endDay)"></span>
+                                                                <span class="block text-xs text-secondary-medium dark:text-ink-muted" x-text="entry.diamond ? formatDay(entry.startDay) : formatShort(entry.startDay) + ' – ' + formatShort(entry.endDay)"></span>
                                                             </span>
                                                         </button>
                                                     </li>
@@ -1196,15 +1196,15 @@
         >
             <template x-if="hover">
                 <div class="flex flex-col gap-2">
-                    <div class="flex items-center gap-1.5 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">
+                    <div class="flex items-center gap-1.5 text-xs font-semibold text-secondary-medium dark:text-ink-muted">
                         <span x-text="labels.kinds[hover.row.kind] ?? ''"></span>
                         <span aria-hidden="true">·</span>
                         <span class="tabular-nums" x-text="hover.row.wbs"></span>
                     </div>
                     <p class="text-sm leading-snug font-bold text-secondary-dark dark:text-ink" dir="auto" x-text="hover.row.name"></p>
                     <div class="flex flex-wrap items-center gap-1.5">
-                        <span x-show="hover.row.statusLabel" class="gantt-pill inline-flex rounded-full px-2 py-0.5 text-[10.5px] font-semibold ring-1 ring-inset" x-bind:class="tones.pill[hover.row.tone]" x-bind:data-tone="hover.row.tone" x-text="hover.row.statusLabel"></span>
-                        <span x-show="hover.row.critical" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-[10.5px] font-semibold text-status-critical">{{ __('gantt.critical') }}</span>
+                        <span x-show="hover.row.statusLabel" class="gantt-pill inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ring-1 ring-inset" x-bind:class="tones.pill[hover.row.tone]" x-bind:data-tone="hover.row.tone" x-text="hover.row.statusLabel"></span>
+                        <span x-show="hover.row.critical" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-semibold text-status-critical">{{ __('gantt.critical') }}</span>
                     </div>
                     <div class="relative h-1.5 rounded-full" x-bind:class="tones.track[hover.row.tone]" aria-hidden="true">
                         <div class="absolute inset-y-0 start-0 rounded-full" x-bind:class="tones.bar[hover.row.tone]" x-bind:style="`width:${hover.row.progress}%`"></div>
@@ -1260,7 +1260,7 @@
                         </template>
                     </dl>
                     @if ($explorer)
-                        <p class="border-t border-board-line pt-2 text-[11px] text-secondary-medium dark:text-ink-muted">{{ __('gantt.tip_hint') }}</p>
+                        <p class="border-t border-board-line pt-2 text-xs text-secondary-medium dark:text-ink-muted">{{ __('gantt.tip_hint') }}</p>
                     @endif
                 </div>
             </template>

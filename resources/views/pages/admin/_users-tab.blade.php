@@ -27,11 +27,11 @@
                                 <span class="block truncate text-xs text-secondary-medium dark:text-ink-muted">{{ $user->email }}</span>
                                 <span class="mt-1 flex flex-wrap gap-1">
                                     @forelse ($user->roles->take(2) as $userRole)
-                                        <span class="rounded-md border border-secondary-soft bg-white px-1.5 py-0.5 text-[0.65rem] font-semibold leading-none text-secondary-medium dark:border-line dark:bg-surface-1 dark:text-ink-muted">
+                                        <span class="rounded-md border border-secondary-soft bg-white px-1.5 py-0.5 text-xs font-semibold leading-none text-secondary-medium dark:border-line dark:bg-surface-1 dark:text-ink-muted">
                                             {{ $userRole->name }}
                                         </span>
                                     @empty
-                                        <span class="rounded-md border border-secondary-soft bg-white px-1.5 py-0.5 text-[0.65rem] font-semibold leading-none text-secondary-light dark:border-line dark:bg-surface-1 dark:text-ink-muted">
+                                        <span class="rounded-md border border-secondary-soft bg-white px-1.5 py-0.5 text-xs font-semibold leading-none text-secondary-light dark:border-line dark:bg-surface-1 dark:text-ink-muted">
                                             {{ __('users.no_role') }}
                                         </span>
                                     @endforelse

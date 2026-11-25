@@ -28,7 +28,7 @@
         </td>
         <td class="{{ $bodyCell }}">
             @if ($loop->first && $row['breakdown_kind'] === 'fixed')
-                <span class="text-[11px] text-secondary-medium dark:text-ink-muted">{{ __('reports.matrix.fixed_counts_note') }}</span>
+                <span class="text-xs text-secondary-medium dark:text-ink-muted">{{ __('reports.matrix.fixed_counts_note') }}</span>
             @endif
         </td>
         <td class="{{ $bodyCell }}"></td>

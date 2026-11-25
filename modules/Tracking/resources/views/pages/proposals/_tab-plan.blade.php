@@ -86,7 +86,7 @@
                             <p class="flex min-w-0 items-center gap-2">
                                 <a href="{{ route('milestones.show', $milestone) }}" wire:navigate class="truncate text-sm font-semibold underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium {{ $inkText }}" dir="auto">{{ $milestone->name }}</a>
                                 @if ($milestone->is_final_report)
-                                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md border border-secondary-light px-1.5 py-0.5 text-[11px] font-semibold {{ $mutedText }}" data-final-report>
+                                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md border border-secondary-light px-1.5 py-0.5 text-xs font-semibold {{ $mutedText }}" data-final-report>
                                         <flux:icon.document-check variant="micro" class="size-3.5" aria-hidden="true" />{{ __('milestones.final_report_badge') }}
                                     </span>
                                 @endif

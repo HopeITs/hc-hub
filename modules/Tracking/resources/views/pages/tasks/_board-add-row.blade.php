@@ -55,12 +55,12 @@
                                 </span>
                             @else
                                 @foreach ($boardTaskDraftAssignees->take(3) as $userOption)
-                                    <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-dark text-[10px] font-semibold text-white ring-2 ring-white dark:bg-surface-3 dark:ring-surface-1">
+                                    <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-dark text-xs font-semibold text-white ring-2 ring-white dark:bg-surface-3 dark:ring-surface-1">
                                         {{ Illuminate\Support\Str::of($userOption['name'])->explode(' ')->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('') }}
                                     </span>
                                 @endforeach
                                 @if ($boardTaskDraftAssignees->count() > 3)
-                                    <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-soft text-[9px] font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
+                                    <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-soft text-xs font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
                                         +{{ $boardTaskDraftAssignees->count() - 3 }}
                                     </span>
                                 @endif
@@ -72,7 +72,7 @@
                         wire:model="taskDrafts.{{ $boardRowKey }}.due_date"
                         value="{{ $boardTaskDraft['due_date'] }}"
                         aria-label="{{ __('tasks.due_date_2') }}"
-                        class="w-24 shrink-0 rounded border-0 bg-transparent p-0.5 text-[11px] tabular-nums text-secondary-medium focus:ring-1 focus:ring-secondary-light focus:outline-none dark:text-ink-muted"
+                        class="w-24 shrink-0 rounded border-0 bg-transparent p-0.5 text-xs tabular-nums text-secondary-medium focus:ring-1 focus:ring-secondary-light focus:outline-none dark:text-ink-muted"
                         data-test="task-board-add-due-date-{{ $case->value }}"
                     />
 

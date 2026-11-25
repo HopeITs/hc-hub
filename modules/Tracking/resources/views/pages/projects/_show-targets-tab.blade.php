@@ -31,13 +31,13 @@
                                         @endif
                                         <span class="min-w-0 text-secondary-dark dark:text-ink" dir="auto">{{ $indicator->libraryIndicator?->localizedName() ?? $indicator->name }}</span>
                                         @if ($indicator->library_indicator_id === null)
-                                            <span class="inline-flex items-center gap-1 rounded-full border border-status-critical px-2 py-0.5 text-[11px] font-semibold text-status-critical">
+                                            <span class="inline-flex items-center gap-1 rounded-full border border-status-critical px-2 py-0.5 text-xs font-semibold text-status-critical">
                                                 <flux:icon.link-slash variant="micro" class="size-3" aria-hidden="true" />
                                                 {{ __('targets.not_linked_to_library') }}
                                             </span>
                                         @endif
                                         @if ($indicator->project_id === $this->projectId)
-                                            <span class="ms-auto inline-flex items-center gap-1 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">
+                                            <span class="ms-auto inline-flex items-center gap-1 text-xs font-semibold text-secondary-medium dark:text-ink-muted">
                                                 <flux:icon.map-pin variant="micro" class="size-3" aria-hidden="true" />
                                                 {{ __('projects.indicator_scoped_here') }}
                                             </span>

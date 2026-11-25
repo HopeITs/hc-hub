@@ -284,7 +284,7 @@
                                 <div class="pointer-events-none absolute inset-y-0 z-20 -translate-x-1/2 rtl:translate-x-1/2" :style="'inset-inline-start: ' + hover.at + '%'">
                                     <span class="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-primary"></span>
                                     <span class="absolute rounded-full border-2 border-dashed border-primary bg-white/80 dark:bg-surface-1/80" style="top: {{ $topPad }}px; width: 1.75rem; height: 1.75rem; transform: translate(-50%, -50%);"></span>
-                                    <span class="absolute start-1/2 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md bg-secondary-dark px-1.5 py-0.5 text-[10px] font-semibold text-white dark:bg-surface-3 dark:text-ink rtl:translate-x-1/2" style="top: 0" x-text="hover.label"></span>
+                                    <span class="absolute start-1/2 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md bg-secondary-dark px-1.5 py-0.5 text-xs font-semibold text-white dark:bg-surface-3 dark:text-ink rtl:translate-x-1/2" style="top: 0" x-text="hover.label"></span>
                                 </div>
                             </template>
 
@@ -323,7 +323,7 @@
                                         @endif
 
                                         @if ($milestone->children_count > 0)
-                                            <span aria-hidden="true" class="absolute -top-1 -end-1 flex size-4 items-center justify-center rounded-full bg-secondary-dark text-[9px] font-bold text-white ring-2 ring-white dark:bg-ink dark:text-surface-0 dark:ring-surface-1">{{ $milestone->children_count }}</span>
+                                            <span aria-hidden="true" class="absolute -top-1 -end-1 flex size-4 items-center justify-center rounded-full bg-secondary-dark text-xs font-bold text-white ring-2 ring-white dark:bg-ink dark:text-surface-0 dark:ring-surface-1">{{ $milestone->children_count }}</span>
                                         @endif
                                     </a>
 
@@ -347,8 +347,8 @@
                                             </div>
 
                                             <div class="mt-1.5 flex flex-wrap items-center gap-1">
-                                                <x-ui.enum-badge :case="$milestone->status" class="px-1.5! py-0.5! text-[10px]!" />
-                                                <x-ui.milestone-flags :milestone="$milestone" class="px-1.5! py-0.5! text-[10px]!" />
+                                                <x-ui.enum-badge :case="$milestone->status" class="px-1.5! py-0.5! text-xs!" />
+                                                <x-ui.milestone-flags :milestone="$milestone" class="px-1.5! py-0.5! text-xs!" />
                                             </div>
 
                                             <p class="mt-1 tabular-nums text-secondary-medium dark:text-ink-muted">{{ $milestone->planned_start_date->translatedFormat(__('formats.date')) }}</p>
@@ -359,7 +359,7 @@
                                                 type="button"
                                                 wire:click="openCreateModal(null, null, null, {{ $milestone->id }})"
                                                 data-test="milestone-timeline-add-related-{{ $milestone->id }}"
-                                                class="mt-2 flex w-full cursor-pointer items-center justify-center gap-1 rounded-md border border-dashed border-secondary-soft py-1 text-[11px] font-semibold text-secondary-medium hover:border-primary hover:text-primary dark:hover:text-brand-text dark:border-line dark:text-ink-muted"
+                                                class="mt-2 flex w-full cursor-pointer items-center justify-center gap-1 rounded-md border border-dashed border-secondary-soft py-1 text-xs font-semibold text-secondary-medium hover:border-primary hover:text-primary dark:hover:text-brand-text dark:border-line dark:text-ink-muted"
                                             >
                                                 <flux:icon.plus variant="micro" class="size-3" />
                                                 {{ __('milestones.add_related_milestone') }}

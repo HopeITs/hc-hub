@@ -123,7 +123,7 @@
             </dt>
             <dd class="flex items-center gap-2">
                 @if ($daysLate > 0)
-                    <span class="rounded-md border border-primary px-1.5 text-[11px] font-bold whitespace-nowrap text-primary dark:border-brand-text dark:text-brand-text" data-test="task-days-late">{{ trans_choice('tasks.show.days_late', $daysLate, ['count' => $daysLate]) }}</span>
+                    <span class="rounded-md border border-primary px-1.5 text-xs font-bold whitespace-nowrap text-primary dark:border-brand-text dark:text-brand-text" data-test="task-days-late">{{ trans_choice('tasks.show.days_late', $daysLate, ['count' => $daysLate]) }}</span>
                 @endif
                 @if ($canRescheduleTask)
                     <input id="task-property-dueDate" type="date" wire:model.live.change="dueDate" class="{{ $dateInputClass }}" data-test="task-edit-due-date-input" />

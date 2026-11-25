@@ -75,7 +75,7 @@
                         <span @class(['text-3xl leading-none font-extrabold tracking-tight tabular-nums', $headline['tone']])>{{ $count }}</span>
                         <span class="text-xs tabular-nums text-secondary-medium dark:text-ink-muted">{{ trans_choice('transfers.of_count_tranches', $matching, ['count' => $matching]) }}</span>
                     </span>
-                    <span @class(['mt-1 block text-[11px] text-secondary-medium dark:text-ink-muted group-aria-pressed:underline', 'group-hover:underline' => ! $isUnavailable])>{{ $headline['note'] }}</span>
+                    <span @class(['mt-1 block text-xs text-secondary-medium dark:text-ink-muted group-aria-pressed:underline', 'group-hover:underline' => ! $isUnavailable])>{{ $headline['note'] }}</span>
                 </button>
             </li>
         @endforeach

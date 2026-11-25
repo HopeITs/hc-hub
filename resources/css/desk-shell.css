@@ -309,7 +309,7 @@
     .dk-menu-t strong { font-size: 13.5px; font-weight: 700; line-height: 1.35; }
     .dk-menu-t small { font-size: 12px; font-weight: 500; line-height: 1.35; color: var(--ink-3); }
     .dk-menu-ext { width: 16px; height: 16px; flex: none; color: var(--faint); }
-    .dk-menu .dk-danger, .dk-menu .dk-danger .dk-menu-ic { color: var(--bad); }
+    .dk-menu .dk-danger, .dk-menu .dk-danger .dk-menu-ic { color: var(--bad-ink); }
     .dk-menu-foot { margin-top: 4px; padding: 9px 10px 4px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); }
     .dk-menu-foot kbd { margin-inline: 2px; }
     .dk-menu-in { transition: opacity .14s cubic-bezier(.2, .8, .2, 1), transform .16s cubic-bezier(.2, .8, .2, 1); }
@@ -660,7 +660,7 @@
     .dk-gl-l { font-size: 12.5px; line-height: 1.35; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .dk-gl-d { font-size: 12px; font-weight: 700; color: var(--ink-3); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .dk-gl-d.dk-good { color: var(--good); }
-    .dk-gl-d.dk-bad { color: var(--bad); }
+    .dk-gl-d.dk-bad { color: var(--bad-ink); }
     @container pb (min-width: 420px) {
         .dk-pb > .dk-glance { grid-template-columns: repeat(3, minmax(0, 1fr)); }
         .dk-glance > li:nth-child(2n + 1) { border-inline-start: 1px solid var(--line); padding-inline-start: 16px; }

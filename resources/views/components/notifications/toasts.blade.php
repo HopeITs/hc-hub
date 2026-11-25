@@ -52,9 +52,9 @@
                             x-bind:class="item.sticky ? 'bg-primary dark:bg-status-critical' : 'bg-secondary-light dark:bg-ink-faint'"
                             aria-hidden="true"
                         ></span>
-                        <p class="min-w-0 truncate text-[11px] font-semibold uppercase tracking-[0.1em] text-secondary-medium dark:text-ink-muted" x-text="item.module_label"></p>
-                        <span x-show="item.sticky" class="shrink-0 text-[11px] font-bold uppercase tracking-[0.1em] text-status-critical">{{ __('notifications.toast.critical') }}</span>
-                        <span class="ms-auto shrink-0 text-[11px] text-secondary-light" x-text="ago(item)" data-toast-time></span>
+                        <p class="min-w-0 truncate text-xs font-semibold uppercase tracking-[0.1em] text-secondary-medium dark:text-ink-muted" x-text="item.module_label"></p>
+                        <span x-show="item.sticky" class="shrink-0 text-xs font-bold uppercase tracking-[0.1em] text-status-critical">{{ __('notifications.toast.critical') }}</span>
+                        <span class="ms-auto shrink-0 text-xs text-secondary-light" x-text="ago(item)" data-toast-time></span>
                     </div>
 
                     <p class="mt-1 line-clamp-3 text-sm font-semibold leading-snug" x-text="item.text"></p>

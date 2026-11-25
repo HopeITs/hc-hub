@@ -108,7 +108,7 @@
                                                 @if ($sourceLabel === null)
                                                     {{-- source_id has no foreign key: the plan or proposal can be
                                                          removed out from under this row. --}}
-                                                    <span class="rounded-md border border-primary px-2 py-0.5 text-[11px] font-semibold text-primary dark:text-brand-text">
+                                                    <span class="rounded-md border border-primary px-2 py-0.5 text-xs font-semibold text-primary dark:text-brand-text">
                                                         {{ __('targets.source_no_longer_available') }}
                                                     </span>
                                                 @else

@@ -443,3 +443,47 @@ test('status, funding and series tokens stay on the brand palette in both themes
             ->and($value)->not->toMatch('/--color-(?:green|blue|teal|amber|emerald|sky|yellow|orange)/');
     }
 })->with(['light' => 0, 'dark' => 1]);
+
+test('desk avatar tones and the HR avatar stay on the brand palette', function () {
+    $css = dirname(__DIR__, 2).'/resources/css/';
+    $workspace = file_get_contents($css.'desk-workspace.css');
+
+    preg_match_all('/\[data-tone="tone-\d"\][^{]*\{([^}]*)\}/', $workspace, $tones);
+
+    expect($tones[1])->not->toBeEmpty();
+
+    foreach ($tones[1] as $declaration) {
+        expect($declaration)->toMatch('/--av:\s*var\(--color-(?:primary|grey-ink|grey-ink-muted)\)/');
+    }
+
+    expect(file_get_contents($css.'tokens.css'))->toContain('--color-hr-avatar: var(--color-primary);');
+});
+
+test('desk critical text reads in the critical text token, not the red fill', function () {
+    foreach (glob(dirname(__DIR__, 2).'/resources/css/desk*.css') as $file) {
+        expect(preg_match('/(?<![-\w])color:\s*var\(--bad\)/', file_get_contents($file)))->toBe(0, basename($file));
+    }
+
+    expect(file_get_contents(dirname(__DIR__, 2).'/resources/css/desk.css'))->toContain('--bad-ink: var(--color-status-critical-text);');
+});
+
+test('no visible text is set below 12px', function () {
+    $small = [];
+    $roots = [dirname(__DIR__, 2).'/resources', ...(glob(dirname(__DIR__, 2).'/modules/*/resources') ?: [])];
+
+    foreach ($roots as $root) {
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)) as $file) {
+            $path = str_replace('\\', '/', $file->getPathname());
+
+            if (! preg_match('/\.(css|js|php)$/', $path) || str_contains($path, 'print') || str_contains($path, '/vendor/')) {
+                continue;
+            }
+
+            if (preg_match('/text-\[(?:\d|10|11)(?:\.\d+)?px\]|text-\[0\.(?:[0-6]\d*|7[0-4]\d*)rem\]|font-size:\s*(?:\d|10|11)(?:\.\d+)?px|fontSize:\s*[\'"](?:\d|10|11)px/', file_get_contents($path))) {
+                $small[] = $path;
+            }
+        }
+    }
+
+    expect($small)->toBe([]);
+});

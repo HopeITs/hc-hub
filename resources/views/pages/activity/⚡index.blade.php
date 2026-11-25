@@ -436,7 +436,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
                             </x-ui.data-table.cell>
 
                             <x-ui.data-table.cell :label="__('activity.filters.module')">
-                                <span class="{{ $tagClasses($tone) }} inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase whitespace-nowrap">
+                                <span class="{{ $tagClasses($tone) }} inline-flex items-center rounded border px-1.5 py-0.5 text-xs font-semibold tracking-wide uppercase whitespace-nowrap">
                                     {{ $notificationPresenter->moduleLabel($activity->module) }}
                                 </span>
                             </x-ui.data-table.cell>

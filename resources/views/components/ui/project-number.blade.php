@@ -22,7 +22,7 @@
         @endif
         <bdi dir="ltr" class="font-semibold tabular-nums">{{ $number }}</bdi>
         @if ($isPlaceholder)
-            <span class="inline-flex items-center rounded-full bg-status-warn-soft px-2 py-0.5 text-[11px] font-semibold text-status-warn" data-placeholder-chip="{{ $number }}">{{ __('common.placeholder_number') }}</span>
+            <span class="inline-flex items-center rounded-full bg-status-warn-soft px-2 py-0.5 text-xs font-semibold text-status-warn" data-placeholder-chip="{{ $number }}">{{ __('common.placeholder_number') }}</span>
         @endif
     @elseif (! $isInternal)
         <span class="text-secondary-medium dark:text-ink-muted">{{ __('common.no_external_project_number') }}</span>

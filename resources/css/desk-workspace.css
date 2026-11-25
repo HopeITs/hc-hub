@@ -69,7 +69,7 @@
      * bar (.dk-card-r): a meter (0 → to) or a span (from → to) with today (--now) */
     .dk-card-l { grid-area: l; flex: none; margin-inline-end: 12px; display: grid; place-items: center; align-content: center; color: var(--ink-2); font-variant-numeric: tabular-nums; }
     .dk-card-l b { font-weight: 800; line-height: 1; }
-    .dk-card-l small { font-size: var(--text-caption); font-weight: 700; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); }
+    .dk-card-l small { font-size: var(--text-caption); font-weight: 700; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
     .dk-card-e { grid-area: e; margin-inline-start: 12px; display: grid; justify-items: end; gap: 1px; text-align: end; white-space: nowrap; }
     .dk-card-e b { font-size: 15px; font-weight: 800; letter-spacing: -.01em; line-height: 20px; color: var(--ink); }
     .dk-card-e small { font-size: var(--text-caption); font-weight: 700; line-height: 14px; color: var(--ink-3); }
@@ -85,10 +85,11 @@
     .dk-card-l:is([data-kind="date"], [data-kind="year"])[data-tone="neutral"] { background: var(--sunk); box-shadow: none; }
     .dk-card-l:is([data-kind="date"], [data-kind="year"]):is([data-tone="critical"], [data-tone="warn"]) b { color: var(--tone); }
 
-    /* People: initials on one of six calm grounds, by person. */
-    .dk-card-l[data-kind="avatar"] { width: 34px; height: 34px; border-radius: 50%; font-size: 12px; color: var(--paper); background: var(--av, var(--ink-3)); }
-    .dk-card-l[data-tone="tone-0"] { --av: #5b6cd9; } .dk-card-l[data-tone="tone-1"] { --av: #2f9e8f; } .dk-card-l[data-tone="tone-2"] { --av: #c2703d; }
-    .dk-card-l[data-tone="tone-3"] { --av: #a2559b; } .dk-card-l[data-tone="tone-4"] { --av: #3f88c5; } .dk-card-l[data-tone="tone-5"] { --av: #7a8a3a; }
+    /* People: initials on one of the brand grounds (red and the two dark greys), white type at 4.5:1 or more in both themes. */
+    .dk-card-l[data-kind="avatar"] { width: 34px; height: 34px; border-radius: 50%; font-size: 12px; color: var(--on-brand); background: var(--av, var(--color-grey-ink-muted)); }
+    .dk-card-l:is([data-tone="tone-0"], [data-tone="tone-3"]) { --av: var(--color-primary); }
+    .dk-card-l:is([data-tone="tone-1"], [data-tone="tone-4"]) { --av: var(--color-grey-ink); }
+    .dk-card-l:is([data-tone="tone-2"], [data-tone="tone-5"]) { --av: var(--color-grey-ink-muted); }
 
     /* Accounts: the currency as a coin. */
     .dk-card-l[data-kind="coin"] { width: 38px; height: 38px; border-radius: 50%; font-size: var(--text-caption); letter-spacing: .03em; color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, var(--paper)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tone) 45%, transparent); }
@@ -204,8 +205,8 @@
     .dk-hero [data-tone="neutral"] { --tone: var(--ink-3); }
     .dk-hero-head { flex: none; margin: 0; display: flex; align-items: baseline; gap: 8px; min-width: 0; }
     .dk-hero-head strong { flex: none; font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 30px; color: var(--ink); }
-    .dk-hero[data-tone="critical"] .dk-hero-head strong:not(:is([data-hero="flow"] *)) { color: var(--bad); }
-    [data-hero="flow"][data-tone="critical"] .dk-hero-head strong { color: var(--bad); }
+    .dk-hero[data-tone="critical"] .dk-hero-head strong:not(:is([data-hero="flow"] *)) { color: var(--bad-ink); }
+    [data-hero="flow"][data-tone="critical"] .dk-hero-head strong { color: var(--bad-ink); }
     .dk-hero-head span { min-width: 0; font-size: 12.5px; font-weight: 600; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dk-hero > :not(.dk-hero-head) { flex: 1 1 auto; min-height: 0; min-width: 0; margin: 0; padding: 0; list-style: none; }
 
@@ -290,9 +291,10 @@
     /* Users: who is here, and their roles. */
     .dk-hero-faces { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
     .dk-hero-stack { display: flex; }
-    .dk-hero-stack i { width: 30px; height: 30px; margin-inline-end: -4px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: var(--text-caption); font-weight: 800; color: #fff; background: var(--av, var(--ink-3)); box-shadow: 0 0 0 2px var(--paper); }
-    .dk-hero-stack [data-tone="tone-0"] { --av: #5b6cd9; } .dk-hero-stack [data-tone="tone-1"] { --av: #2f9e8f; } .dk-hero-stack [data-tone="tone-2"] { --av: #c2703d; }
-    .dk-hero-stack [data-tone="tone-3"] { --av: #a2559b; } .dk-hero-stack [data-tone="tone-4"] { --av: #3f88c5; } .dk-hero-stack [data-tone="tone-5"] { --av: #7a8a3a; }
+    .dk-hero-stack i { width: 30px; height: 30px; margin-inline-end: -4px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: var(--text-caption); font-weight: 800; color: var(--on-brand); background: var(--av, var(--color-grey-ink-muted)); box-shadow: 0 0 0 2px var(--paper); }
+    .dk-hero-stack :is([data-tone="tone-0"], [data-tone="tone-3"]) { --av: var(--color-primary); }
+    .dk-hero-stack :is([data-tone="tone-1"], [data-tone="tone-4"]) { --av: var(--color-grey-ink); }
+    .dk-hero-stack :is([data-tone="tone-2"], [data-tone="tone-5"]) { --av: var(--color-grey-ink-muted); }
     [data-hero="faces"] .dk-hero-chips li { padding: 3px 8px; border-radius: var(--radius-round); }
     [data-hero="faces"] .dk-hero-chips b { font-size: 12.5px; }
 
@@ -610,7 +612,7 @@
     /* ── The Ask bar's instant rows (resources/js/ask-index.js) ───── */
     .dk-pal-kind { flex: none; height: 22px; padding-inline: 8px; border-radius: var(--radius-control); display: inline-flex; align-items: center; font-size: var(--text-caption); font-weight: 800; background: var(--sunk); color: var(--ink-3); }
     .dk-pal-kind:is([data-kind="add"], [data-kind="action"]) { background: var(--brand-soft); color: var(--brand-ink); }
-    .dk-pal-kind[data-kind="remove"] { background: var(--bad-soft); color: var(--bad); }
+    .dk-pal-kind[data-kind="remove"] { background: var(--bad-soft); color: var(--bad-ink); }
     .dk-pal-done .dk-pal-kind { background: var(--good-soft); color: var(--good); }
     .dk-pal-i mark { background: none; color: inherit; font-weight: 800; text-decoration: underline; text-decoration-color: var(--brand); text-decoration-thickness: 2px; text-underline-offset: 3px; }
     .dk-pal-instant { display: grid; gap: 2px; }

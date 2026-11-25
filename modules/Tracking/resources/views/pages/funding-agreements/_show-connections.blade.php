@@ -65,7 +65,7 @@
 
                     @if ($term['phase'] !== 'unknown')
                         <div class="mt-3" data-term>
-                            <div class="flex items-baseline justify-between gap-3 text-[11px] tabular-nums {{ $mutedText }}">
+                            <div class="flex items-baseline justify-between gap-3 text-xs tabular-nums {{ $mutedText }}">
                                 <span>{{ $term['begin']->translatedFormat(__('formats.date_short')) }}</span>
                                 <span class="font-semibold {{ $inkText }}">
                                     @if ($term['phase'] === 'ahead')
@@ -107,7 +107,7 @@
                         <div class="mt-2.5 min-w-0" wire:key="project-{{ $project->id }}" data-project="{{ $project->id }}">
                             <div class="flex items-baseline justify-between gap-3">
                                 <a href="{{ route('projects.show', $project) }}" wire:navigate class="min-w-0 truncate text-sm font-semibold underline-offset-4 hover:underline {{ $inkText }}">{{ $project->name }}</a>
-                                <span class="shrink-0 text-[11px] {{ $mutedText }}">{{ $project->status->label() }}</span>
+                                <span class="shrink-0 text-xs {{ $mutedText }}">{{ $project->status->label() }}</span>
                             </div>
                             <p class="truncate text-xs {{ $mutedText }}">{{ collect([$project->program?->name, $project->city?->name ?? __('common.unknown_city')])->filter()->implode(' · ') }}</p>
                             @if ($project->milestones_count > 0)
@@ -115,7 +115,7 @@
                                     <span class="flex h-1 flex-1 overflow-hidden rounded-full bg-secondary-soft dark:bg-surface-2" aria-hidden="true">
                                         <span class="money-grow h-full rounded-full bg-secondary-dark dark:bg-ink-muted" style="width: {{ round($project->reached_milestones_count / $project->milestones_count * 100, 2) }}%"></span>
                                     </span>
-                                    <span class="shrink-0 text-[11px] tabular-nums {{ $mutedText }}">{{ __('funding_agreements.milestones_reached', ['reached' => $project->reached_milestones_count, 'total' => $project->milestones_count]) }}</span>
+                                    <span class="shrink-0 text-xs tabular-nums {{ $mutedText }}">{{ __('funding_agreements.milestones_reached', ['reached' => $project->reached_milestones_count, 'total' => $project->milestones_count]) }}</span>
                                 </div>
                             @endif
                         </div>

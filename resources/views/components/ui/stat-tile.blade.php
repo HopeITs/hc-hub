@@ -42,7 +42,7 @@
                     <flux:icon :name="$icon" class="size-5" />
                 </div>
             @elseif ($scope !== null)
-                <span class="rounded-full border border-secondary-light px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">{{ $scope }}</span>
+                <span class="rounded-full border border-secondary-light px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:text-ink-muted">{{ $scope }}</span>
             @endif
         </div>
     </a>
@@ -66,7 +66,7 @@
                     <flux:icon :name="$icon" class="size-5" />
                 </div>
             @elseif ($scope !== null)
-                <span class="rounded-full border border-secondary-light px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">{{ $scope }}</span>
+                <span class="rounded-full border border-secondary-light px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:text-ink-muted">{{ $scope }}</span>
             @endif
         </div>
     </div>

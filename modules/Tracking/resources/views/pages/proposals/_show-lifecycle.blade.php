@@ -46,7 +46,7 @@
                     ]) aria-hidden="true"></span>
 
                     <span @class([
-                        'px-0.5 text-center text-[11px] leading-tight',
+                        'px-0.5 text-center text-xs leading-tight',
                         'font-bold text-status-critical' => in_array($stop['state'], ['current', 'rejected'], true),
                         'font-medium '.$inkText => $stop['state'] === 'past',
                         'font-medium '.$mutedText => $stop['state'] === 'ahead',
@@ -56,7 +56,7 @@
                         <x-ui.hold-chip />
                     @endif
 
-                    <span class="min-h-4 text-center text-[10px] tabular-nums {{ $mutedText }}">
+                    <span class="min-h-4 text-center text-xs tabular-nums {{ $mutedText }}">
                         @if ($stop['date'] !== null)
                             <time datetime="{{ $stop['date']->toDateString() }}">{{ $stop['date']->translatedFormat(__('formats.date_short')) }}</time>
                         @endif

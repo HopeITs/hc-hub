@@ -128,11 +128,11 @@
 
                                                 <div class="flex shrink-0 items-center gap-2">
                                                     @if ($isOverdue)
-                                                        <span class="text-[11px] font-bold tracking-wide text-status-critical uppercase">{{ __('proposals.overdue') }}</span>
+                                                        <span class="text-xs font-bold tracking-wide text-status-critical uppercase">{{ __('proposals.overdue') }}</span>
                                                     @elseif ($transfer->state() === 'transit')
-                                                        <span class="text-[11px] font-bold tracking-wide text-status-warn uppercase" data-transit>{{ __('funding_agreements.tranche_state_transit') }}</span>
+                                                        <span class="text-xs font-bold tracking-wide text-status-warn uppercase" data-transit>{{ __('funding_agreements.tranche_state_transit') }}</span>
                                                     @elseif ($transfer->isMissingNetAmount())
-                                                        <span class="text-[11px] font-bold tracking-wide text-status-warn uppercase" data-missing-net>{{ __('funding_agreements.received_net_not_recorded') }}</span>
+                                                        <span class="text-xs font-bold tracking-wide text-status-warn uppercase" data-missing-net>{{ __('funding_agreements.received_net_not_recorded') }}</span>
                                                     @endif
                                                     <x-ui.enum-badge :case="$transfer->ar_status" />
                                                     @can('transfers.update')

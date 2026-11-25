@@ -40,7 +40,7 @@
     $help ??= __('sectors.picker_help');
     $error = $errors->first($model) ?: $errors->first($model.'.*');
     $mutedText = 'text-secondary-medium dark:text-ink-muted';
-    $badgeClasses = 'inline-flex items-center gap-1 rounded-full border border-secondary-light px-1.5 text-[10px] font-semibold leading-4 text-secondary-dark dark:border-line-strong dark:text-ink';
+    $badgeClasses = 'inline-flex items-center gap-1 rounded-full border border-secondary-light px-1.5 text-xs font-semibold leading-4 text-secondary-dark dark:border-line-strong dark:text-ink';
 @endphp
 
 <x-ui.form-field :label="$label" :for="$id" :required="$required" :help="$help" :error="$error" {{ $attributes->only('class') }} data-test="sector-picker">

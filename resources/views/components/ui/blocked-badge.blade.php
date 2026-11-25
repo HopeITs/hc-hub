@@ -5,7 +5,7 @@
      button that opens the unblock dialog. Needs ownerAssignment loaded. --}}
 @if ($project->isOwnerRejected())
     @php
-        $badgeClasses = 'inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-status-critical-soft px-2.5 text-[11px] font-bold tracking-wide whitespace-nowrap text-status-critical-text uppercase';
+        $badgeClasses = 'inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-status-critical-soft px-2.5 text-xs font-bold tracking-wide whitespace-nowrap text-status-critical-text uppercase';
     @endphp
 
     @can('unblock', $project->ownerAssignment)

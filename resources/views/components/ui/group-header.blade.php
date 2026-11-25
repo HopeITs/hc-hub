@@ -20,7 +20,7 @@
         </button>
         <span class="size-2 shrink-0 rounded-full {{ $colorClass }}" aria-hidden="true"></span>
         <p class="truncate text-xs font-bold tracking-wide text-secondary-dark uppercase dark:text-ink">{{ $label }}</p>
-        <span class="inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-secondary-soft px-1.5 py-0.5 text-[11px] font-semibold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ $count }}</span>
+        <span class="inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-secondary-soft px-1.5 py-0.5 text-xs font-semibold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ $count }}</span>
         <div class="ms-auto shrink-0">{{ $actions ?? '' }}</div>
     </div>
     <div x-show="open" x-collapse>

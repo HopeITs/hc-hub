@@ -13,7 +13,7 @@
     @php $chipLabel = $item['context'] === null ? $item['title'] : $item['title'].' · '.$item['context']; @endphp
     <div
         wire:key="calendar-layer-{{ $item['layer'] }}-{{ $item['id'] }}-{{ $day->toDateString() }}"
-        class="flex items-center gap-1 rounded border border-dashed border-secondary-light px-1.5 py-0.5 text-[10px] text-secondary-dark dark:border-line dark:text-ink-muted"
+        class="flex items-center gap-1 rounded border border-dashed border-secondary-light px-1.5 py-0.5 text-xs text-secondary-dark dark:border-line dark:text-ink-muted"
         title="{{ $chipLabel }}"
         data-test="calendar-layer-{{ $item['layer'] }}-{{ $item['id'] }}-{{ $day->toDateString() }}"
     >

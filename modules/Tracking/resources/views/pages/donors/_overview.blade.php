@@ -119,7 +119,7 @@
                                                     · {{ __('donors.overdue') }}
                                                 @endif
                                             </p>
-                                            <p class="shrink-0 text-sm font-extrabold tabular-nums {{ $inkText }}">{{ $this->shortAmount($transfer['amount']) }} <span class="text-[11px] font-semibold {{ $mutedText }}">{{ $transfer['currency'] }}</span></p>
+                                            <p class="shrink-0 text-sm font-extrabold tabular-nums {{ $inkText }}">{{ $this->shortAmount($transfer['amount']) }} <span class="text-xs font-semibold {{ $mutedText }}">{{ $transfer['currency'] }}</span></p>
                                         </div>
                                         <p class="mt-0.5 truncate text-sm">
                                             <a href="{{ route('donors.show', tap(new \Modules\Tracking\Models\Donor, fn ($donor) => $donor->id = $transfer['donorId'])) }}" wire:navigate class="font-semibold underline-offset-4 hover:underline {{ $inkText }}">{{ $transfer['donor'] }}</a>
@@ -274,7 +274,7 @@
                                         </p>
                                     @endif
                                     @if ($donor->last_contacted_on !== null)
-                                        <p class="mt-1 text-[11px] {{ $mutedText }}">{{ __('donors.last_contacted', ['date' => $donor->last_contacted_on->translatedFormat(__('formats.date'))]) }}</p>
+                                        <p class="mt-1 text-xs {{ $mutedText }}">{{ __('donors.last_contacted', ['date' => $donor->last_contacted_on->translatedFormat(__('formats.date'))]) }}</p>
                                     @endif
                                 </div>
                             </div>
@@ -286,14 +286,14 @@
                                 @forelse ($money['lines'] as $currency => $line)
                                     <div class="[&+&]:mt-3" wire:key="donor-{{ $donor->id }}-money-{{ $currency }}">
                                         <p class="flex items-baseline justify-between gap-3">
-                                            <span class="text-lg leading-none font-extrabold tracking-tight tabular-nums {{ $inkText }}">{{ $this->amount($line['committed']) }} <span class="text-[11px] font-semibold tracking-normal {{ $mutedText }}">{{ $currency }}</span></span>
+                                            <span class="text-lg leading-none font-extrabold tracking-tight tabular-nums {{ $inkText }}">{{ $this->amount($line['committed']) }} <span class="text-xs font-semibold tracking-normal {{ $mutedText }}">{{ $currency }}</span></span>
                                             <span class="text-xs font-bold tabular-nums text-funding">{{ Modules\Tracking\Models\DonorProposal::percentLabel($line['received'], $line['committed']) }}%</span>
                                         </p>
                                         <div class="mt-2 flex h-1.5 w-full gap-0.5 overflow-hidden rounded-full bg-secondary-soft dark:bg-surface-2" role="img" aria-label="{{ __('donors.money_bar_label', ['currency' => $currency, 'received' => $this->amount($line['received']), 'pending' => $this->amount($line['pending']), 'committed' => $this->amount($line['committed'])]) }}">
                                             <span class="money-grow h-full rounded-s-full bg-funding" style="width: {{ $line['committed'] > 0 ? min(100, round($line['received'] / $line['committed'] * 100, 2)) : 0 }}%"></span>
                                             <span class="money-grow money-pending h-full" style="width: {{ $line['committed'] > 0 ? min(100, round($line['pending'] / $line['committed'] * 100, 2)) : 0 }}%"></span>
                                         </div>
-                                        <p class="mt-1 text-[11px] tabular-nums {{ $mutedText }}">
+                                        <p class="mt-1 text-xs tabular-nums {{ $mutedText }}">
                                             <span class="font-bold text-funding">{{ $this->shortAmount($line['received']) }}</span> {{ __('donors.received_lower') }}
                                             @if ($line['pending'] > 0)
                                                 · <span class="font-bold text-status-warn">{{ $this->shortAmount($line['pending']) }}</span> {{ __('donors.pending_lower') }}
@@ -323,7 +323,7 @@
                                                     @else
                                                         <span class="block truncate text-sm leading-snug font-semibold {{ $inkText }}">{{ $agreement->proposal?->name }}</span>
                                                     @endcan
-                                                    <span class="block truncate text-[11px] {{ $mutedText }}">
+                                                    <span class="block truncate text-xs {{ $mutedText }}">
                                                         {{ $agreement->proposal?->status->label() }}
                                                         @if ($agreement->proposal?->projects->isNotEmpty())
                                                             · {{ trans_choice('common.count_project', $agreement->proposal->projects->count(), ['count' => $agreement->proposal->projects->count()]) }}
@@ -352,13 +352,13 @@
                                     <p @class(['text-sm font-bold', 'text-status-critical' => $money['next']['overdue'], $inkText => ! $money['next']['overdue']])>{{ $money['next']['date']->translatedFormat(__('formats.date')) }}</p>
                                     <p class="text-xs tabular-nums {{ $mutedText }}">{{ $money['next']['currency'] }} {{ $this->shortAmount($money['next']['amount']) }}</p>
                                     @if ($money['overdue'] > 0)
-                                        <p class="mt-1 text-[11px] font-semibold text-status-critical">{{ trans_choice('donors.count_transfers_overdue', $money['overdue'], ['count' => $money['overdue']]) }}</p>
+                                        <p class="mt-1 text-xs font-semibold text-status-critical">{{ trans_choice('donors.count_transfers_overdue', $money['overdue'], ['count' => $money['overdue']]) }}</p>
                                     @endif
                                 @else
                                     <p class="text-sm {{ $mutedText }}">{{ __('donors.none_scheduled') }}</p>
                                 @endif
                                 @if ($money['lastReceived'] !== null)
-                                    <p class="mt-1 text-[11px] {{ $mutedText }}">{{ __('donors.last_received_on', ['date' => $money['lastReceived']->translatedFormat(__('formats.date'))]) }}</p>
+                                    <p class="mt-1 text-xs {{ $mutedText }}">{{ __('donors.last_received_on', ['date' => $money['lastReceived']->translatedFormat(__('formats.date'))]) }}</p>
                                 @endif
                             </div>
                             @endif

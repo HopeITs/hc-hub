@@ -46,8 +46,8 @@
         <div @class(['grid gap-x-3 gap-y-1.5', 'grid-cols-[auto_repeat(2,auto)]' => count($fields) === 1, 'grid-cols-[auto_repeat(4,auto)]' => count($fields) === 2])>
             <span></span>
             @foreach ($fields as $field)
-                <span class="text-[11px] font-semibold {{ $mutedText }}">{{ $fieldLabels[$field] }}</span>
-                <span class="text-[11px] font-semibold {{ $mutedText }}">{{ __('monthly_reports.of_whom_disabled') }}</span>
+                <span class="text-xs font-semibold {{ $mutedText }}">{{ $fieldLabels[$field] }}</span>
+                <span class="text-xs font-semibold {{ $mutedText }}">{{ __('monthly_reports.of_whom_disabled') }}</span>
             @endforeach
 
             @foreach (Gender::cases() as $gender)
@@ -89,7 +89,7 @@
                 $model = $prefix.'.'.$field;
             @endphp
             <label class="flex flex-col gap-1">
-                <span class="text-[11px] font-semibold {{ $mutedText }}">{{ $fieldLabels[$field] }}</span>
+                <span class="text-xs font-semibold {{ $mutedText }}">{{ $fieldLabels[$field] }}</span>
                 @if ($editable)
                     <input
                         type="text"
@@ -124,7 +124,7 @@
 
     @if ($showsComputed)
         <div class="flex flex-col gap-1">
-            <span class="text-[11px] font-semibold {{ $mutedText }}">{{ $kind === MonthlyReportEntryKind::Count ? __('monthly_reports.total') : __('monthly_reports.computed_value') }}</span>
+            <span class="text-xs font-semibold {{ $mutedText }}">{{ $kind === MonthlyReportEntryKind::Count ? __('monthly_reports.total') : __('monthly_reports.computed_value') }}</span>
             <bdi dir="ltr" class="{{ $readClasses }} pt-1.5" data-computed="{{ $computedKey }}">{{ $computed }}</bdi>
         </div>
     @endif

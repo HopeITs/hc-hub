@@ -11,7 +11,7 @@
 @php
     $readsArabic = app()->getLocale() === 'ar';
     $total = $sectors->count();
-    $badgeClasses = 'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold leading-4';
+    $badgeClasses = 'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold leading-4';
 @endphp
 
 {{--

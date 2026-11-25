@@ -132,8 +132,8 @@
     /* The full-page backdrop behind the sign-in card and the error pages (light only; dark uses surface-0). */
     --color-auth-ground: var(--color-grey-line);
 
-    /* HR's avatar red (HR's own --color-primary) behind employee photos, so a cut-out photo looks as it does in HR; same in both themes. */
-    --color-hr-avatar: #c2151c;
+    /* The brand primary behind employee photos, so a cut-out photo looks as it does in HR; same in both themes. */
+    --color-hr-avatar: var(--color-primary);
 
     /* One recipe for bordered panels (W-29): x-ui.panel and the desk .dk-panel share this radius and border. */
     --radius-panel: var(--radius-surface);

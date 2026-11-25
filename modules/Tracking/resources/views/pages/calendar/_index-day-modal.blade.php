@@ -36,7 +36,7 @@
                             </a>
                         @endif
                         @if ($item['subLabel'] !== null)
-                            <p class="mt-0.5 truncate text-[11px] text-secondary-medium dark:text-ink-muted">{{ $item['subLabel'] }}</p>
+                            <p class="mt-0.5 truncate text-xs text-secondary-medium dark:text-ink-muted">{{ $item['subLabel'] }}</p>
                         @endif
                     </div>
                 </div>

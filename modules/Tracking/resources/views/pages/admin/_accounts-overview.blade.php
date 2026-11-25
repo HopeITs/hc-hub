@@ -121,9 +121,9 @@
                         </div>
 
                         <span @class([
-                            'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+                            'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap',
                             'bg-status-good-soft text-status-good' => $account->is_active,
-                            'bg-secondary-soft text-secondary-medium dark:bg-surface-2 dark:text-ink-muted' => ! $account->is_active,
+                            'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink-muted' => ! $account->is_active,
                         ])>
                             {{ $account->is_active ? __('accounts.open') : __('accounts.closed') }}
                         </span>

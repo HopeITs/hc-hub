@@ -18,7 +18,7 @@
                     <li wire:key="history-{{ $row->id }}">
                         @if ($isCurrent)
                             <div class="flex items-center gap-3 bg-status-critical-soft p-3.5 dark:bg-surface-2/60">
-                                <span class="rounded-full bg-primary dark:bg-brand px-2 py-0.5 text-[11px] font-bold text-white">{{ __('reports.this_report') }}</span>
+                                <span class="rounded-full bg-primary dark:bg-brand px-2 py-0.5 text-xs font-bold text-white">{{ __('reports.this_report') }}</span>
                                 <span class="tabular-nums text-sm text-secondary-dark dark:text-ink">{{ $row->planned_date?->translatedFormat(__('formats.date')) }}</span>
                                 <span class="ms-auto text-sm font-semibold tabular-nums">{{ number_format((float) $row->value, 2) }}</span>
                                 <x-ui.enum-badge :case="$row->status" />

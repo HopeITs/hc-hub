@@ -26,7 +26,7 @@
                 ])
             >
                 <span class="min-w-0 flex-1">
-                    <span class="block type-label text-[10px]! tracking-normal! break-words @md/directory:text-xs! text-secondary-medium dark:text-ink-muted">{{ $cell['label'] }}</span>
+                    <span class="block type-label text-xs! tracking-normal! break-words @md/directory:text-xs! text-secondary-medium dark:text-ink-muted">{{ $cell['label'] }}</span>
                     <span @class([
                         'mt-1 block type-figure',
                         'text-status-warn' => $cell['count'] > 0,

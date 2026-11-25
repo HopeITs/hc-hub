@@ -219,7 +219,7 @@
                 </label>
 
                 @if ($dueFlag !== null)
-                    <span class="inline-flex items-center rounded-full bg-secondary-soft/60 px-2 py-0.5 text-[10px] font-bold tracking-wide text-status-critical uppercase dark:bg-surface-2">{{ $dueFlag === 'missed' ? __('tasks.missed') : __('tasks.overdue') }}</span>
+                    <span class="inline-flex items-center rounded-full bg-secondary-soft/60 px-2 py-0.5 text-xs font-bold tracking-wide text-status-critical uppercase dark:bg-surface-2">{{ $dueFlag === 'missed' ? __('tasks.missed') : __('tasks.overdue') }}</span>
                 @endif
 
                 <x-ui.form-select

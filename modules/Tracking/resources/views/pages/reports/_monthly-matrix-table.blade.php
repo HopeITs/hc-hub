@@ -55,7 +55,7 @@
                                 </button>
                             @endif
                             @unless ($row['is_active'])
-                                <span class="mt-0.5 inline-flex items-center gap-1 text-[11px] text-secondary-medium dark:text-ink-muted"><flux:icon.pause-circle variant="micro" class="size-3.5" aria-hidden="true" />{{ __('reports.matrix.inactive') }}</span>
+                                <span class="mt-0.5 inline-flex items-center gap-1 text-xs text-secondary-medium dark:text-ink-muted"><flux:icon.pause-circle variant="micro" class="size-3.5" aria-hidden="true" />{{ __('reports.matrix.inactive') }}</span>
                             @endunless
                         </td>
                         <td class="{{ $bodyCell }}">
@@ -100,9 +100,9 @@
                             @else
                                 {{ $this->matrixNumber($row['target']) }}{{ $unit === '%' ? '%' : '' }}
                             @endif
-                            <span class="block text-[11px] font-normal text-secondary-medium dark:text-ink-muted" dir="auto">{{ $row['measure']->label() }}@if ($row['is_cumulative']) · {{ __('reports.matrix.cumulative') }}@endif</span>
+                            <span class="block text-xs font-normal text-secondary-medium dark:text-ink-muted" dir="auto">{{ $row['measure']->label() }}@if ($row['is_cumulative']) · {{ __('reports.matrix.cumulative') }}@endif</span>
                             @if ($row['is_cumulative'] && $row['is_group'])
-                                <span class="block text-[11px] font-normal text-secondary-medium dark:text-ink-muted">{{ __('reports.matrix.cumulative_group_note') }}</span>
+                                <span class="block text-xs font-normal text-secondary-medium dark:text-ink-muted">{{ __('reports.matrix.cumulative_group_note') }}</span>
                             @endif
                         </td>
 
@@ -119,7 +119,7 @@
                                             <span dir="ltr">{{ $cell['not_measured'] ? __('reports.matrix.not_measured') : $this->matrixNumber($cell['value']).($unit === '%' ? '%' : '') }}</span>
                                         </span>
                                         @if ($cell['numerator'] !== null && $row['measure'] === IndicatorMeasure::Percentage && $row['denominator_basis']?->value === 'fixed')
-                                            <span class="block text-[11px] font-normal text-secondary-medium dark:text-ink-muted" dir="ltr">{{ $this->matrixNumber($cell['numerator']) }}</span>
+                                            <span class="block text-xs font-normal text-secondary-medium dark:text-ink-muted" dir="ltr">{{ $this->matrixNumber($cell['numerator']) }}</span>
                                         @endif
                                         @break
                                     @case(MatrixCellState::Pending)
@@ -156,7 +156,7 @@
                                 <span dir="ltr">{{ $this->matrixNumber($row['total']) }}{{ $unit === '%' ? '%' : '' }}</span>
                             @endif
                             @if ($row['excluded'] > 0)
-                                <span class="block text-[11px] font-normal text-secondary-medium dark:text-ink-muted">{{ __('reports.matrix.not_poolable', ['count' => $row['excluded']]) }}</span>
+                                <span class="block text-xs font-normal text-secondary-medium dark:text-ink-muted">{{ __('reports.matrix.not_poolable', ['count' => $row['excluded']]) }}</span>
                             @endif
                         </td>
                         <td class="{{ $bodyCell }} text-end tabular-nums" data-matrix-achieved>
@@ -164,7 +164,7 @@
                                 <span aria-hidden="true">—</span><span class="sr-only">{{ __('reports.matrix.no_achieved') }}</span>
                             @else
                                 <span dir="ltr">{{ $this->matrixNumber($row['achieved']) }}%</span>
-                                <span class="block text-[11px] font-normal text-secondary-medium dark:text-ink-muted" dir="ltr">{{ __('reports.matrix.of_target', ['total' => $this->matrixNumber($row['total']).($unit === '%' ? '%' : ''), 'target' => $this->matrixNumber($row['target']).($unit === '%' ? '%' : '')]) }}</span>
+                                <span class="block text-xs font-normal text-secondary-medium dark:text-ink-muted" dir="ltr">{{ __('reports.matrix.of_target', ['total' => $this->matrixNumber($row['total']).($unit === '%' ? '%' : ''), 'target' => $this->matrixNumber($row['target']).($unit === '%' ? '%' : '')]) }}</span>
                             @endif
                         </td>
                     </tr>

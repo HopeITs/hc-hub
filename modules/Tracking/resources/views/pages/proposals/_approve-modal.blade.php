@@ -92,7 +92,7 @@
                                 <li class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm" data-test="approve-preview-{{ $previewProject['outcome'] }}">
                                     <span class="min-w-0 flex-1 font-medium text-secondary-dark dark:text-ink" dir="auto">{{ $previewProject['name'] }}</span>
                                     <span @class([
-                                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap',
+                                        'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap',
                                         'bg-status-good-soft text-status-good' => $previewProject['outcome'] === 'funded',
                                         'bg-status-warn-soft text-status-warn' => $previewProject['outcome'] === 'waiting',
                                         'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink' => in_array($previewProject['outcome'], ['extended', 'skipped'], true),

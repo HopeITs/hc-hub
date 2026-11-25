@@ -74,7 +74,7 @@ function uiDebtCounts(): array
 test('UI debt never goes up', function () {
     $ceilings = [
         'smallFonts' => 0,
-        'arbitraryTextSizes' => 319,
+        'arbitraryTextSizes' => 18,
         'rawButtons' => 639,
         'importantOverrides' => 566,
         'rawHexColours' => 89,

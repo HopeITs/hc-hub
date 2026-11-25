@@ -66,7 +66,7 @@
             @else
                 <time datetime="{{ $task->due_date->toDateString() }}" @class(['font-bold text-status-critical' => $isOverdue, $inkText => ! $isOverdue])>{{ $task->due_date->translatedFormat(__('formats.date')) }}</time>
                 @if ($isOverdue)
-                    <span class="ms-1 text-[10px] font-bold tracking-wide text-status-critical uppercase">{{ __('proposals.overdue') }}</span>
+                    <span class="ms-1 text-xs font-bold tracking-wide text-status-critical uppercase">{{ __('proposals.overdue') }}</span>
                 @endif
             @endif
         </span>

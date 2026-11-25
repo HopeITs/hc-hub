@@ -7,7 +7,7 @@
      The full label "Submitted (On hold)" is x-ui.enum-badge's job, through
      Proposal::statusLabel(). --}}
 <span
-    {{ $attributes->class('inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] font-semibold whitespace-nowrap '.\App\Enums\StatusTone::Warn->badgeClasses()) }}
+    {{ $attributes->class('inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-semibold whitespace-nowrap '.\App\Enums\StatusTone::Warn->badgeClasses()) }}
     data-tone="warn"
     data-test="on-hold-chip"
 >

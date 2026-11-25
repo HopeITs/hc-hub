@@ -139,7 +139,7 @@
                                             {{-- secondary-light is 2.69:1 on white. The
                                                  "not yet" signal is the hollow dot, not a
                                                  colour nobody can read. --}}
-                                            <span class="text-[11px] tabular-nums whitespace-nowrap {{ $mutedText }}">
+                                            <span class="text-xs tabular-nums whitespace-nowrap {{ $mutedText }}">
                                                 <span class="sr-only">{{ $node['label'] }}: </span>
                                                 @if ($node['date'] === null)
                                                     <span class="sr-only">{{ __('transfers.not_yet_assigned') }}</span>
@@ -180,7 +180,7 @@
                             <div class="min-w-0">
                                 <div class="flex items-end justify-between gap-4">
                                     <p class="text-2xl leading-none font-extrabold tracking-tight tabular-nums {{ $inkText }}">
-                                        {{ $this->amount($promised) }}<span class="ms-1.5 text-[11px] font-bold tracking-normal {{ $mutedText }}">{{ $sentCurrency->value }}</span>
+                                        {{ $this->amount($promised) }}<span class="ms-1.5 text-xs font-bold tracking-normal {{ $mutedText }}">{{ $sentCurrency->value }}</span>
                                     </p>
 
                                     <div class="flex items-center gap-1.5">

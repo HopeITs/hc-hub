@@ -211,7 +211,7 @@ new #[Layout('layouts::desk'), Title('titles.report')] class extends Component {
             </span>
             @if ($report->monthlyReport !== null)
                 {{-- A mirror is changed only on its monthly report (contracts §13). --}}
-                <a href="{{ route('monthly-reports.show', $report->monthlyReport) }}" wire:navigate class="inline-flex items-center gap-1 rounded-md border border-secondary-light px-2 py-0.5 text-[11px] font-semibold hover:bg-secondary-soft dark:border-line-strong dark:hover:bg-white/[0.06]" data-monthly-report-chip="{{ $report->id }}">
+                <a href="{{ route('monthly-reports.show', $report->monthlyReport) }}" wire:navigate class="inline-flex items-center gap-1 rounded-md border border-secondary-light px-2 py-0.5 text-xs font-semibold hover:bg-secondary-soft dark:border-line-strong dark:hover:bg-white/[0.06]" data-monthly-report-chip="{{ $report->id }}">
                     <flux:icon.calendar-days variant="micro" class="size-3" aria-hidden="true" />
                     {{ __('reports.monthly_report_chip') }}
                 </a>

@@ -518,9 +518,9 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
                         </div>
 
                         <span @class([
-                            'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+                            'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap',
                             'bg-status-good-soft text-status-good' => $city->is_active,
-                            'bg-secondary-soft text-secondary-medium dark:bg-surface-2 dark:text-ink-muted' => ! $city->is_active,
+                            'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink-muted' => ! $city->is_active,
                         ]) title="{{ $city->is_active ? __('cities.hr_open') : __('cities.hr_closed') }}">
                             {{ $city->is_active ? __('cities.hr_open_short') : __('cities.hr_closed_short') }}
                         </span>
@@ -554,7 +554,7 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
                                 <div class="h-full bg-status-active" style="width: {{ $openPct }}%"></div>
                                 <div class="h-full bg-secondary-light dark:bg-ink-faint/60" style="width: {{ 100 - $openPct }}%"></div>
                             </div>
-                            <div class="mt-1 flex items-center justify-between text-[11px] text-secondary-medium dark:text-ink-muted">
+                            <div class="mt-1 flex items-center justify-between text-xs text-secondary-medium dark:text-ink-muted">
                                 <span>{{ $cityStats['open'] }} {{ __('cities.open') }}</span>
                                 <span>{{ $cityStats['closed'] }} {{ __('cities.closed') }}</span>
                             </div>

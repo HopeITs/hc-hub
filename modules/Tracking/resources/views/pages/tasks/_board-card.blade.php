@@ -112,7 +112,7 @@
                                         />
                                     @endforeach
                                     @if ($boardAssignees->count() > 3)
-                                        <span title="{{ $boardAssignees->skip(3)->map->name->implode(', ') }}" class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-soft text-[10px] font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
+                                        <span title="{{ $boardAssignees->skip(3)->map->name->implode(', ') }}" class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-soft text-xs font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
                                             +{{ $boardAssignees->count() - 3 }}
                                         </span>
                                     @endif
@@ -138,7 +138,7 @@
                                 </span>
                             @endif
 
-                            <div @class(['inline-flex items-center gap-1 rounded-full px-2 py-1 font-semibold', 'bg-status-critical-soft text-primary dark:text-status-critical' => $isOverdue, 'bg-secondary-soft text-secondary-medium dark:bg-white/10 dark:text-ink-muted' => ! $isOverdue])>
+                            <div @class(['inline-flex items-center gap-1 rounded-full px-2 py-1 font-semibold', 'bg-status-critical-soft text-primary dark:text-status-critical' => $isOverdue, 'bg-secondary-soft text-secondary-dark dark:bg-white/10 dark:text-ink-muted' => ! $isOverdue])>
                                 {{ FluxMarkup::icon('calendar-days', 'micro', 'size-3 shrink-0') }}
                                 @if ($isDueDateLocked)
                                     {{-- Plain text: a greyed-out date box reads as broken to someone who may only look. --}}
@@ -164,7 +164,7 @@
                                     type="button"
                                     x-on:click="subtasksOpen[{{ $task->id }}] = !subtasksOpen[{{ $task->id }}]"
                                     :aria-expanded="!!subtasksOpen[{{ $task->id }}]"
-                                    class="inline-flex items-center gap-1 rounded-full bg-secondary-soft px-2 py-1 font-semibold text-secondary-medium hover:bg-secondary-light/60 dark:bg-white/10 dark:text-ink-muted dark:hover:bg-surface-2"
+                                    class="inline-flex items-center gap-1 rounded-full bg-secondary-soft px-2 py-1 font-semibold text-secondary-dark hover:bg-secondary-light/60 dark:bg-white/10 dark:text-ink-muted dark:hover:bg-surface-2"
                                     :aria-label="subtasksOpen[{{ $task->id }}] ? {{ Js::from(__('tasks.hide_subtasks')) }} : {{ Js::from(__('tasks.show_subtasks')) }}"
                                     data-test="task-board-subtasks-toggle-{{ $task->id }}"
                                 >
@@ -201,7 +201,7 @@
                             </button>
                                     @endif
                                     {{ FluxMarkup::statusPill($subtask->status, 'shrink-0') }}
-                                    <div class="basis-full ps-7 text-[11px] text-secondary-medium dark:text-ink-muted">
+                                    <div class="basis-full ps-7 text-xs text-secondary-medium dark:text-ink-muted">
                                         {{ $boardSubtaskAssignees->isEmpty() ? __('common.not_assigned') : $boardSubtaskAssignees->map->name->implode(', ') }}
                                         @if ($subtask->due_date !== null)
                                             · {{ $subtask->due_date->translatedFormat(__('formats.date_short')) }}
@@ -249,12 +249,12 @@
                                                 </span>
                                             @else
                                                 @foreach ($boardDraftAssignees->take(3) as $userOption)
-                                                    <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-dark text-[10px] font-semibold text-white ring-2 ring-white dark:bg-surface-3 dark:ring-surface-1">
+                                                    <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-dark text-xs font-semibold text-white ring-2 ring-white dark:bg-surface-3 dark:ring-surface-1">
                                                         {{ Illuminate\Support\Str::of($userOption['name'])->explode(' ')->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('') }}
                                                     </span>
                                                 @endforeach
                                                 @if ($boardDraftAssignees->count() > 3)
-                                                    <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-soft text-[9px] font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
+                                                    <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-soft text-xs font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
                                                         +{{ $boardDraftAssignees->count() - 3 }}
                                                     </span>
                                                 @endif
@@ -266,14 +266,14 @@
                                         wire:model="subtaskDrafts.{{ $task->id }}.due_date"
                                         value="{{ $boardSubtaskDraft['due_date'] }}"
                                         aria-label="{{ __('tasks.due_date_2') }}"
-                                        class="w-24 shrink-0 rounded border-0 bg-transparent p-0.5 text-[11px] tabular-nums text-secondary-medium focus:ring-1 focus:ring-secondary-light focus:outline-none dark:text-ink-muted"
+                                        class="w-24 shrink-0 rounded border-0 bg-transparent p-0.5 text-xs tabular-nums text-secondary-medium focus:ring-1 focus:ring-secondary-light focus:outline-none dark:text-ink-muted"
                                         data-test="task-board-subtask-due-date-{{ $task->id }}"
                                     />
 
                                     <select
                                         wire:model="subtaskDrafts.{{ $task->id }}.priority"
                                         aria-label="{{ __('tasks.priority') }}"
-                                        class="shrink-0 rounded-md border border-secondary-soft bg-white px-1 py-0.5 text-[11px] text-secondary-dark dark:border-line dark:bg-surface-1 dark:text-ink"
+                                        class="shrink-0 rounded-md border border-secondary-soft bg-white px-1 py-0.5 text-xs text-secondary-dark dark:border-line dark:bg-surface-1 dark:text-ink"
                                         data-test="task-board-subtask-priority-{{ $task->id }}"
                                     >
                                         @foreach (TaskPriority::cases() as $priorityCase)

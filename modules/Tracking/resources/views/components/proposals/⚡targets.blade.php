@@ -760,7 +760,7 @@ new class extends Component {
                                             @endif
                                             <span class="min-w-0 {{ $inkText }}" dir="auto">{{ $instance->libraryIndicator?->localizedName() ?? $instance->name }}</span>
                                             @if ($instance->library_indicator_id === null)
-                                                <span class="inline-flex items-center gap-1 rounded-full border border-status-critical px-2 py-0.5 text-[11px] font-semibold text-status-critical" data-badge="not-linked">
+                                                <span class="inline-flex items-center gap-1 rounded-full border border-status-critical px-2 py-0.5 text-xs font-semibold text-status-critical" data-badge="not-linked">
                                                     <flux:icon.link-slash variant="micro" class="size-3" aria-hidden="true" />
                                                     {{ __('targets.not_linked_to_library') }}
                                                 </span>
@@ -802,7 +802,7 @@ new class extends Component {
                                     </header>
 
                                     @forelse ($group['levels'] as $level)
-                                        <p class="px-3 pt-2 text-[11px] font-semibold {{ $mutedText }}">{{ __('indicator_library.level_kinds.'.$level['kind']) }}</p>
+                                        <p class="px-3 pt-2 text-xs font-semibold {{ $mutedText }}">{{ __('indicator_library.level_kinds.'.$level['kind']) }}</p>
                                         <ul class="divide-y divide-secondary-soft dark:divide-line">
                                             @foreach ($level['entries'] as $entry)
                                                 @php
@@ -811,7 +811,7 @@ new class extends Component {
                                                 <li class="flex items-start gap-2 px-3 py-2" wire:key="entry-{{ $entry->id }}" data-entry="{{ $entry->id }}">
                                                     <div class="min-w-0 flex-1">
                                                         <p class="text-sm {{ $inkText }}" dir="auto">{{ $entry->localizedName() }}</p>
-                                                        <p class="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[11px] {{ $mutedText }}">
+                                                        <p class="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs {{ $mutedText }}">
                                                             <bdi dir="ltr" class="font-mono">{{ $entry->code }}</bdi>
                                                             <span aria-hidden="true">·</span>
                                                             <span>{{ $entry->measure->label() }}@if ($entry->unit !== null) ({{ $entry->unit }})@endif</span>
@@ -827,7 +827,7 @@ new class extends Component {
                                                     </div>
 
                                                     @if ($nodes === [])
-                                                        <span class="shrink-0 text-[11px] {{ $mutedText }}">{{ __('targets.no_compatible_node') }}</span>
+                                                        <span class="shrink-0 text-xs {{ $mutedText }}">{{ __('targets.no_compatible_node') }}</span>
                                                     @else
                                                         <flux:dropdown position="bottom" align="end">
                                                             <flux:button size="xs" icon="plus" :aria-label="__('targets.attach_entry', ['code' => $entry->code])">{{ __('targets.attach') }}</flux:button>

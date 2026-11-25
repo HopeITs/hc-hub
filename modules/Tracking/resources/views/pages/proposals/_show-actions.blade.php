@@ -5,7 +5,7 @@
         :label="$this->proposal->statusLabel()"
         :tone="$this->proposal->isOnHold() ? \App\Enums\StatusTone::Warn : null"
     />
-    <span class="rounded-md border border-secondary-light px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">
+    <span class="rounded-md border border-secondary-light px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:text-ink-muted">
         {{ $this->proposal->phase->label() }}
     </span>
     @can('update', $this->proposal)

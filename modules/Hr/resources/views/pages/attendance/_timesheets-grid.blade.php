@@ -105,7 +105,7 @@
                                     @foreach ($days as $day)
                                         <th scope="col" class="px-px py-2 text-center font-semibold tabular-nums">
                                             <span class="block leading-tight">{{ $day['n'] }}</span>
-                                            <span class="block text-[10px] font-normal leading-tight">{{ $day['w'] }}</span>
+                                            <span class="block text-xs font-normal leading-tight">{{ $day['w'] }}</span>
                                         </th>
                                     @endforeach
                                 </tr>

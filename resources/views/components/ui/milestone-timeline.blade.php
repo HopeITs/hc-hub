@@ -48,7 +48,7 @@
                     @foreach ($ticks as $tick)
                         <span class="absolute bottom-2 -translate-x-1/2 type-meta whitespace-nowrap text-secondary-medium tabular-nums rtl:translate-x-1/2 dark:text-ink-muted" style="inset-inline-start: {{ $tick['at'] }}%">{{ $tick['label'] }}</span>
                     @endforeach
-                    <span class="absolute bottom-1.5 -translate-x-1/2 rounded-full bg-primary dark:bg-ink dark:text-surface-0 px-2 py-0.5 text-[0.6875rem] font-bold whitespace-nowrap text-white rtl:translate-x-1/2" style="inset-inline-start: {{ $todayAt }}%">{{ __('ui.today') }}</span>
+                    <span class="absolute bottom-1.5 -translate-x-1/2 rounded-full bg-primary dark:bg-ink dark:text-surface-0 px-2 py-0.5 text-xs font-bold whitespace-nowrap text-white rtl:translate-x-1/2" style="inset-inline-start: {{ $todayAt }}%">{{ __('ui.today') }}</span>
                 </div>
                 <span></span>
             </div>

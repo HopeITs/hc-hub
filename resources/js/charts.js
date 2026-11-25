@@ -190,13 +190,13 @@ function buildOptions(config) {
         categories: config.categories,
         axisBorder: { show: false },
         axisTicks: { show: false },
-        labels: { style: { colors: text, fontSize: '11px' }, formatter: config.horizontal ? format.axis : undefined },
+        labels: { style: { colors: text, fontSize: '12px' }, formatter: config.horizontal ? format.axis : undefined },
         tooltip: { enabled: false },
         ...(config.horizontal ? valueAxisBounds : {}),
     };
     options.yaxis = {
         labels: {
-            style: { colors: text, fontSize: '11px' },
+            style: { colors: text, fontSize: '12px' },
             formatter: config.horizontal ? undefined : format.axis,
             maxWidth: 120,
         },

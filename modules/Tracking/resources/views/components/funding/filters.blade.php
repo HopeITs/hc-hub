@@ -25,7 +25,7 @@
     >
         {{ __('finance_tables.filters') }}
         @if ($count > 0)
-            <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[0.6875rem] font-bold leading-5 tabular-nums text-white dark:bg-brand" data-filter-count>{{ $count }}</span>
+            <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold leading-5 tabular-nums text-white dark:bg-brand" data-filter-count>{{ $count }}</span>
         @endif
     </x-ui.button>
 

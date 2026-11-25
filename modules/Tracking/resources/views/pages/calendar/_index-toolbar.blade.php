@@ -42,7 +42,7 @@
                                     <span class="min-w-0 flex-1 truncate">{{ __($labelKey) }}</span>
                                     @if ($$showProp)<flux:icon.check class="size-4 shrink-0 text-primary dark:text-brand-text" />@endif
                                 </button>
-                                <button type="button" wire:click="focusOnlyType('{{ $typeKey }}')" class="me-1 shrink-0 cursor-pointer rounded px-1.5 py-1 text-[10px] font-semibold text-secondary-medium opacity-0 hover:bg-white group-hover:opacity-100 dark:text-ink-muted dark:hover:bg-white/[0.06]" data-test="calendar-filter-only-{{ $typeKey }}">
+                                <button type="button" wire:click="focusOnlyType('{{ $typeKey }}')" class="me-1 shrink-0 cursor-pointer rounded px-1.5 py-1 text-xs font-semibold text-secondary-medium opacity-0 hover:bg-white group-hover:opacity-100 dark:text-ink-muted dark:hover:bg-white/[0.06]" data-test="calendar-filter-only-{{ $typeKey }}">
                                     {{ __('calendar.only') }}
                                 </button>
                             </div>
@@ -63,7 +63,7 @@
                                     <span class="min-w-0 flex-1 truncate">{{ __($labelKey) }}</span>
                                     @if ($$showProp)<flux:icon.check class="size-4 shrink-0 text-primary dark:text-brand-text" />@endif
                                 </button>
-                                <button type="button" wire:click="focusOnlyType('{{ $typeKey }}')" class="me-1 shrink-0 cursor-pointer rounded px-1.5 py-1 text-[10px] font-semibold text-secondary-medium opacity-0 hover:bg-white group-hover:opacity-100 dark:text-ink-muted dark:hover:bg-white/[0.06]" data-test="calendar-filter-only-{{ $typeKey }}">
+                                <button type="button" wire:click="focusOnlyType('{{ $typeKey }}')" class="me-1 shrink-0 cursor-pointer rounded px-1.5 py-1 text-xs font-semibold text-secondary-medium opacity-0 hover:bg-white group-hover:opacity-100 dark:text-ink-muted dark:hover:bg-white/[0.06]" data-test="calendar-filter-only-{{ $typeKey }}">
                                     {{ __('calendar.only') }}
                                 </button>
                             </div>
@@ -98,7 +98,7 @@
                     <flux:icon.user variant="micro" class="size-4" />
                     <span class="hidden text-sm sm:inline">{{ __('calendar.filter_by_responsible') }}</span>
                     @if ($selectedFilterCount > 0)
-                        <span class="inline-flex min-w-4 items-center justify-center rounded-full bg-primary dark:bg-white/10 dark:text-ink px-1 text-[10px] font-semibold text-white" data-test="calendar-responsible-filter-count">{{ $selectedFilterCount }}</span>
+                        <span class="inline-flex min-w-4 items-center justify-center rounded-full bg-primary dark:bg-white/10 dark:text-ink px-1 text-xs font-semibold text-white" data-test="calendar-responsible-filter-count">{{ $selectedFilterCount }}</span>
                     @endif
                 </x-slot:trigger>
 

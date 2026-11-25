@@ -96,19 +96,19 @@
                                                 @if ($line['unlinked'] || $line['needsMonths'] || $line['missingFixedDenominator'])
                                                     <span class="mt-1 flex flex-wrap gap-1">
                                                         @if ($line['unlinked'])
-                                                            <span class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-[11px] font-bold text-status-critical" data-template-flag="unlinked-{{ $line['id'] }}">
+                                                            <span class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-bold text-status-critical" data-template-flag="unlinked-{{ $line['id'] }}">
                                                                 <flux:icon name="link-slash" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
                                                                 {{ __('report_templates.link_library_first') }}
                                                             </span>
                                                         @endif
                                                         @if ($line['needsMonths'])
-                                                            <span class="inline-flex items-center gap-1 rounded-full bg-status-warn-soft px-2 py-0.5 text-[11px] font-bold text-status-warn" data-template-flag="months-{{ $line['id'] }}">
+                                                            <span class="inline-flex items-center gap-1 rounded-full bg-status-warn-soft px-2 py-0.5 text-xs font-bold text-status-warn" data-template-flag="months-{{ $line['id'] }}">
                                                                 <flux:icon name="calendar" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
                                                                 {{ __('report_templates.choose_measurement_months') }}
                                                             </span>
                                                         @endif
                                                         @if ($line['missingFixedDenominator'])
-                                                            <span class="inline-flex items-center gap-1 rounded-full bg-status-warn-soft px-2 py-0.5 text-[11px] font-bold text-status-warn" data-template-flag="denominator-{{ $line['id'] }}">
+                                                            <span class="inline-flex items-center gap-1 rounded-full bg-status-warn-soft px-2 py-0.5 text-xs font-bold text-status-warn" data-template-flag="denominator-{{ $line['id'] }}">
                                                                 <flux:icon name="exclamation-circle" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
                                                                 {{ __('report_templates.missing_fixed_denominator') }}
                                                             </span>
@@ -180,7 +180,7 @@
                                                 @if ($target['code'] !== null)
                                                     <span class="type-meta text-secondary-medium dark:text-ink-muted" dir="ltr">{{ $target['code'] }}</span>
                                                 @endif
-                                                <span class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-[11px] font-bold text-status-critical">
+                                                <span class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-xs font-bold text-status-critical">
                                                     <flux:icon name="link-slash" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
                                                     {{ __('report_templates.link_library_first') }}
                                                 </span>
@@ -247,7 +247,7 @@
                                             <span dir="auto">{{ $row['statement'] }}</span>
                                             @if ($row['adjusted'])
                                                 <span class="mt-1 flex">
-                                                    <span class="inline-flex items-center gap-1 rounded-full bg-status-warn-soft px-2 py-0.5 text-[11px] font-bold text-status-warn" data-calendar-adjusted="{{ $row['id'] }}">
+                                                    <span class="inline-flex items-center gap-1 rounded-full bg-status-warn-soft px-2 py-0.5 text-xs font-bold text-status-warn" data-calendar-adjusted="{{ $row['id'] }}">
                                                         <flux:icon name="adjustments-horizontal" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
                                                         {{ __('report_templates.calendar.'.$calendarScope) }}
                                                     </span>

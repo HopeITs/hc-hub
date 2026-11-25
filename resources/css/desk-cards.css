@@ -12,7 +12,7 @@
      * Figure above, boundary dot on the thread, label and late dots below. */
     .dk-flow-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0; padding: 0 0 4px; font-size: 13.5px; color: var(--ink-2); }
     .dk-flow-head strong { color: var(--ink); font-weight: 800; }
-    .dk-flow-you { color: var(--bad); font-weight: 700; }
+    .dk-flow-you { color: var(--bad-ink); font-weight: 700; }
     .dk-flow-ok { color: var(--good); font-weight: 700; }
 
     .dk-flow { list-style: none; margin: 0; padding: 4px 0 0; display: flex; align-items: flex-start; min-width: 0; }
@@ -49,7 +49,7 @@
     .dk-flow-tip li i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); }
     .dk-flow-tip li.dk-bad i { background: var(--bad); }
     .dk-flow-tip li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .dk-flow-tip li em { font-style: normal; font-size: var(--text-caption); color: var(--bad); }
+    .dk-flow-tip li em { font-style: normal; font-size: var(--text-caption); color: var(--bad-ink); }
     .dk-flow-tip .dk-is { margin: 6px 0 0; font-size: 12px; }
 
     /* Narrow card: the thread turns vertical, one stage a row. */
@@ -82,7 +82,7 @@
     .dk-todo-input { flex: 1; min-width: 0; height: 36px; padding-inline: 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--sunk); color: var(--ink); font-family: var(--font); font-size: 14px; transition: border-color .15s ease, background .15s ease; }
     .dk-todo-input::placeholder { color: var(--ink-3); }
     .dk-todo-input[aria-invalid="true"] { border-color: var(--bad); }
-    .dk-todo-err { margin: 0; font-size: 12.5px; color: var(--bad); }
+    .dk-todo-err { margin: 0; font-size: 12.5px; color: var(--bad-ink); }
     .dk-todo-empty { margin: auto 0; text-align: center; font-size: 13.5px; color: var(--ink-3); }
     .dk-todo-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: auto; scrollbar-width: thin; margin-inline: -4px; padding-inline: 4px; }
     .dk-todo-list { list-style: none; margin: 0; padding: 0; }
@@ -119,7 +119,7 @@
     .dk-od-t { font-size: 14px; font-weight: 700; color: var(--ink); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-od-t:hover { text-decoration: underline; }
     .dk-od-main .dk-is { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px; }
-    .dk-od-late { justify-self: end; color: var(--bad); font-size: 13px; font-weight: 800; white-space: nowrap; }
+    .dk-od-late { justify-self: end; color: var(--bad-ink); font-size: 13px; font-weight: 800; white-space: nowrap; }
     @container pb (max-width: 419px) {
         .dk-od > li { grid-template-columns: minmax(0, 1fr) auto; }
         .dk-od-main { grid-column: 1 / -1; grid-row: 2; }
@@ -146,12 +146,12 @@
     .dk-focus-eyebrow { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--text-caption); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
     [lang="ar"] .dk-focus-eyebrow { letter-spacing: 0; text-transform: none; font-size: 12.5px; }
     .dk-focus-eyebrow .dk-sev { margin-top: 0; }
-    .dk-focus-latechip { padding: 1px 8px; border-radius: var(--radius-round); background: var(--bad-soft); color: var(--bad); letter-spacing: 0; text-transform: none; font-size: var(--text-caption); }
+    .dk-focus-latechip { padding: 1px 8px; border-radius: var(--radius-round); background: var(--bad-soft); color: var(--bad-ink); letter-spacing: 0; text-transform: none; font-size: var(--text-caption); }
     .dk-focus-title { margin: 0; font-size: clamp(18px, 2vw, 24px); font-weight: 800; line-height: 1.25; color: var(--ink); text-wrap: balance; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .dk-focus-ctx { margin: 0; font-size: 14px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-focus-meta { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; font-size: 13px; color: var(--ink-3); }
     .dk-focus-meta .dk-who { color: var(--ink-2); font-weight: 700; }
-    .dk-focus-meta .dk-bad { color: var(--bad); font-weight: 700; }
+    .dk-focus-meta .dk-bad { color: var(--bad-ink); font-weight: 700; }
     .dk-focus-acts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; padding-top: 8px; }
 
     .dk-focus-nav { display: flex; align-items: center; justify-content: center; gap: 8px; flex: none; }
@@ -197,7 +197,7 @@
     .dk-load-word { font-size: var(--text-caption); font-weight: 800; padding: 1px 7px; border-radius: var(--radius-round); white-space: nowrap; }
     .dk-load-word.dk-free { background: var(--good-soft); color: var(--good); }
     .dk-load-word.dk-busy { background: var(--warn-soft); color: var(--warn); }
-    .dk-load-word.dk-overloaded { background: var(--bad-soft); color: var(--bad); }
+    .dk-load-word.dk-overloaded { background: var(--bad-soft); color: var(--bad-ink); }
     .dk-load-bar { position: relative; height: 6px; border-radius: var(--radius-control); background: var(--line); overflow: hidden; }
     .dk-load-bar b, .dk-load-bar i { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: var(--radius-control); }
     .dk-load-bar b { background: var(--ink-3); }
@@ -229,7 +229,7 @@
     [lang="ar"] .dk-ph h2 { font-size: 13px; line-height: 20px; letter-spacing: 0; text-transform: none; }
     .dk-ph > .dk-pc { flex: none; margin: 0; margin-inline-start: 4px; min-width: 0; height: auto; padding: 0; border-radius: 0; background: none; color: var(--ink); font-size: 28px; font-weight: 800; line-height: 1; letter-spacing: -.02em; display: block; }
     .dk-panel[data-health="brand"] .dk-ph > .dk-pc { color: var(--brand-ink); }
-    .dk-panel[data-health="critical"] .dk-ph > .dk-pc { color: var(--bad); }
+    .dk-panel[data-health="critical"] .dk-ph > .dk-pc { color: var(--bad-ink); }
     .dk-ph .dk-iconbtn { flex: none; }
 
     .dk-ptools { padding: 0 var(--panel-pad) 8px; }
@@ -312,7 +312,7 @@
     /* Too narrow for dots beside a label: the head keeps the late count and the stage's figure turns red. */
     @container pb (max-width: 359px) {
         .dk-panel[data-rows="2"] .dk-pb .dk-flow-late { display: none; }
-        .dk-panel[data-rows="2"] .dk-pb .dk-flow-hot .dk-flow-n { color: var(--bad); }
+        .dk-panel[data-rows="2"] .dk-pb .dk-flow-hot .dk-flow-n { color: var(--bad-ink); }
     }
 
     .dk-panel[data-rows="2"] .dk-pb > .dk-glance { row-gap: 6px; }

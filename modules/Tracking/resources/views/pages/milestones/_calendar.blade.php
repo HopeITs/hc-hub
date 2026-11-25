@@ -25,11 +25,11 @@
         <flux:dropdown position="bottom-start" class="filter-picker">
             <x-ui.button size="sm" icon:trailing="chevron-down" data-test="milestone-calendar-view-mode-button">{{ __('calendar.'.$viewMode) }}</x-ui.button>
             <flux:menu class="filter-menu">
-                <div class="px-2 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-secondary-medium dark:text-ink-muted">{{ __('calendar.time_period') }}</div>
+                <div class="px-2 pb-1 pt-1 text-xs font-semibold uppercase tracking-[0.1em] text-secondary-medium dark:text-ink-muted">{{ __('calendar.time_period') }}</div>
                 @foreach ([['day', 'D'], ['four_days', '4'], ['week', 'W'], ['month', 'M']] as [$periodKey, $shortcut])
                     <flux:menu.item wire:click="setViewMode('{{ $periodKey }}')" data-test="milestone-calendar-view-mode-{{ $periodKey }}">
                         <span class="min-w-0 flex-1 truncate">{{ __('calendar.'.$periodKey) }}</span>
-                        <kbd class="me-1 rounded border border-secondary-soft px-1.5 py-0.5 text-[10px] font-semibold dark:border-line">{{ $shortcut }}</kbd>
+                        <kbd class="me-1 rounded border border-secondary-soft px-1.5 py-0.5 text-xs font-semibold dark:border-line">{{ $shortcut }}</kbd>
                         @if ($viewMode === $periodKey)<flux:icon.check class="size-4 shrink-0 text-primary dark:text-brand-text" />@endif
                     </flux:menu.item>
                 @endforeach
@@ -79,7 +79,7 @@
                         </span>
 
                         @foreach ($dayMilestones as $milestone)
-                            <div data-milestone-chip wire:key="milestone-calendar-chip-{{ $milestone->id }}" class="group flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] {{ $markerTone($milestone) }}">
+                            <div data-milestone-chip wire:key="milestone-calendar-chip-{{ $milestone->id }}" class="group flex items-center gap-1 rounded px-1.5 py-0.5 text-xs {{ $markerTone($milestone) }}">
                                 <flux:icon.flag variant="micro" class="size-3 shrink-0" />
                                 <a href="{{ route('milestones.show', $milestone) }}" wire:navigate class="min-w-0 flex-1 truncate text-start font-medium hover:underline" data-test="milestone-calendar-chip-{{ $milestone->id }}">
                                     {{ $milestone->name }}
@@ -120,7 +120,7 @@
                     </div>
                 @endforeach
 
-                <div class="flex items-center justify-end border-e border-secondary-soft px-2 py-1.5 text-[11px] font-semibold text-secondary-medium dark:border-line dark:text-ink-muted">{{ __('calendar.all_day') }}</div>
+                <div class="flex items-center justify-end border-e border-secondary-soft px-2 py-1.5 text-xs font-semibold text-secondary-medium dark:border-line dark:text-ink-muted">{{ __('calendar.all_day') }}</div>
                 @foreach ($periodDays as $day)
                     @php $dayMilestones = $calendar['milestonesByDay']->get($day->toDateString(), new \Illuminate\Support\Collection); @endphp
                     <div
@@ -130,7 +130,7 @@
                         data-test="milestone-calendar-allday-{{ $day->toDateString() }}"
                     >
                         @foreach ($dayMilestones as $milestone)
-                            <div data-milestone-chip wire:key="milestone-calendar-period-chip-{{ $milestone->id }}" class="group flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] {{ $markerTone($milestone) }}">
+                            <div data-milestone-chip wire:key="milestone-calendar-period-chip-{{ $milestone->id }}" class="group flex items-center gap-1 rounded px-1.5 py-0.5 text-xs {{ $markerTone($milestone) }}">
                                 <flux:icon.flag variant="micro" class="size-3 shrink-0" />
                                 <a href="{{ route('milestones.show', $milestone) }}" wire:navigate class="min-w-0 flex-1 truncate text-start font-medium hover:underline" data-test="milestone-calendar-period-chip-{{ $milestone->id }}">
                                     {{ $milestone->name }}
@@ -151,7 +151,7 @@
             <div class="max-h-96 overflow-y-auto border-t border-secondary-soft dark:border-line" x-init="$el.scrollTop = Math.max(0, {{ $currentHour }} * 48 - 160)">
                 <div class="grid" style="{{ $gridColumns }}">
                     @for ($hour = 0; $hour < 24; $hour++)
-                        <div class="h-12 border-b border-e border-secondary-soft px-2 py-1 text-end text-[11px] text-secondary-medium dark:border-line dark:text-ink-muted">
+                        <div class="h-12 border-b border-e border-secondary-soft px-2 py-1 text-end text-xs text-secondary-medium dark:border-line dark:text-ink-muted">
                             {{ $hour === 0 ? '' : \Carbon\CarbonImmutable::today()->addHours($hour)->translatedFormat('ga') }}
                         </div>
                         @foreach ($periodDays as $day)

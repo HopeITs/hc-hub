@@ -445,7 +445,7 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
 ?>
 
 @php
-    $dropdownLabelClasses = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.1em] text-secondary-medium dark:text-ink-muted';
+    $dropdownLabelClasses = 'mb-1.5 block text-xs font-semibold uppercase tracking-[0.1em] text-secondary-medium dark:text-ink-muted';
     $canEditMilestone = auth()->user()->can('update', $this->milestone);
     $canMoveMilestone = $canEditMilestone || auth()->user()->can('updateProgress', $this->milestone);
     $canAddRelated = $this->milestone->proposal_id === null && auth()->user()->can('create', [Modules\Tracking\Models\Milestone::class, $this->milestone->project_id]);

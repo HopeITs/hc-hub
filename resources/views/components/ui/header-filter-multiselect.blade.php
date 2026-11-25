@@ -67,7 +67,7 @@
     x-on:keydown.escape.stop="open = false"
     x-on:click.outside="open = false"
 >
-    <label for="{{ $id }}" class="mb-1.5 block text-[11px] font-semibold uppercase leading-4 tracking-[0.1em] text-secondary-medium dark:text-ink-muted">
+    <label for="{{ $id }}" class="mb-1.5 block text-xs font-semibold uppercase leading-4 tracking-[0.1em] text-secondary-medium dark:text-ink-muted">
         {{ $label }}
     </label>
 
