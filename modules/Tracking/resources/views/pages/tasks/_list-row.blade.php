@@ -151,7 +151,7 @@
             @else
                 @foreach ($assignees->take(3) as $employee)
                     <div class="group/avatar relative" title="{{ $employee->name }}">
-                        <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-dark text-[11px] font-semibold text-white ring-2 ring-white transition-transform group-hover/row:ring-secondary-soft/40 dark:bg-surface-3 dark:ring-surface-1 dark:group-hover/row:ring-surface-2">
+                        <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-dark text-xs font-semibold text-white ring-2 ring-white transition-transform group-hover/row:ring-secondary-soft/40 dark:bg-surface-3 dark:ring-surface-1 dark:group-hover/row:ring-surface-2">
                             {{ Illuminate\Support\Str::of($employee->name)->explode(' ')->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('') }}
                         </span>
                         @if ($canUpdate)
@@ -168,7 +168,7 @@
                     </div>
                 @endforeach
                 @if ($assignees->count() > 3)
-                    <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-soft text-[10px] font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
+                    <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-soft text-xs font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
                         +{{ $assignees->count() - 3 }}
                     </span>
                 @endif

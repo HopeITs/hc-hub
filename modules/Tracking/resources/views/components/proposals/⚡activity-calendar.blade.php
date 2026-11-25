@@ -458,7 +458,7 @@ new class extends Component {
                         <tr>
                             @foreach ($months as $month)
                                 <th scope="col" @class([
-                                    'w-11 min-w-11 border-b border-secondary-soft px-0 pb-1.5 text-center text-[11px] font-semibold dark:border-line',
+                                    'w-11 min-w-11 border-b border-secondary-soft px-0 pb-1.5 text-center text-xs font-semibold dark:border-line',
                                     'text-secondary-dark dark:text-ink' => $month['inPeriod'],
                                     'text-secondary-light dark:text-ink-faint' => ! $month['inPeriod'],
                                 ]) abbr="{{ $month['title'] }}">{{ $month['label'] }}</th>
@@ -497,12 +497,12 @@ new class extends Component {
                                                 <span class="mt-0.5 flex flex-wrap items-center gap-1.5">
                                                     <span class="type-meta text-secondary-medium dark:text-ink-muted">{{ $row['kind']->label() }}</span>
                                                     @if ($calendar === [])
-                                                        <span class="inline-flex items-center gap-1 rounded-full bg-secondary-soft px-2 py-0.5 text-[11px] font-semibold text-secondary-dark dark:bg-surface-3 dark:text-ink" data-test="no-calendar-{{ $row['id'] }}">
+                                                        <span class="inline-flex items-center gap-1 rounded-full bg-secondary-soft px-2 py-0.5 text-xs font-semibold text-secondary-dark dark:bg-surface-3 dark:text-ink" data-test="no-calendar-{{ $row['id'] }}">
                                                             <flux:icon.calendar variant="micro" class="size-3" aria-hidden="true" />{{ __('results_framework.no_calendar') }}
                                                         </span>
                                                     @endif
                                                     @if ($row['isOverride'])
-                                                        <span class="inline-flex items-center rounded-full border border-secondary-light px-2 py-0.5 text-[11px] font-semibold text-secondary-dark dark:border-line-strong dark:text-ink" data-test="center-calendar-{{ $row['id'] }}">{{ __('results_framework.calendar_center_own') }}</span>
+                                                        <span class="inline-flex items-center rounded-full border border-secondary-light px-2 py-0.5 text-xs font-semibold text-secondary-dark dark:border-line-strong dark:text-ink" data-test="center-calendar-{{ $row['id'] }}">{{ __('results_framework.calendar_center_own') }}</span>
                                                         @if ($canEdit)
                                                             <x-ui.button tone="ghost" size="xs" icon="arrow-uturn-left" wire:click="confirmReset({{ $row['id'] }}, '{{ $row['version'] }}')" :aria-label="__('results_framework.calendar_reset_center')" data-test="reset-center-{{ $row['id'] }}" />
                                                         @endif

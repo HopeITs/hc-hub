@@ -22,12 +22,12 @@
     <div class="flex items-start gap-3">
         <div class="flex size-12 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-secondary-soft bg-board-head transition-transform group-hover:scale-105 dark:border-line dark:bg-surface-2">
             <flux:icon :name="$icon" variant="micro" class="size-4 text-secondary-medium dark:text-ink-muted" />
-            <span class="text-[10px] font-bold text-secondary-dark dark:text-ink">{{ \Illuminate\Support\Str::upper($media->type->value) }}</span>
+            <span class="text-xs font-bold text-secondary-dark dark:text-ink">{{ \Illuminate\Support\Str::upper($media->type->value) }}</span>
         </div>
 
         <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-semibold text-secondary-dark dark:text-ink" title="{{ $media->original_name }}">{{ $media->original_name }}</p>
-            <span class="mt-1.5 inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap {{ $categoryTone }}">
+            <span class="mt-1.5 inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ $categoryTone }}">
                 {{ $media->collection->label() }}
             </span>
         </div>

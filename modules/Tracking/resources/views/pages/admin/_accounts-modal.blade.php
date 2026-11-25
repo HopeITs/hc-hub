@@ -20,9 +20,9 @@
                 <x-slot:hint>
                     <span class="flex flex-col gap-0.5">
                         <span @class([
-                            'inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+                            'inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap',
                             'bg-status-good-soft text-status-good' => $editingAccountIsActive,
-                            'bg-secondary-soft text-secondary-medium dark:bg-surface-2 dark:text-ink-muted' => ! $editingAccountIsActive,
+                            'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink-muted' => ! $editingAccountIsActive,
                         ])>
                             {{ $editingAccountIsActive ? __('accounts.open') : __('accounts.closed') }}
                         </span>

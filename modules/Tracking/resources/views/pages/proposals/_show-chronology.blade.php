@@ -15,7 +15,7 @@
                     <div class="relative mt-6 pt-5">
                         @if ($chronology['todayPercent'] !== null)
                             <span class="pointer-events-none absolute inset-y-0 z-20 w-px bg-primary dark:bg-ink" style="inset-inline-start: {{ $chronology['todayPercent'] }}%" aria-hidden="true"></span>
-                            <span class="absolute top-0 z-20 -translate-x-1/2 text-[10px] font-bold tracking-wide text-status-critical dark:text-ink uppercase rtl:translate-x-1/2" style="inset-inline-start: {{ $chronology['todayPercent'] }}%">{{ __('common.today') }}</span>
+                            <span class="absolute top-0 z-20 -translate-x-1/2 text-xs font-bold tracking-wide text-status-critical dark:text-ink uppercase rtl:translate-x-1/2" style="inset-inline-start: {{ $chronology['todayPercent'] }}%">{{ __('common.today') }}</span>
                         @endif
 
                         {{-- The scrubbing cursor, drawn over every lane at once. --}}
@@ -33,10 +33,10 @@
                                     <polyline points="{{ $climb['line'] }}" class="chrono-line" />
                                     <line x1="0" x2="1000" y1="{{ $climb['ceiling'] }}" y2="{{ $climb['ceiling'] }}" class="chrono-ceiling" />
                                 </svg>
-                                <p class="pointer-events-none absolute end-0 text-[10px] font-semibold tabular-nums {{ $mutedText }}" style="inset-block-start: max(0px, calc({{ $climb['ceiling'] }}% - 1.05rem))">
+                                <p class="pointer-events-none absolute end-0 text-xs font-semibold tabular-nums {{ $mutedText }}" style="inset-block-start: max(0px, calc({{ $climb['ceiling'] }}% - 1.05rem))">
                                     {{ __('proposals.committed_ceiling', ['amount' => number_format($climb['committed'], 0), 'currency' => $climb['currency']]) }}
                                 </p>
-                                <p class="pointer-events-none absolute start-0 bottom-0 text-[10px] font-semibold tabular-nums text-funding">
+                                <p class="pointer-events-none absolute start-0 bottom-0 text-xs font-semibold tabular-nums text-funding">
                                     {{ __('proposals.landed_so_far', ['amount' => number_format($climb['landed'], 0), 'currency' => $climb['currency']]) }}
                                 </p>
                             </div>
@@ -54,12 +54,12 @@
                                     ]) style="inset-inline-start: {{ $event['at'] }}%" wire:key="chrono-{{ $event['key'] }}" data-lane="{{ $event['lane'] }}">
                                         <span @class(['flex flex-col gap-1', 'items-center' => $event['anchor'] === 'center', 'items-start' => $event['anchor'] === 'start', 'items-end' => $event['anchor'] === 'end'])>
                                             <span @class([
-                                                'text-[11px] font-bold whitespace-nowrap tabular-nums',
+                                                'text-xs font-bold whitespace-nowrap tabular-nums',
                                                 'text-funding' => $event['state'] === 'received',
                                                 'text-status-critical' => in_array($event['state'], ['overdue', 'failed'], true),
                                                 'text-status-warn' => $event['state'] === 'pending',
                                             ])>{{ number_format($event['amount'], 0) }} {{ $event['currency'] }}</span>
-                                            <span class="text-[10px] whitespace-nowrap tabular-nums {{ $mutedText }}">{{ $event['date']->translatedFormat(__('formats.date_short')) }}</span>
+                                            <span class="text-xs whitespace-nowrap tabular-nums {{ $mutedText }}">{{ $event['date']->translatedFormat(__('formats.date_short')) }}</span>
                                             @if ($event['lane'] > 0)
                                                 <span class="-my-1 w-px bg-secondary-light {{ $event['anchor'] === 'start' ? 'ms-[0.3125rem]' : ($event['anchor'] === 'end' ? 'me-[0.3125rem]' : '') }}" style="height: {{ $event['lane'] * 2 }}rem" aria-hidden="true"></span>
                                             @endif
@@ -121,7 +121,7 @@
                                     <a
                                         href="{{ route('projects.show', tap(new Project, fn ($project) => $project->id = $bar['id'])) }}"
                                         wire:navigate
-                                        class="absolute top-0 flex h-7 min-w-0 items-center rounded-sm bg-funding-soft px-2 text-[11px] font-semibold text-funding transition-colors hover:bg-funding hover:text-white dark:hover:text-surface-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:text-ink"
+                                        class="absolute top-0 flex h-7 min-w-0 items-center rounded-sm bg-funding-soft px-2 text-xs font-semibold text-funding transition-colors hover:bg-funding hover:text-white dark:hover:text-surface-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:text-ink"
                                         style="inset-inline-start: {{ $bar['start'] }}%; width: {{ $bar['width'] }}%"
                                     >
                                         <span class="truncate">{{ $bar['name'] }}</span>
@@ -146,7 +146,7 @@
                                             @if ($move['lane'] > 0)
                                                 <span class="-my-1 w-px bg-secondary-light {{ $move['anchor'] === 'start' ? 'ms-1' : ($move['anchor'] === 'end' ? 'me-1' : '') }}" style="height: {{ $move['lane'] * 1.25 }}rem" aria-hidden="true"></span>
                                             @endif
-                                            <span class="text-[10px] font-semibold whitespace-nowrap {{ $mutedText }}">{{ $move['status']->label() }}</span>
+                                            <span class="text-xs font-semibold whitespace-nowrap {{ $mutedText }}">{{ $move['status']->label() }}</span>
                                         </span>
                                     </li>
                                 @endforeach
@@ -170,14 +170,14 @@
                                 <dt class="type-label {{ $mutedText }}">{{ __('proposals.received_by_then') }}</dt>
                                 <dd class="mt-1 text-sm font-bold tabular-nums text-funding">
                                     <span x-text="readout.received">{{ number_format($arrivals['climbs'][0]['landed'], 0) }}</span>
-                                    <span class="text-[11px] font-semibold {{ $mutedText }}" x-text="currency">{{ $arrivals['climbs'][0]['currency'] }}</span>
+                                    <span class="text-xs font-semibold {{ $mutedText }}" x-text="currency">{{ $arrivals['climbs'][0]['currency'] }}</span>
                                 </dd>
                             </div>
                             <div>
                                 <dt class="type-label {{ $mutedText }}">{{ __('proposals.still_owed_then') }}</dt>
                                 <dd class="mt-1 text-sm font-bold tabular-nums {{ $inkText }}">
                                     <span x-text="readout.owed">{{ number_format(max(0, $arrivals['climbs'][0]['committed'] - $arrivals['climbs'][0]['landed']), 0) }}</span>
-                                    <span class="text-[11px] font-semibold {{ $mutedText }}" x-text="currency">{{ $arrivals['climbs'][0]['currency'] }}</span>
+                                    <span class="text-xs font-semibold {{ $mutedText }}" x-text="currency">{{ $arrivals['climbs'][0]['currency'] }}</span>
                                 </dd>
                             </div>
                             <div>
@@ -185,7 +185,7 @@
                                 <dd class="mt-1 text-sm font-bold tabular-nums {{ $inkText }}" x-text="readout.running">{{ $this->projects->count() }}/{{ $this->projects->count() }}</dd>
                             </div>
                         </dl>
-                        <p class="mt-2 text-[11px] {{ $mutedText }}">{{ __('proposals.scrub_hint') }}</p>
+                        <p class="mt-2 text-xs {{ $mutedText }}">{{ __('proposals.scrub_hint') }}</p>
                     @endif
 
                     <dl class="mt-8 grid grid-cols-2 gap-x-6 gap-y-4 border-t pt-5 {{ $hairline }} @2xl/detail:grid-cols-4">

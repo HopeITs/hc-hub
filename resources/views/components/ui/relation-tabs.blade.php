@@ -17,7 +17,7 @@
         >
             {{ $tab['label'] }}
             @if (($tab['count'] ?? null) !== null)
-                <span class="inline-flex min-w-5 items-center justify-center rounded-md border border-secondary-light px-1 text-[11px] font-semibold tabular-nums">{{ $tab['count'] }}</span>
+                <span class="inline-flex min-w-5 items-center justify-center rounded-md border border-secondary-light px-1 text-xs font-semibold tabular-nums">{{ $tab['count'] }}</span>
             @endif
         </button>
     @endforeach

@@ -453,3 +453,77 @@ test('status, funding and series tokens stay on the brand palette in both themes
             ->and($value)->not->toMatch('/--color-(?:green|blue|teal|amber|emerald|sky|yellow|orange)/');
     }
 })->with(['light' => 0, 'dark' => 1]);
+
+test('desk avatar tones and the HR avatar stay on the brand palette', function () {
+    $css = dirname(__DIR__, 2).'/resources/css/';
+    $workspace = file_get_contents($css.'desk-workspace.css');
+
+    preg_match_all('/\[data-tone="tone-\d"\][^{]*\{([^}]*)\}/', $workspace, $tones);
+
+    expect($tones[1])->not->toBeEmpty();
+
+    foreach ($tones[1] as $declaration) {
+        expect($declaration)->toMatch('/--av:\s*var\(--color-(?:primary|grey-ink|grey-ink-muted)\)/');
+    }
+
+    expect(file_get_contents($css.'tokens.css'))->toContain('--color-hr-avatar: var(--color-primary);');
+});
+
+test('critical text reads in the critical text token, not the red fill, in every stylesheet', function () {
+    foreach (glob(dirname(__DIR__, 2).'/resources/css/*.css') as $file) {
+        // D2: the red fill tokens are 2.3 : 1 on the dark surfaces, so no text colour may use them.
+        $redFill = str_starts_with(basename($file), 'desk')
+            ? '--bad|--color-status-critical|--color-primary|--color-red-\d+'
+            : '--bad|--brand|--color-brand|--color-status-critical|--color-primary|--color-red-\d+';
+
+        expect(preg_match('/(?<![-\w])color:\s*var\((?:'.$redFill.')\)/', file_get_contents($file)))->toBe(0, basename($file));
+    }
+
+    expect(file_get_contents(dirname(__DIR__, 2).'/resources/css/flux-overrides.css'))
+        ->toMatch('/:where\(\.dark\) \[data-flux-error\] \{\s*color: var\(--color-status-critical-text\);/');
+
+    expect(file_get_contents(dirname(__DIR__, 2).'/resources/css/desk.css'))->toContain('--bad-ink: var(--color-status-critical-text);');
+});
+
+test('no visible text is set below 12px', function () {
+    $small = [];
+    $roots = [dirname(__DIR__, 2).'/resources', dirname(__DIR__, 2).'/app', ...(glob(dirname(__DIR__, 2).'/modules/*', GLOB_ONLYDIR) ?: [])];
+
+    foreach ($roots as $root) {
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)) as $file) {
+            $path = str_replace('\\', '/', $file->getPathname());
+
+            if (! preg_match('/\.(css|js|php)$/', $path) || str_contains($path, 'print') || str_contains($path, '/vendor/')) {
+                continue;
+            }
+
+            if (preg_match('/text-\[(?:\d|10|11)(?:\.\d+)?px\]|text-\[0\.(?:[0-6]\d*|7[0-4]\d*)rem\]|font-size:\s*(?:\d|10|11)(?:\.\d+)?px|fontSize:\s*[\'"](?:\d|10|11)px/', file_get_contents($path))) {
+                $small[] = $path;
+            }
+        }
+    }
+
+    expect($small)->toBe([]);
+});
+
+test('the Flux accent and the zinc steps past the ink grey are brand greys in light, and dark keeps them on its own surfaces', function () {
+    [$light, $dark] = explode('.dark {', file_get_contents(dirname(__DIR__, 2).'/resources/css/tokens.css'), 2);
+
+    foreach (['accent', 'accent-content', 'zinc-800', 'zinc-900', 'zinc-950'] as $name) {
+        expect($light)->toMatch("/^\s*--color-{$name}: var\(--color-grey-(?:ink|ink-muted|ink-faint|line-strong|line)\);$/m");
+    }
+
+    expect($dark)->toContain('--color-accent: var(--color-ink);')
+        ->and($dark)->toMatch('/^\s*--color-zinc-900: var\(--color-surface-\d\);$/m');
+});
+
+test('annual plan weeks in progress and done differ by shape, not only by colour', function () {
+    $css = file_get_contents(dirname(__DIR__, 2).'/resources/css/annual-plan.css');
+
+    preg_match('/\.is-ongoing \{([^}]*)\}/', $css, $ongoing);
+    preg_match('/\.is-completed \{([^}]*)\}/', $css, $completed);
+
+    // Ongoing is an outline filled to half height; completed is the solid fill.
+    expect($ongoing[1] ?? '')->toContain('box-shadow: inset')->toContain('50%')
+        ->and($completed[1] ?? '')->not->toContain('box-shadow')->not->toContain('gradient');
+});

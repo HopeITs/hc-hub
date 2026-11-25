@@ -203,7 +203,7 @@
             {{-- Who is paying for this statement: the donor behind a proposal, or the plan year. --}}
             @foreach ($measurement['funders'] as $funder)
                 <span @class([
-                    'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-semibold',
+                    'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold',
                     'border-funding/30 bg-funding-soft text-funding' => $funder['type'] === 'donor',
                     'border-secondary-light text-secondary-medium dark:text-ink-muted' => $funder['type'] !== 'donor',
                 ])>
@@ -216,7 +216,7 @@
                 <span class="inline-flex items-center gap-1" aria-label="{{ __('results_framework.rating_split', ['green' => $rag['green'], 'amber' => $rag['amber'], 'red' => $rag['red']]) }}">
                     @foreach (['green' => 'bg-status-good', 'amber' => 'bg-status-warn', 'red' => 'bg-primary dark:bg-status-critical'] as $band => $fill)
                         @if ($rag[$band] > 0)
-                            <span class="inline-flex items-center gap-1 rounded-full bg-white px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">
+                            <span class="inline-flex items-center gap-1 rounded-full bg-white px-1.5 py-0.5 text-xs font-bold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">
                                 <span aria-hidden="true" class="size-1.5 rounded-full {{ $fill }}"></span>{{ $rag[$band] }}
                             </span>
                         @endif
@@ -341,7 +341,7 @@
                                     <li class="flex flex-1 flex-col gap-1.5 rounded-lg border border-secondary-soft px-2.5 py-2 @xl/directory:min-w-72 dark:border-line" wire:key="framework-target-{{ $targetRow['target']->id }}">
                                         <div class="flex min-w-0 items-center gap-2">
                                             <span @class([
-                                                'inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] font-semibold',
+                                                'inline-flex shrink-0 items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-semibold',
                                                 'border-funding/30 bg-funding-soft text-funding' => $targetRow['sourceType'] === 'proposal',
                                                 'border-secondary-light text-secondary-medium dark:text-ink-muted' => $targetRow['sourceType'] !== 'proposal',
                                             ])>
@@ -383,7 +383,7 @@
 
                                             <flux:tooltip :content="$targetRow['reports'] > 0 ? __('results_framework.count_reports_count_approved', ['count' => $targetRow['reports'], 'approved' => $targetRow['approved']]) : __('projects.target_no_reports_yet')">
                                                 <span @class([
-                                                    'ms-auto inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold tabular-nums',
+                                                    'ms-auto inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums',
                                                     'bg-status-good-soft text-status-good' => $targetRow['reports'] > 0,
                                                     'bg-status-warn-soft text-status-warn' => $targetRow['reports'] === 0,
                                                 ])>

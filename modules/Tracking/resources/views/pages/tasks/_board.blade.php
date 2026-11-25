@@ -19,7 +19,7 @@
     $priorityChipClasses = fn (TaskPriority $case): string => match ($case) {
         TaskPriority::High => 'bg-status-critical-soft text-primary dark:text-status-critical',
         TaskPriority::Medium => 'bg-status-warn-soft text-status-warn',
-        TaskPriority::Low => 'bg-secondary-soft text-secondary-medium dark:bg-white/10 dark:text-ink-muted',
+        TaskPriority::Low => 'bg-secondary-soft text-secondary-dark dark:bg-white/10 dark:text-ink-muted',
     };
 
     $priorityIconClasses = fn (TaskPriority $case): string => match ($case) {
@@ -79,7 +79,7 @@
                 {{-- Wide layout only: the empty column as a narrow vertical strip. --}}
                 <div class="hidden flex-1 flex-col items-center gap-2 px-1" :class="adding ? '' : '@6xl/directory:flex'" data-test="task-board-strip-{{ $case->value }}">
                     {{ FluxMarkup::icon($columnIcon($case), 'micro', 'size-4 shrink-0 '.$columnAccent($case).' rounded-full text-white') }}
-                    <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-secondary-medium shadow-sm dark:bg-surface-1 dark:text-ink-muted">{{ $columnTotal }}</span>
+                    <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-xs font-bold tabular-nums text-secondary-medium shadow-sm dark:bg-surface-1 dark:text-ink-muted">{{ $columnTotal }}</span>
                     @if ($canCreateTask)
                         {{ FluxMarkup::ghostIconButton('plus', __('tasks.add_task_to_status', ['status' => $case->label()]), 'x-on:click="adding = true; $nextTick(() => $refs.boardQuickAdd?.focus())" data-test="task-board-strip-add-'.$case->value.'"', 'size-7!') }}
                     @endif
@@ -91,7 +91,7 @@
                 <div class="flex min-w-0 items-center gap-1.5">
                     {{ FluxMarkup::icon($columnIcon($case), 'micro', 'size-4 shrink-0 '.$columnAccent($case).' rounded-full text-white') }}
                     <span class="truncate text-xs font-bold tracking-wide text-secondary-dark uppercase dark:text-ink">{{ $case->label() }}</span>
-                    <span class="inline-flex min-w-6 shrink-0 items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-[11px] font-bold tabular-nums text-secondary-medium shadow-sm dark:bg-surface-1 dark:text-ink-muted" data-test="task-board-count-{{ $case->value }}">{{ $columnTotal }}</span>
+                    <span class="inline-flex min-w-6 shrink-0 items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-xs font-bold tabular-nums text-secondary-medium shadow-sm dark:bg-surface-1 dark:text-ink-muted" data-test="task-board-count-{{ $case->value }}">{{ $columnTotal }}</span>
                 </div>
                 @if ($canCreateTask)
                     {{ FluxMarkup::ghostIconButton('plus', __('tasks.add_task_to_status', ['status' => $case->label()]), 'x-on:click="adding = true; $nextTick(() => $refs.boardQuickAdd?.focus())" data-test="task-board-header-add-'.$case->value.'"', 'size-7!') }}

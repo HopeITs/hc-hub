@@ -10,7 +10,7 @@
 
 <div class="min-h-0 flex-1 overflow-y-auto px-1 pb-2" data-csb-exclude>
     @if ($search !== '' && ($chats->isNotEmpty() || $colleagues->isNotEmpty()))
-        <p class="px-2 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">{{ __('hr_chat.ui.chats') }}</p>
+        <p class="px-2 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">{{ __('hr_chat.ui.chats') }}</p>
     @endif
 
     @foreach ($chats as $item)
@@ -26,7 +26,7 @@
                 <span class="flex items-center gap-2">
                     <span class="min-w-0 flex-1 truncate text-sm {{ $item['unread'] > 0 ? 'font-bold text-ink' : 'font-semibold text-ink' }}">{{ $item['title'] }}</span>
                     @if ($item['last_at'])
-                        <span class="shrink-0 text-[11px] text-ink-faint">{{ \Modules\Hr\Support\ChatTime::listLabel($item['last_at']) }}</span>
+                        <span class="shrink-0 text-xs text-ink-faint">{{ \Modules\Hr\Support\ChatTime::listLabel($item['last_at']) }}</span>
                     @endif
                 </span>
                 <span class="flex items-center gap-2">
@@ -35,7 +35,7 @@
                         {{ $item['last_preview'] }}
                     </span>
                     @if ($item['unread'] > 0)
-                        <span class="min-w-[18px] shrink-0 rounded-full px-1.5 text-center text-[11px] font-semibold text-white {{ $item['muted'] ? 'bg-ink-faint' : 'bg-primary' }}">{{ $item['unread'] }}</span>
+                        <span class="min-w-[18px] shrink-0 rounded-full px-1.5 text-center text-xs font-semibold text-white {{ $item['muted'] ? 'bg-ink-faint' : 'bg-primary' }}">{{ $item['unread'] }}</span>
                     @endif
                 </span>
             </span>
@@ -44,7 +44,7 @@
 
     {{-- While searching: colleagues there is no chat with yet. One tap starts it. --}}
     @if ($colleagues->isNotEmpty())
-        <p class="px-2 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">{{ __('hr_chat.ui.colleagues') }}</p>
+        <p class="px-2 pb-1 pt-3 text-xs font-semibold uppercase tracking-wide text-ink-faint">{{ __('hr_chat.ui.colleagues') }}</p>
         @foreach ($colleagues as $person)
             <button type="button" wire:click="{{ $startAction }}({{ $person['id'] }})" wire:key="chat-colleague-{{ $person['id'] }}"
                     class="flex w-full items-center gap-2.5 rounded-lg px-2 py-2 text-start hover:bg-surface-2"

@@ -21,7 +21,7 @@
 @endphp
 
 @if ($hostCenterLabel !== null)
-    <span {{ $attributes->class('inline-flex items-center gap-1 rounded-full bg-secondary-soft px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-secondary-dark dark:bg-surface-2 dark:text-ink') }} data-test="hosted-by-badge">
+    <span {{ $attributes->class('inline-flex items-center gap-1 rounded-full bg-secondary-soft px-2 py-0.5 text-xs font-bold whitespace-nowrap text-secondary-dark dark:bg-surface-2 dark:text-ink') }} data-test="hosted-by-badge">
         <flux:icon name="building-office-2" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
         <span dir="auto">{{ __('projects.hosted_by', ['center' => $hostCenterLabel]) }}</span>
     </span>

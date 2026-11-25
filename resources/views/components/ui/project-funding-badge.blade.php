@@ -16,7 +16,7 @@
 @endphp
 
 @if ($fundingBadge !== null)
-    <span {{ $attributes->class(['inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap', $fundingBadge['classes']]) }} data-test="funding-badge-{{ $fundingState }}">
+    <span {{ $attributes->class(['inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap', $fundingBadge['classes']]) }} data-test="funding-badge-{{ $fundingState }}">
         <flux:icon :name="$fundingBadge['icon']" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
         {{ match ($fundingState) {
             'awaiting_owner' => __('projects.awaiting_owner_acknowledgement'),

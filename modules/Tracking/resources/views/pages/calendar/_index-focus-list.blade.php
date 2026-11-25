@@ -47,7 +47,7 @@
                                         {{ $item['title'] }}
                                     </a>
                                 @endif
-                                <p class="mt-0.5 truncate text-[11px] text-secondary-medium dark:text-ink-muted">
+                                <p class="mt-0.5 truncate text-xs text-secondary-medium dark:text-ink-muted">
                                     {{ $item['date']->translatedFormat(__($item['date']->year === now()->year ? 'formats.weekday_date' : 'formats.weekday_date_year')) }}
                                     @if ($item['subLabel'] !== null)
                                         · {{ $item['subLabel'] }}

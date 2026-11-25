@@ -34,7 +34,7 @@
                     <span class="type-label text-secondary-medium dark:text-ink-muted">{{ $group['result']->type->label() }}</span>
                 </span>
                 <p class="min-w-0 flex-1 text-sm font-semibold text-secondary-dark dark:text-ink">{{ $group['result']->statement }}</p>
-                <span class="shrink-0 rounded-full border border-secondary-light px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">
+                <span class="shrink-0 rounded-full border border-secondary-light px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:text-ink-muted">
                     {{ trans_choice('projects.count_indicator', $group['indicators']->count(), ['count' => $group['indicators']->count()]) }}
                 </span>
             </header>
@@ -56,7 +56,7 @@
                                     wire:key="project-target-{{ $target->id }}"
                                 >
                                     <div class="flex flex-wrap items-center gap-1.5">
-                                        <span class="rounded-md border border-secondary-light px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">
+                                        <span class="rounded-md border border-secondary-light px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:text-ink-muted">
                                             {{ $target->source_type === 'annual_plan' ? __('common.annual_plan') : __('common.proposal') }}
                                         </span>
                                         <x-ui.enum-badge :case="$target->period" />
@@ -66,7 +66,7 @@
 
                                     <flux:tooltip :content="$hasReports ? trans_choice('common.count_report', $target->reports_count, ['count' => $target->reports_count]) : __('projects.target_no_reports_yet')">
                                         <span @class([
-                                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                                            'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
                                             'bg-status-good-soft text-status-good' => $hasReports,
                                             'bg-status-warn-soft text-status-warn' => ! $hasReports,
                                         ])>

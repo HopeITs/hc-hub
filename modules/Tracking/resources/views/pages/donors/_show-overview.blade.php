@@ -146,7 +146,7 @@
                                                 'border-2 border-dashed border-status-critical bg-white dark:bg-surface-1' => $point['state'] === 'failed',
                                                 'border-[3px] border-status-warn bg-white dark:bg-surface-1' => in_array($point['state'], ['due', 'transit', 'undated'], true),
                                             ]) style="width: {{ $point['size'] }}rem; height: {{ $point['size'] }}rem"></span>
-                                            <span @class(['pointer-events-none absolute hidden', 'top-full mt-2' => $loop->parent->first, 'bottom-full mb-2' => ! $loop->parent->first, 'start-0' => $point['position'] < 20, 'end-0' => $point['position'] > 80, 'start-1/2 -translate-x-1/2 rtl:translate-x-1/2' => $point['position'] >= 20 && $point['position'] <= 80, 'rounded-md bg-secondary-dark px-2.5 py-1.5 text-start text-[11px] whitespace-nowrap text-white shadow-[0_6px_16px_-6px_rgb(0_0_0/0.4)] group-hover:block group-focus-visible:block dark:bg-surface-3 dark:shadow-raised dark:text-ink'])>
+                                            <span @class(['pointer-events-none absolute hidden', 'top-full mt-2' => $loop->parent->first, 'bottom-full mb-2' => ! $loop->parent->first, 'start-0' => $point['position'] < 20, 'end-0' => $point['position'] > 80, 'start-1/2 -translate-x-1/2 rtl:translate-x-1/2' => $point['position'] >= 20 && $point['position'] <= 80, 'rounded-md bg-secondary-dark px-2.5 py-1.5 text-start text-xs whitespace-nowrap text-white shadow-[0_6px_16px_-6px_rgb(0_0_0/0.4)] group-hover:block group-focus-visible:block dark:bg-surface-3 dark:shadow-raised dark:text-ink'])>
                                                 <span class="block font-bold tabular-nums">{{ $amount($point['amount']) }} {{ $point['currency'] }}</span>
                                                 <span class="block tabular-nums opacity-80">{{ $stateLabels[$point['state']] }} · {{ $point['date']->translatedFormat(__('formats.date')) }}</span>
                                             </span>
@@ -160,9 +160,9 @@
                             <span></span>
                             <div class="relative h-12" aria-hidden="true">
                                 @foreach ($this->calendar['ticks'] as $tick)
-                                    <span class="absolute top-2 text-[10px] whitespace-nowrap tabular-nums {{ $mutedText }}" style="inset-inline-start: {{ $tick['position'] }}%">{{ $tick['label'] }}</span>
+                                    <span class="absolute top-2 text-xs whitespace-nowrap tabular-nums {{ $mutedText }}" style="inset-inline-start: {{ $tick['position'] }}%">{{ $tick['label'] }}</span>
                                 @endforeach
-                                <span class="absolute top-6 -translate-x-1/2 rounded-sm bg-secondary-dark px-1.5 py-0.5 text-[10px] font-bold text-white rtl:translate-x-1/2 dark:bg-ink dark:text-surface-0" style="inset-inline-start: {{ $this->calendar['today'] }}%">{{ __('donors.today') }}</span>
+                                <span class="absolute top-6 -translate-x-1/2 rounded-sm bg-secondary-dark px-1.5 py-0.5 text-xs font-bold text-white rtl:translate-x-1/2 dark:bg-ink dark:text-surface-0" style="inset-inline-start: {{ $this->calendar['today'] }}%">{{ __('donors.today') }}</span>
                             </div>
                         </div>
                     </div>
@@ -269,7 +269,7 @@
                                                 <a href="{{ route('funding-agreements.show', $agreement) }}#reports-heading" wire:navigate class="group flex min-h-9 items-center justify-between gap-3 border-b py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-secondary-medium {{ $hairline }}">
                                                     <span class="min-w-0">
                                                         <span class="block truncate font-medium underline-offset-4 group-hover:underline {{ $inkText }}">{{ $owedReport->title }}</span>
-                                                        <span class="block text-[11px] {{ $mutedText }}">{{ $owedReport->type->label() }}</span>
+                                                        <span class="block text-xs {{ $mutedText }}">{{ $owedReport->type->label() }}</span>
                                                     </span>
                                                     <span @class(['shrink-0 text-xs font-semibold tabular-nums', 'text-status-critical' => $owedReport->isOverdue(), $mutedText => ! $owedReport->isOverdue()])>
                                                         {{ $owedReport->isOverdue() ? __('donors.report_overdue_since', ['date' => $formatDate($owedReport->due_on)]) : __('donors.report_due_on', ['date' => $formatDate($owedReport->due_on)]) }}
@@ -292,7 +292,7 @@
                                                 <a href="{{ route('reports.show', $report) }}" wire:navigate class="group flex min-h-9 items-center justify-between gap-3 border-b py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-secondary-medium {{ $hairline }}">
                                                     <span class="min-w-0">
                                                         <span class="block truncate font-medium underline-offset-4 group-hover:underline {{ $inkText }}">{{ $report->planIndicator?->indicator?->name ?? __('donors.report_number', ['number' => $report->id]) }}</span>
-                                                        <span class="block text-[11px] tabular-nums {{ $mutedText }}">{{ $report->planned_date->translatedFormat(__('formats.date')) }}</span>
+                                                        <span class="block text-xs tabular-nums {{ $mutedText }}">{{ $report->planned_date->translatedFormat(__('formats.date')) }}</span>
                                                     </span>
                                                     <x-ui.enum-badge :case="$report->status" />
                                                 </a>
@@ -321,7 +321,7 @@
                                                 @endforeach
                                             </tr>
                                         </thead>
-                                        <tbody class="[&>tr>td]:@max-3xl:block [&>tr>td]:@max-3xl:whitespace-normal [&>tr>td]:@max-3xl:before:block [&>tr>td]:@max-3xl:before:text-[11px] [&>tr>td]:@max-3xl:before:font-semibold [&>tr>td]:@max-3xl:before:content-[attr(data-label)] [&>tr>td]:@max-3xl:before:text-secondary-medium dark:[&>tr>td]:@max-3xl:before:text-secondary-soft [&>tr>td]:@max-3xl:p-0 [&>tr]:@max-3xl:grid [&>tr]:@max-3xl:grid-cols-2 [&>tr]:@max-3xl:gap-x-4 [&>tr]:@max-3xl:gap-y-2 [&>tr]:@max-3xl:py-3 @max-3xl:block">
+                                        <tbody class="[&>tr>td]:@max-3xl:block [&>tr>td]:@max-3xl:whitespace-normal [&>tr>td]:@max-3xl:before:block [&>tr>td]:@max-3xl:before:text-xs [&>tr>td]:@max-3xl:before:font-semibold [&>tr>td]:@max-3xl:before:content-[attr(data-label)] [&>tr>td]:@max-3xl:before:text-secondary-medium dark:[&>tr>td]:@max-3xl:before:text-secondary-soft [&>tr>td]:@max-3xl:p-0 [&>tr]:@max-3xl:grid [&>tr]:@max-3xl:grid-cols-2 [&>tr]:@max-3xl:gap-x-4 [&>tr]:@max-3xl:gap-y-2 [&>tr]:@max-3xl:py-3 @max-3xl:block">
                                             @foreach ($agreement->transfers as $transfer)
                                                 @php
                                                     $state = $this->transferState($transfer);

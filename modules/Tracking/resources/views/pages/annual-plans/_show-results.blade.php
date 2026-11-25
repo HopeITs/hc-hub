@@ -59,7 +59,7 @@
                                     <span class="@2xl/detail:text-end">
                                         <span
                                             @class([
-                                                'inline-flex min-w-6 items-center justify-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] font-semibold tabular-nums',
+                                                'inline-flex min-w-6 items-center justify-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-semibold tabular-nums',
                                                 'border-status-good text-status-good' => $target->reports_count > 0,
                                                 'border-secondary-light text-secondary-medium dark:text-ink-muted' => $target->reports_count === 0,
                                             ])

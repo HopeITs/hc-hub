@@ -170,7 +170,7 @@
                                         @if ($target['donors'] !== [])
                                             <div class="mt-2 flex flex-wrap gap-1">
                                                 @foreach ($target['donors'] as $donor)
-                                                    <span class="inline-flex items-center gap-1 rounded-full border border-funding/30 bg-funding-soft px-2 py-0.5 text-[11px] font-semibold text-funding">
+                                                    <span class="inline-flex items-center gap-1 rounded-full border border-funding/30 bg-funding-soft px-2 py-0.5 text-xs font-semibold text-funding">
                                                         <flux:icon.building-library variant="micro" class="size-3" aria-hidden="true" />
                                                         {{ $donor }}
                                                     </span>
@@ -220,7 +220,7 @@
                                                     @foreach ($target['reportRows'] as $report)
                                                         <li wire:key="report-{{ $report->id }}">
                                                             <a href="{{ route('reports.show', $report) }}" wire:navigate class="-mx-1 flex items-center gap-2 rounded px-1 py-0.5 type-meta transition-colors hover:bg-white dark:hover:bg-white/5">
-                                                                <span class="inline-flex shrink-0 items-center rounded border px-1.5 py-px text-[10px] font-semibold {{ $this->reportStatusChip($report->status) }}">
+                                                                <span class="inline-flex shrink-0 items-center rounded border px-1.5 py-px text-xs font-semibold {{ $this->reportStatusChip($report->status) }}">
                                                                     {{ $report->status->label() }}
                                                                 </span>
                                                                 <span class="tabular-nums font-semibold text-secondary-dark dark:text-ink">{{ $this->figure((float) $report->value) }}</span>

@@ -115,7 +115,7 @@
                 role="img"
             >
                 @forelse ($cardAssignees->take(3) as $employee)
-                    <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-dark text-[11px] font-semibold text-white ring-2 ring-white dark:bg-surface-3 dark:ring-surface-1" title="{{ $employee->name }}">
+                    <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-dark text-xs font-semibold text-white ring-2 ring-white dark:bg-surface-3 dark:ring-surface-1" title="{{ $employee->name }}">
                         {{ Str::of($employee->name)->explode(' ')->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('') }}
                     </span>
                 @empty
@@ -124,7 +124,7 @@
                     </span>
                 @endforelse
                 @if ($cardAssignees->count() > 3)
-                    <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-soft text-[10px] font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">+{{ $cardAssignees->count() - 3 }}</span>
+                    <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-soft text-xs font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">+{{ $cardAssignees->count() - 3 }}</span>
                 @endif
             </span>
         </div>

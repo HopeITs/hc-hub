@@ -219,7 +219,7 @@
                         <div class="sticky top-0 z-20 hidden bg-white/95 backdrop-blur-sm @3xl/cal:grid dark:bg-surface-1/95" style="grid-template-columns: var(--lane-w) var(--track-w)">
                             <div x-ref="laneHead" class="sticky start-0 z-10 flex flex-col justify-end gap-1 border-e bg-white px-4 pt-3 pb-2 dark:bg-surface-1 {{ $hairline }}">
                                 <p class="text-xs font-bold {{ $inkText }}" x-text="zoom === 'quarter' ? @js(__('funding_agreements.expected_each_quarter')) : @js(__('funding_agreements.expected_each_month'))">{{ __('funding_agreements.expected_each_month') }}</p>
-                                <p class="text-[11px] leading-snug {{ $mutedText }}" x-text="zoom === 'quarter' ? @js(__('funding_agreements.select_a_quarter_to_highlight_its_tranches')) : @js(__('funding_agreements.select_a_month_to_highlight_its_tranches'))">{{ __('funding_agreements.select_a_month_to_highlight_its_tranches') }}</p>
+                                <p class="text-xs leading-snug {{ $mutedText }}" x-text="zoom === 'quarter' ? @js(__('funding_agreements.select_a_quarter_to_highlight_its_tranches')) : @js(__('funding_agreements.select_a_month_to_highlight_its_tranches'))">{{ __('funding_agreements.select_a_month_to_highlight_its_tranches') }}</p>
                             </div>
                             <div class="relative border-b {{ $hairline }}">
                                 <div class="relative h-10">
@@ -227,7 +227,7 @@
                                         @foreach ($periods as $period)
                                             <span
                                                 @class([
-                                                    'absolute bottom-1.5 ps-2 text-[11px] whitespace-nowrap tabular-nums',
+                                                    'absolute bottom-1.5 ps-2 text-xs whitespace-nowrap tabular-nums',
                                                     'font-bold '.$inkText => $period['year'] !== null || $period['current'],
                                                     $mutedText => $period['year'] === null && ! $period['current'],
                                                 ])
@@ -237,7 +237,7 @@
                                             >{{ $period['label'] }}@if ($period['year'] !== null) <span class="{{ $mutedText }} font-semibold">{{ $period['year'] }}</span>@endif</span>
                                         @endforeach
                                     @endforeach
-                                    <span class="absolute top-0.5 z-[2] -translate-x-1/2 rounded-full bg-primary dark:bg-ink dark:text-surface-0 px-1.5 py-px text-[10px] leading-4 font-bold text-white rtl:translate-x-1/2" style="inset-inline-start: calc(var(--month-w) * {{ $calendar['today'] }})">{{ __('common.today') }}</span>
+                                    <span class="absolute top-0.5 z-[2] -translate-x-1/2 rounded-full bg-primary dark:bg-ink dark:text-surface-0 px-1.5 py-px text-xs leading-4 font-bold text-white rtl:translate-x-1/2" style="inset-inline-start: calc(var(--month-w) * {{ $calendar['today'] }})">{{ __('common.today') }}</span>
                                 </div>
 
                                 @foreach ($calendar['inflow'] as $inflowCurrency => $inflow)
@@ -286,7 +286,7 @@
                                                                     'text-funding' => ! $periodInTrouble && $periodMoney['pending'] <= 0,
                                                                     $inkText => ! $periodInTrouble && $periodMoney['pending'] > 0,
                                                                 ])>{{ $shortAmount($periodMoney['total']) }}</span>
-                                                                <span class="block text-[10px] font-semibold {{ $mutedText }}">{{ $inflowCurrency }}</span>
+                                                                <span class="block text-xs font-semibold {{ $mutedText }}">{{ $inflowCurrency }}</span>
                                                             </span>
                                                         </button>
                                                     @endif

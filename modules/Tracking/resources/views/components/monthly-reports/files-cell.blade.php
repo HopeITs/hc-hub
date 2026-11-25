@@ -29,7 +29,7 @@
                 aria-label="{{ __('monthly_reports.download_name', ['name' => $file['name']]) }}"
                 dir="auto"
             >{{ $file['name'] }}</a>
-            <span class="shrink-0 text-[11px] {{ $mutedText }}" dir="auto">{{ $file['type'] }}</span>
+            <span class="shrink-0 text-xs {{ $mutedText }}" dir="auto">{{ $file['type'] }}</span>
             @if ($editable)
                 <button
                     type="button"
@@ -48,7 +48,7 @@
     @endif
 
     @if ($missing !== [])
-        <p class="flex items-start gap-1 text-[11px] font-semibold text-status-warn" data-missing-evidence="{{ $lineId }}">
+        <p class="flex items-start gap-1 text-xs font-semibold text-status-warn" data-missing-evidence="{{ $lineId }}">
             <flux:icon.exclamation-triangle variant="micro" class="mt-px size-3 shrink-0" aria-hidden="true" />
             <span dir="auto">{{ __('monthly_reports.missing_evidence', ['types' => implode(app()->getLocale() === 'ar' ? '، ' : ', ', $missing)]) }}</span>
         </p>

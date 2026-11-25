@@ -58,7 +58,7 @@
 
                                 @if ($dayItemCount > 0)
                                     {{-- Phone cells are too narrow for chip names: a count opens the day list instead. --}}
-                                    <button type="button" wire:click.stop="openDayDetail('{{ $day->toDateString() }}')" class="flex min-h-9 w-full cursor-pointer items-center justify-center rounded bg-secondary-soft px-1 text-[11px] leading-tight font-semibold text-secondary-dark sm:hidden dark:bg-surface-2 dark:text-ink" data-test="calendar-day-count-{{ $day->toDateString() }}">
+                                    <button type="button" wire:click.stop="openDayDetail('{{ $day->toDateString() }}')" class="flex min-h-9 w-full cursor-pointer items-center justify-center rounded bg-secondary-soft px-1 text-xs leading-tight font-semibold text-secondary-dark sm:hidden dark:bg-surface-2 dark:text-ink" data-test="calendar-day-count-{{ $day->toDateString() }}">
                                         {{ trans_choice('calendar.items_short', $dayItemCount, ['count' => $dayItemCount]) }}
                                     </button>
                                 @endif
@@ -80,7 +80,7 @@
 
                                 @if ($dayItemCount > 3)
                                     {{-- A busy day shows its first three chips; the rest are one click away in the day list. --}}
-                                    <button type="button" wire:click.stop="openDayDetail('{{ $day->toDateString() }}')" class="hidden w-fit cursor-pointer rounded px-1 text-[10px] font-semibold text-secondary-medium hover:bg-secondary-soft sm:block dark:text-ink-muted dark:hover:bg-surface-2" data-test="calendar-day-more-{{ $day->toDateString() }}">
+                                    <button type="button" wire:click.stop="openDayDetail('{{ $day->toDateString() }}')" class="hidden w-fit cursor-pointer rounded px-1 text-xs font-semibold text-secondary-medium hover:bg-secondary-soft sm:block dark:text-ink-muted dark:hover:bg-surface-2" data-test="calendar-day-more-{{ $day->toDateString() }}">
                                         {{ trans_choice('calendar.more_items', $dayItemCount - 3, ['count' => $dayItemCount - 3]) }}
                                     </button>
                                 @endif

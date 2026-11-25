@@ -111,7 +111,7 @@
                                             'border-2 border-secondary-soft bg-white dark:border-line-strong dark:bg-surface-1' => $isAhead,
                                         ]) aria-hidden="true"></span>
                                         <span @class([
-                                            'px-0.5 text-center text-[11px] leading-tight',
+                                            'px-0.5 text-center text-xs leading-tight',
                                             'font-bold text-primary dark:text-brand-text' => $isCurrent || $isRejectionPoint,
                                             'hidden font-medium @4xl/directory:block '.$inkText => $isPast,
                                             'hidden font-medium text-secondary-medium dark:text-ink-faint @4xl/directory:block' => $isAhead,
@@ -172,7 +172,7 @@
                                                 <li class="relative flex min-h-9 items-center gap-x-2.5 gap-y-0.5 py-1 ps-5" wire:key="proposal-{{ $proposal->id }}-project-{{ $project->id }}">
                                                     <span class="absolute start-0 size-2 rounded-full border-2 border-secondary-dark bg-white dark:border-ink-muted dark:bg-surface-1" aria-hidden="true"></span>
                                                     <a href="{{ route('projects.show', $project) }}" wire:navigate class="min-w-0 text-sm leading-snug font-semibold underline-offset-4 hover:underline {{ $inkText }}">{{ $project->name }}</a>
-                                                    <span class="shrink-0 text-[11px] {{ $mutedText }}">{{ $project->status->label() }}</span>
+                                                    <span class="shrink-0 text-xs {{ $mutedText }}">{{ $project->status->label() }}</span>
                                                 </li>
                                             @endforeach
                                         </ul>

@@ -78,18 +78,18 @@
 
                         <span class="mt-1 flex flex-wrap gap-1" data-column-centers>
                             @if ($column['fieldWork'])
-                                <span class="inline-flex items-center gap-1 rounded-full border border-secondary-light px-2 py-0.5 text-[11px] font-medium {{ $inkText }} dark:border-line">
+                                <span class="inline-flex items-center gap-1 rounded-full border border-secondary-light px-2 py-0.5 text-xs font-medium {{ $inkText }} dark:border-line">
                                     <flux:icon.map variant="micro" class="size-3" aria-hidden="true" />
                                     {{ __('targets.column_field_work') }}
                                 </span>
                             @elseif ($column['centers'] === [])
-                                <span class="inline-flex items-center gap-1 rounded-full border border-dashed border-secondary-light px-2 py-0.5 text-[11px] font-medium {{ $mutedText }} dark:border-line">
+                                <span class="inline-flex items-center gap-1 rounded-full border border-dashed border-secondary-light px-2 py-0.5 text-xs font-medium {{ $mutedText }} dark:border-line">
                                     <flux:icon.question-mark-circle variant="micro" class="size-3" aria-hidden="true" />
                                     {{ __('targets.column_center_not_set') }}
                                 </span>
                             @else
                                 @foreach ($column['centers'] as $centerName)
-                                    <span class="inline-flex items-center gap-1 rounded-full bg-board px-2 py-0.5 text-[11px] font-medium {{ $inkText }} dark:bg-surface-2" dir="auto">
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-board px-2 py-0.5 text-xs font-medium {{ $inkText }} dark:bg-surface-2" dir="auto">
                                         <flux:icon.building-office-2 variant="micro" class="size-3" aria-hidden="true" />
                                         {{ $centerName }}
                                     </span>
@@ -98,20 +98,20 @@
                         </span>
 
                         @if ($column['shared'])
-                            <span class="mt-1 flex items-start gap-1 text-[11px] font-normal {{ $inkText }}" data-shared-target>
+                            <span class="mt-1 flex items-start gap-1 text-xs font-normal {{ $inkText }}" data-shared-target>
                                 <flux:icon.user-group variant="micro" class="mt-px size-3 shrink-0" aria-hidden="true" />
                                 {{ __('targets.column_shared_target') }}
                             </span>
                         @endif
 
                         @if ($column['waiting'] !== null)
-                            <span class="mt-1 flex items-start gap-1 text-[11px] font-normal {{ $inkText }}" data-waiting-reason>
+                            <span class="mt-1 flex items-start gap-1 text-xs font-normal {{ $inkText }}" data-waiting-reason>
                                 <flux:icon.lock-closed variant="micro" class="mt-px size-3 shrink-0" aria-hidden="true" />
                                 <span dir="auto">{{ $column['waiting'] }}</span>
                             </span>
                         @endif
 
-                        <span class="mt-0.5 block text-[11px] font-normal tabular-nums {{ $mutedText }}">
+                        <span class="mt-0.5 block text-xs font-normal tabular-nums {{ $mutedText }}">
                             @if ($column['beneficiaries'] === null)
                                 {{ __('targets.beneficiaries_unknown') }}
                             @else
@@ -144,14 +144,14 @@
                     <tr wire:key="grid-row-{{ $indicator->id }}" data-grid-row="{{ $indicator->id }}">
                         <th scope="row" class="{{ $stickyCell }} max-w-40 border-b sm:max-w-none border-e border-secondary-soft px-3 py-2 text-start align-top font-normal dark:border-line">
                             @if ($indicator->code !== null)
-                                <bdi dir="ltr" class="block font-mono text-[11px] {{ $mutedText }}">{{ $indicator->code }}</bdi>
+                                <bdi dir="ltr" class="block font-mono text-xs {{ $mutedText }}">{{ $indicator->code }}</bdi>
                             @endif
                             <span class="block text-sm {{ $inkText }}" dir="auto">{{ $indicatorName }}</span>
-                            <span class="mt-0.5 block text-[11px] {{ $mutedText }}">
+                            <span class="mt-0.5 block text-xs {{ $mutedText }}">
                                 {{ $indicator->measure->label() }}@if ($unit !== null && ! $row['isPercentage']) · {{ $unit }}@endif
                             </span>
                             @if (! $row['linked'])
-                                <span class="mt-1 inline-flex items-center gap-1 rounded-full border border-status-critical px-2 py-0.5 text-[11px] font-semibold text-status-critical" data-badge="not-linked">
+                                <span class="mt-1 inline-flex items-center gap-1 rounded-full border border-status-critical px-2 py-0.5 text-xs font-semibold text-status-critical" data-badge="not-linked">
                                     <flux:icon.link-slash variant="micro" class="size-3" aria-hidden="true" />
                                     {{ __('targets.not_linked_to_library') }}
                                 </span>
@@ -228,7 +228,7 @@
                                     </div>
 
                                     @if ($row['isPercentage'])
-                                        <div class="mt-1.5 flex items-center gap-1.5 text-[11px] {{ $mutedText }}">
+                                        <div class="mt-1.5 flex items-center gap-1.5 text-xs {{ $mutedText }}">
                                             <label for="{{ $inputId }}-population">{{ __('targets.population_base') }}</label>
                                             <input
                                                 id="{{ $inputId }}-population"
@@ -260,18 +260,18 @@
                                 @if ($row['linked'])
                                     <div class="mt-1 flex flex-col items-start gap-1">
                                         @if ($facts['derived'] !== null)
-                                            <bdi dir="ltr" class="text-[11px] tabular-nums {{ $mutedText }}">{{ $facts['derived'] }}</bdi>
+                                            <bdi dir="ltr" class="text-xs tabular-nums {{ $mutedText }}">{{ $facts['derived'] }}</bdi>
                                         @endif
 
                                         @if ($row['isPercentage'] && $facts['beneficiaries'] === null)
-                                            <span class="inline-flex items-center gap-1 rounded-full border border-secondary-light px-2 py-0.5 text-[11px] font-semibold {{ $inkText }}" data-badge="beneficiaries-missing">
+                                            <span class="inline-flex items-center gap-1 rounded-full border border-secondary-light px-2 py-0.5 text-xs font-semibold {{ $inkText }}" data-badge="beneficiaries-missing">
                                                 <flux:icon.users variant="micro" class="size-3" aria-hidden="true" />
                                                 {{ __('targets.beneficiaries_missing') }}
                                             </span>
                                         @endif
 
                                         @if ($facts['reported'])
-                                            <span class="inline-flex items-center gap-1 text-[11px] {{ $mutedText }}" data-badge="reported">
+                                            <span class="inline-flex items-center gap-1 text-xs {{ $mutedText }}" data-badge="reported">
                                                 <flux:icon.lock-closed variant="micro" class="size-3" aria-hidden="true" />
                                                 {{ __('targets.cell_reported') }}
                                             </span>
@@ -282,7 +282,7 @@
                                                 <button
                                                     type="button"
                                                     wire:click="acceptSuggestion('{{ $key }}')"
-                                                    class="inline-flex items-center gap-1 rounded-md border border-dashed border-secondary-light px-1.5 py-0.5 text-[11px] italic {{ $mutedText }} hover:border-primary hover:text-primary"
+                                                    class="inline-flex items-center gap-1 rounded-md border border-dashed border-secondary-light px-1.5 py-0.5 text-xs italic {{ $mutedText }} hover:border-primary hover:text-primary"
                                                     data-suggestion="{{ $key }}"
                                                     aria-label="{{ __('targets.use_suggestion_for', ['value' => $facts['suggestion'], 'cell' => $cellLabel]) }}"
                                                 >
@@ -290,7 +290,7 @@
                                                     {{ __('targets.suggestion_last_year', ['value' => $facts['suggestion']]) }}
                                                 </button>
                                             @else
-                                                <span class="inline-flex items-center gap-1 text-[11px] italic {{ $mutedText }}" data-suggestion="{{ $key }}">
+                                                <span class="inline-flex items-center gap-1 text-xs italic {{ $mutedText }}" data-suggestion="{{ $key }}">
                                                     <flux:icon.light-bulb variant="micro" class="size-3" aria-hidden="true" />
                                                     {{ __('targets.suggestion_last_year', ['value' => $facts['suggestion']]) }}
                                                 </span>
@@ -298,13 +298,13 @@
                                         @endif
 
                                         @if ($facts['centerTotal'] !== null)
-                                            <span class="text-[11px] {{ $mutedText }}" data-center-total>
+                                            <span class="text-xs {{ $mutedText }}" data-center-total>
                                                 {{ __($facts['attribution'] === DonorAttribution::Split ? 'targets.center_total_split' : 'targets.center_total_shared', ['value' => $facts['centerTotal']]) }}
                                             </span>
                                         @endif
 
                                         @foreach ($cellErrors as $cellError)
-                                            <p id="{{ $inputId }}-error" class="flex items-start gap-1 text-[11px] font-semibold text-status-critical" role="alert">
+                                            <p id="{{ $inputId }}-error" class="flex items-start gap-1 text-xs font-semibold text-status-critical" role="alert">
                                                 <flux:icon.exclamation-triangle variant="micro" class="mt-px size-3 shrink-0" aria-hidden="true" />
                                                 {{ $cellError }}
                                             </p>

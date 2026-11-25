@@ -66,9 +66,9 @@
                                 'border-secondary-dark bg-secondary-dark dark:border-ink-muted dark:bg-ink-muted' => ! $isSelected && ! $isEmpty,
                                 'border-secondary-light bg-white dark:bg-surface-1' => ! $isSelected && $isEmpty,
                             ]) aria-hidden="true"></span>
-                            <span title="{{ $stop['phase']->label() }}" @class(['mt-1 w-full truncate text-[11px] font-bold @xl/directory:text-xs @3xl/directory:text-sm', 'text-primary dark:text-brand-text' => $isSelected, $inkText => ! $isSelected && ! $isEmpty, $mutedText => ! $isSelected && $isEmpty])>{{ $stop['phase']->label() }}</span>
+                            <span title="{{ $stop['phase']->label() }}" @class(['mt-1 w-full truncate text-xs font-bold @xl/directory:text-xs @3xl/directory:text-sm', 'text-primary dark:text-brand-text' => $isSelected, $inkText => ! $isSelected && ! $isEmpty, $mutedText => ! $isSelected && $isEmpty])>{{ $stop['phase']->label() }}</span>
                             <span @class(['text-2xl leading-none font-extrabold tabular-nums @3xl/directory:text-3xl', 'text-secondary-light' => $isEmpty, $inkText => ! $isEmpty])>{{ $stop['count'] }}</span>
-                            <span class="flex min-h-4 flex-col items-center gap-0.5 text-[11px] font-medium tabular-nums {{ $mutedText }}">
+                            <span class="flex min-h-4 flex-col items-center gap-0.5 text-xs font-medium tabular-nums {{ $mutedText }}">
                                 @foreach ($stop['money'] as $currency => $total)
                                     <span>{{ $currency }} {{ $shortAmount($total) }}</span>
                                 @endforeach

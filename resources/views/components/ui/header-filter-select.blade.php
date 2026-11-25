@@ -56,7 +56,7 @@
 
 {{-- `deferred` hands the choice to the host dialog's pick() (finance filters, Desk panel filters), which keeps it as a draft until the dialog applies it; the label and the check read the draft through the host's value()/is(). --}}
 <div class="min-w-0" data-header-filter-select @if ($deferred) data-filter-models="{{ json_encode([$model]) }}" @endif>
-    <label for="{{ $id }}" class="mb-1.5 block text-[11px] font-semibold uppercase leading-4 tracking-[0.1em] text-secondary-medium dark:text-ink-muted">
+    <label for="{{ $id }}" class="mb-1.5 block text-xs font-semibold uppercase leading-4 tracking-[0.1em] text-secondary-medium dark:text-ink-muted">
         {{ $label }}
     </label>
 

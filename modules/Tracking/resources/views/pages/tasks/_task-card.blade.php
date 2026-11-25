@@ -30,7 +30,7 @@
     <div class="flex items-center justify-between gap-2">
         <x-ui.status-pill :case="$task->status" />
         @if ($isAssignedToMe)
-            <span class="inline-flex shrink-0 items-center gap-1 text-[10px] font-bold text-primary dark:text-status-critical" data-test="{{ $testPrefix }}-role-assigned-{{ $task->id }}">
+            <span class="inline-flex shrink-0 items-center gap-1 text-xs font-bold text-primary dark:text-status-critical" data-test="{{ $testPrefix }}-role-assigned-{{ $task->id }}">
                 <flux:icon.user variant="micro" class="size-3" aria-hidden="true" />
                 {{ __('tasks.assigned_to_you') }}
             </span>
@@ -39,7 +39,7 @@
     @unless ($isAssignedToMe)
         @php $assigneeName = $task->taskAssignees->first()?->employee?->name; @endphp
         @if ($assigneeName !== null)
-            <span class="inline-flex items-start gap-1 text-[10px] font-semibold text-secondary-medium dark:text-ink-muted" data-test="{{ $testPrefix }}-role-delegated-{{ $task->id }}">
+            <span class="inline-flex items-start gap-1 text-xs font-semibold text-secondary-medium dark:text-ink-muted" data-test="{{ $testPrefix }}-role-delegated-{{ $task->id }}">
                 <flux:icon.paper-airplane variant="micro" class="mt-0.5 size-3 shrink-0" aria-hidden="true" />
                 <span class="break-words">{{ __('tasks.assigned_to_name', ['name' => $assigneeName]) }}</span>
             </span>

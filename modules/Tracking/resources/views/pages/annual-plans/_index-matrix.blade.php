@@ -313,9 +313,9 @@
                                                 @endif
 
                                                 <span class="pointer-events-none absolute inset-x-0 bottom-0 flex translate-y-full flex-col gap-0.5 bg-secondary-dark px-1.5 py-1 text-center transition-transform duration-200 group-hover/cell:translate-y-0 motion-reduce:transition-none" aria-hidden="true">
-                                                    <span class="truncate text-[0.625rem] font-semibold text-white">{{ $plan->manager?->name ?? __('common.not_assigned') }}</span>
+                                                    <span class="truncate text-xs font-semibold text-white">{{ $plan->manager?->name ?? __('common.not_assigned') }}</span>
                                                     @if ($stats['reports'] > 0)
-                                                        <span class="text-[0.625rem] tabular-nums text-secondary-soft">{{ __('annual_plans.approved') }} {{ $stats['approved'] }}/{{ $stats['reports'] }}</span>
+                                                        <span class="text-xs tabular-nums text-secondary-soft">{{ __('annual_plans.approved') }} {{ $stats['approved'] }}/{{ $stats['reports'] }}</span>
                                                     @endif
                                                 </span>
                                             </a>

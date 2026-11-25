@@ -8,7 +8,7 @@
         <div>
             <h2 id="proposal-logframes-heading" class="text-base font-bold text-secondary-dark dark:text-ink">
                 {{ __('results_framework.proposal_logframes') }}
-                <span class="ms-1 inline-flex min-w-6 items-center justify-center rounded-full bg-secondary-soft px-2 py-0.5 text-[11px] font-semibold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ $proposalFrameworks->count() }}</span>
+                <span class="ms-1 inline-flex min-w-6 items-center justify-center rounded-full bg-secondary-soft px-2 py-0.5 text-xs font-semibold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ $proposalFrameworks->count() }}</span>
             </h2>
             <p class="type-meta text-secondary-medium dark:text-ink-muted">{{ __('results_framework.proposal_logframes_hint') }}</p>
         </div>

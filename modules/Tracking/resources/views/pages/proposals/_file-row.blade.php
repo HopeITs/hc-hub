@@ -18,7 +18,7 @@
     @else
         <span class="inline-flex size-10 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-secondary-soft bg-board-head dark:border-line dark:bg-surface-2" aria-hidden="true">
             <flux:icon :name="$fileIcon" variant="micro" class="size-3.5 {{ $mutedText }}" />
-            <span class="text-[10px] font-bold {{ $inkText }}">{{ \Illuminate\Support\Str::upper($media->type->value) }}</span>
+            <span class="text-xs font-bold {{ $inkText }}">{{ \Illuminate\Support\Str::upper($media->type->value) }}</span>
         </span>
     @endif
 
@@ -45,7 +45,7 @@
                 <span class="truncate">{{ $media->uploader->name }}</span>
             @endif
             @unless ($isStored)
-                <span class="rounded-md border border-secondary-light px-1.5 text-[11px] font-semibold">{{ __('reports.reference_only') }}</span>
+                <span class="rounded-md border border-secondary-light px-1.5 text-xs font-semibold">{{ __('reports.reference_only') }}</span>
             @endunless
         </p>
     </div>

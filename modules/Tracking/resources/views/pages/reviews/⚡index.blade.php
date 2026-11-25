@@ -259,7 +259,7 @@ new #[Layout('layouts::desk'), Title('titles.my_reviews')] class extends Compone
                         @elseif ($isAwaiting)
                             {{-- Dark red text on the dark ground reads under 3:1, so a long wait fills the pill in dark mode. --}}
                             <span @class([
-                                'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold whitespace-nowrap',
+                                'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold whitespace-nowrap',
                                 'bg-status-critical-soft text-status-critical dark:bg-brand dark:text-white' => $isLong,
                                 'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink' => ! $isLong,
                             ])>{{ __('proposals.my_reviews_waiting_on_you') }}</span>

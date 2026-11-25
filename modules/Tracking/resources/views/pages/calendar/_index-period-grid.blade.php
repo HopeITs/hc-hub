@@ -27,7 +27,7 @@
 
                 </div>
                 <div class="grid border-b border-board-line" style="{{ $gridColumns }}">
-                    <div class="flex items-center justify-end border-e border-board-line px-2 py-1.5 text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">{{ __('calendar.all_day') }}</div>
+                    <div class="flex items-center justify-end border-e border-board-line px-2 py-1.5 text-xs font-semibold text-secondary-medium dark:text-ink-muted">{{ __('calendar.all_day') }}</div>
                     @foreach ($periodDays as $day)
                         @php
                             $dayFocusedCount = $focusedType === null ? 0 : collect($focusedGroupKeys[$focusedType])->sum(fn (string $key) => $calendar[$key]->get($day->toDateString(), new \Illuminate\Support\Collection)->count());
@@ -69,7 +69,7 @@
                 <div class="max-h-96 overflow-y-auto border-board-line" x-init="$el.scrollTop = Math.max(0, {{ $currentHour }} * 48 - 160)">
                     <div class="grid" style="{{ $gridColumns }}">
                         @for ($hour = 0; $hour < 24; $hour++)
-                            <div class="h-12 border-b border-e border-board-line px-2 py-1 text-end text-[11px] text-secondary-medium dark:text-ink-muted">
+                            <div class="h-12 border-b border-e border-board-line px-2 py-1 text-end text-xs text-secondary-medium dark:text-ink-muted">
                                 {{ $hour === 0 ? '' : \Carbon\CarbonImmutable::today()->addHours($hour)->translatedFormat('ga') }}
                             </div>
                             @foreach ($periodDays as $day)

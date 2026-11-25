@@ -12,10 +12,10 @@
 @if ($sectors->isNotEmpty())
     <ul {{ $attributes->class('flex flex-wrap items-center gap-1') }} aria-label="{{ __('sectors.sectors') }}">
         @foreach ($sectors as $sector)
-            <li class="inline-flex items-center gap-1 rounded-full bg-secondary-soft px-2 py-0.5 text-[11px] font-medium leading-4 text-secondary-dark dark:bg-surface-2 dark:text-ink" wire:key="sector-chip-{{ $sector->id }}">
+            <li class="inline-flex items-center gap-1 rounded-full bg-secondary-soft px-2 py-0.5 text-xs font-medium leading-4 text-secondary-dark dark:bg-surface-2 dark:text-ink" wire:key="sector-chip-{{ $sector->id }}">
                 <span dir="auto">{{ $sector->localizedName() }}</span>
                 @unless ($sector->is_active)
-                    <span class="inline-flex items-center gap-0.5 rounded-full border border-secondary-light px-1 text-[10px] font-semibold text-secondary-medium dark:border-line-strong dark:text-ink-muted">
+                    <span class="inline-flex items-center gap-0.5 rounded-full border border-secondary-light px-1 text-xs font-semibold text-secondary-medium dark:border-line-strong dark:text-ink-muted">
                         <flux:icon.pause-circle variant="micro" class="size-2.5" aria-hidden="true" />{{ __('sectors.inactive') }}
                     </span>
                 @endunless

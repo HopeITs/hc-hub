@@ -286,7 +286,7 @@
     }
 
     .admin-directory [data-flux-error] {
-        color: var(--color-primary);
+        color: var(--color-status-critical-text);
     }
 
     .admin-directory [data-flux-pagination],
@@ -902,6 +902,15 @@ ui-toast-group {
     /* Invalid fields: ties Flux's dark:data-invalid:border-primary (0,2,0) and wins by order. */
     :where(.dark) [data-flux-control][data-invalid] {
         border-color: var(--color-brand-text);
+    }
+
+    /*
+     * Field errors (flux:error): Flux sets dark:text-red-400, which is the brand red, 2.7 : 1 on a dark field (D2).
+     * The words and Flux's warning-triangle icon read in the critical text token; the icon keeps it an error. Ties
+     * Flux's 0,1,0 and wins by order.
+     */
+    :where(.dark) [data-flux-error] {
+        color: var(--color-status-critical-text);
     }
 
     :where(.dark select)[data-flux-control] option {

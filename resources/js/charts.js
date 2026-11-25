@@ -46,6 +46,36 @@ function perSeries(list, count) {
     return Array.from({ length: count }, (_, index) => list[index % list.length]);
 }
 
+/**
+ * How many earlier marks resolve to the same colour, per mark (0 = first use). Several tones share
+ * one brand grey (light: good = strong, warn = funding; dark: strong = warn), so a repeat must
+ * differ by shape instead of colour (D1: never a new colour).
+ */
+function colourRepeats(colors, count) {
+    const seen = new Map();
+
+    return perSeries(colors, count).map((color) => {
+        const key = String(color).toLowerCase();
+        const repeats = seen.get(key) ?? 0;
+
+        seen.set(key, repeats + 1);
+
+        return repeats;
+    });
+}
+
+/**
+ * The outline each mark gets. In dark the brand red stays #BE1F24 as a fill (D2) but reads only
+ * ~2.7 : 1 on the dark surfaces, so red marks get a light ink outline to clear 3 : 1; other marks
+ * keep the fallback (none, or the slice gap colour).
+ */
+function markOutlines(colors, count, dark, fallback) {
+    const red = toneColor('critical').toLowerCase();
+    const ink = token('--color-ink');
+
+    return perSeries(colors, count).map((color) => (dark && String(color).toLowerCase() === red ? ink : fallback));
+}
+
 function isDark() {
     return document.documentElement.classList.contains('dark');
 }
@@ -132,8 +162,20 @@ function buildOptions(config) {
         // ApexCharts fills donut tooltips with the series colour (its donut default, kept in light); the pale
         // dark tones would sit under ink text. Set in both modes so a live theme flip never keeps the other value.
         options.tooltip.fillSeriesColor = !dark;
-        // A surface-coloured gap between slices, so two neighbouring greys never merge.
-        options.stroke = { width: 2, colors: [token('--color-surface-1')] };
+        const sliceCount = (config.series ?? []).length;
+        const sliceRepeats = colourRepeats(colors, sliceCount);
+
+        // A surface-coloured gap between slices, so two neighbouring greys never merge; red slices get an ink outline in dark.
+        options.stroke = { width: 2, colors: markOutlines(colors, sliceCount, dark, token('--color-surface-1')) };
+
+        // A slice whose grey an earlier slice already uses is hatched, so the two never read as one.
+        if (sliceRepeats.some((repeats) => repeats > 0)) {
+            options.fill = {
+                type: sliceRepeats.map((repeats) => (repeats > 0 ? 'pattern' : 'solid')),
+                opacity: 1,
+                pattern: { style: perSeries(seriesPatterns.slice(1), sliceCount), width: 5, height: 5, strokeWidth: 2 },
+            };
+        }
         options.plotOptions = {
             pie: {
                 expandOnClick: false,
@@ -190,13 +232,13 @@ function buildOptions(config) {
         categories: config.categories,
         axisBorder: { show: false },
         axisTicks: { show: false },
-        labels: { style: { colors: text, fontSize: '11px' }, formatter: config.horizontal ? format.axis : undefined },
+        labels: { style: { colors: text, fontSize: '12px' }, formatter: config.horizontal ? format.axis : undefined },
         tooltip: { enabled: false },
         ...(config.horizontal ? valueAxisBounds : {}),
     };
     options.yaxis = {
         labels: {
-            style: { colors: text, fontSize: '11px' },
+            style: { colors: text, fontSize: '12px' },
             formatter: config.horizontal ? undefined : format.axis,
             maxWidth: 120,
         },
@@ -215,12 +257,45 @@ function buildOptions(config) {
             },
         };
 
-        if (seriesCount > 1 && !config.distributed) {
-            options.fill = {
-                type: perSeries(seriesFills, seriesCount),
-                opacity: 1,
-                pattern: { style: perSeries(seriesPatterns, seriesCount), width: 5, height: 5, strokeWidth: 2 },
-            };
+        const pattern = { width: 5, height: 5, strokeWidth: 2 };
+
+        if (config.distributed) {
+            // One series, one colour per bar: a bar whose grey an earlier bar already uses is hatched. ApexCharts
+            // picks the fill type per series, so the pattern has to ride on each data point.
+            const pointCount = (config.series?.[0]?.data ?? []).length;
+            const pointRepeats = colourRepeats(colors, pointCount);
+
+            options.stroke.colors = markOutlines(colors, pointCount, dark, 'transparent');
+
+            if (pointRepeats.some((repeats) => repeats > 0)) {
+                options.series = config.series.map((entry) => ({
+                    ...entry,
+                    data: entry.data.map((value, index) => ({
+                        x: config.categories?.[index] ?? String(index),
+                        y: value,
+                        ...(pointRepeats[index] > 0
+                            ? { fill: { type: 'pattern', pattern: { ...pattern, style: seriesPatterns[1 + (index % (seriesPatterns.length - 1))] } } }
+                            : {}),
+                    })),
+                }));
+            }
+        } else {
+            options.stroke.colors = markOutlines(colors, seriesCount, dark, 'transparent');
+
+            if (seriesCount > 1) {
+                // Alternate solid and hatched, and always hatch a series whose grey an earlier series already uses.
+                const seriesRepeats = colourRepeats(colors, seriesCount);
+
+                options.fill = {
+                    type: perSeries(seriesFills, seriesCount).map((type, index) => (seriesRepeats[index] > 0 ? 'pattern' : type)),
+                    opacity: 1,
+                    pattern: { ...pattern, style: perSeries(seriesPatterns, seriesCount) },
+                };
+            }
+        }
+
+        if (options.stroke.colors.some((color) => color !== 'transparent')) {
+            options.stroke.width = 1.5;
         }
         options.grid.xaxis = { lines: { show: Boolean(config.horizontal) } };
         options.grid.yaxis = { lines: { show: !config.horizontal } };
@@ -237,6 +312,21 @@ function buildOptions(config) {
     if ((config.type === 'area' || config.type === 'line') && seriesCount > 1) {
         options.stroke.dashArray = perSeries(seriesDashes, seriesCount);
         options.markers = { size: 3, strokeWidth: 0, shape: perSeries(seriesMarkers, seriesCount), hover: { size: 5 } };
+    }
+
+    if (config.type === 'area' || config.type === 'line') {
+        // In dark a red line is ~2.7 : 1 on the surface; its points carry an ink ring so the series still clears 3 : 1.
+        const outlines = markOutlines(colors, seriesCount, dark, null);
+
+        if (outlines.some(Boolean)) {
+            options.markers = {
+                ...(options.markers ?? {}),
+                size: 4,
+                strokeWidth: 1.5,
+                strokeColors: outlines.map((outline, index) => outline ?? colors[index % colors.length]),
+                hover: { size: 6 },
+            };
+        }
     }
 
     return options;

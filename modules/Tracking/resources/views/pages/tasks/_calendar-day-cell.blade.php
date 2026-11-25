@@ -135,12 +135,12 @@
                     </span>
                 @else
                     @foreach ($dayDraftAssignees->take(2) as $userOption)
-                        <span class="inline-flex size-5 items-center justify-center rounded-full border-2 border-white bg-secondary-dark text-[8px] font-semibold text-white dark:border-surface-1 dark:bg-surface-3">
+                        <span class="inline-flex size-5 items-center justify-center rounded-full border-2 border-white bg-secondary-dark text-xs font-semibold text-white dark:border-surface-1 dark:bg-surface-3">
                             {{ Illuminate\Support\Str::of($userOption['name'])->explode(' ')->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('') }}
                         </span>
                     @endforeach
                     @if ($dayDraftAssignees->count() > 2)
-                        <span class="inline-flex size-5 items-center justify-center rounded-full border-2 border-white bg-secondary-soft text-[8px] font-semibold text-secondary-dark dark:border-surface-1 dark:bg-surface-3 dark:text-ink">
+                        <span class="inline-flex size-5 items-center justify-center rounded-full border-2 border-white bg-secondary-soft text-xs font-semibold text-secondary-dark dark:border-surface-1 dark:bg-surface-3 dark:text-ink">
                             +{{ $dayDraftAssignees->count() - 2 }}
                         </span>
                     @endif

@@ -8,7 +8,7 @@
     $currentTarget = $this->currentMoveTarget();
     $optionClasses = 'flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-secondary-dark hover:bg-secondary-soft/60 has-[:checked]:bg-secondary-soft has-[:checked]:font-semibold dark:text-ink dark:hover:bg-white/[0.04] dark:has-[:checked]:bg-surface-3';
     $radioClasses = 'size-4 shrink-0 accent-primary dark:accent-brand';
-    $currentBadge = '<span class="ms-auto shrink-0 rounded-full bg-secondary-soft px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:bg-surface-2 dark:text-ink-muted">'.e(__('tasks.move_current')).'</span>';
+    $currentBadge = '<span class="ms-auto shrink-0 rounded-full bg-secondary-soft px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:bg-surface-2 dark:text-ink-muted">'.e(__('tasks.move_current')).'</span>';
 @endphp
 
 <x-ui.modal
@@ -43,7 +43,7 @@
                     @endphp
                     <div class="mt-2 grid gap-1" wire:key="move-project-{{ $project['id'] }}"
                         x-show="find === '' || {{ Js::from($projectText) }}.includes(find.trim().toLowerCase())">
-                        <p class="px-3 pt-1 text-[11px] font-bold tracking-wide text-secondary-medium uppercase dark:text-ink-muted">{{ $project['name'] }}</p>
+                        <p class="px-3 pt-1 text-xs font-bold tracking-wide text-secondary-medium uppercase dark:text-ink-muted">{{ $project['name'] }}</p>
 
                         <label class="{{ $optionClasses }}" data-move-target="project:{{ $project['id'] }}">
                             <input type="radio" wire:model="moveTarget" value="project:{{ $project['id'] }}" class="{{ $radioClasses }}" />

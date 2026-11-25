@@ -16,7 +16,7 @@
 @endphp
 @if ($relatedToLabel !== null)
     <span
-        class="inline-flex max-w-48 min-w-0 items-center gap-1 rounded-full bg-secondary-soft px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:bg-white/10 dark:text-ink-muted"
+        class="inline-flex max-w-48 min-w-0 items-center gap-1 rounded-full bg-secondary-soft px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:bg-white/10 dark:text-ink-muted"
         title="{{ __('tasks.source_type') }}: {{ $relatedToLabel }}"
         data-test="task-quick-add-related-{{ $testKey }}"
     >
@@ -27,7 +27,7 @@
 <button
     type="button"
     x-on:click="$wire.openQuickTaskInDrawer({{ $typedTitle }}, {{ Js::from($defaultStatus) }}, {{ Js::from($rowKey) }})"
-    class="inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-semibold text-secondary-medium hover:bg-secondary-soft hover:text-secondary-dark dark:text-ink-muted dark:hover:bg-surface-2 dark:hover:text-ink"
+    class="inline-flex shrink-0 items-center gap-1 rounded px-1.5 py-0.5 text-xs font-semibold text-secondary-medium hover:bg-secondary-soft hover:text-secondary-dark dark:text-ink-muted dark:hover:bg-surface-2 dark:hover:text-ink"
     data-test="task-quick-add-more-{{ $testKey }}"
 >
     <flux:icon name="arrows-pointing-out" variant="micro" class="size-3 shrink-0" aria-hidden="true" />

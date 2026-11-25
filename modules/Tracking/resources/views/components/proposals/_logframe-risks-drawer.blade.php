@@ -74,7 +74,7 @@
                                         <input type="checkbox" wire:model.live="riskPicks" value="{{ $entry->id }}" class="size-4 shrink-0 accent-primary" />
                                         <span class="min-w-0 flex-1 truncate font-medium text-secondary-dark dark:text-ink" dir="auto">{{ $entry->localizedTitle() }}</span>
                                         @if (in_array($entry->id, $taken, true))
-                                            <span class="text-[11px] font-semibold text-secondary-medium dark:text-ink-muted">{{ __('risks.already_here') }}</span>
+                                            <span class="text-xs font-semibold text-secondary-medium dark:text-ink-muted">{{ __('risks.already_here') }}</span>
                                         @endif
                                     </label>
                                 @endforeach

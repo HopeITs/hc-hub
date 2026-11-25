@@ -464,7 +464,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
                                         <flux:icon :name="$presenter->moduleIcon($option)" variant="micro" @class(['size-4 shrink-0', 'text-primary dark:text-brand-text' => $isActive])/>
                                         <span class="min-w-0 flex-1 truncate">{{ $presenter->moduleLabel($option) }}</span>
                                         @if ($optionCount > 0)
-                                            <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-secondary-soft/70 px-1.5 text-[0.6875rem] leading-5 font-bold tabular-nums dark:bg-white/10">{{ $optionCount }}</span>
+                                            <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-secondary-soft/70 px-1.5 text-xs leading-5 font-bold tabular-nums dark:bg-white/10">{{ $optionCount }}</span>
                                         @endif
                                     </button>
                                 </li>
@@ -475,7 +475,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
                 </div>
 
                 <button type="button" x-on:click="help = true" class="hidden cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-secondary-medium hover:text-secondary-dark lg:inline-flex dark:text-ink-muted dark:hover:text-ink">
-                    <kbd class="inline-flex size-5 items-center justify-center rounded border border-secondary-soft font-sans text-[0.6875rem] dark:border-line">?</kbd>
+                    <kbd class="inline-flex size-5 items-center justify-center rounded border border-secondary-soft font-sans text-xs dark:border-line">?</kbd>
                     {{ __('notifications.keyboard.hint') }}
                 </button>
             </div>

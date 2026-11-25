@@ -48,7 +48,7 @@
                                                 </div>
 
                                                 <p class="mt-1 text-lg leading-none font-extrabold tracking-tight tabular-nums {{ $inkText }}">
-                                                    {{ $amount($budget) }} <span class="text-[11px] font-bold tracking-normal {{ $mutedText }}">{{ $agreement->currency->value }}</span>
+                                                    {{ $amount($budget) }} <span class="text-xs font-bold tracking-normal {{ $mutedText }}">{{ $agreement->currency->value }}</span>
                                                     <span class="ms-1 text-xs font-bold tracking-normal text-funding">{{ __('funding_agreements.percent_received', ['percent' => $money['percentLabel']]) }}</span>
                                                 </p>
 
@@ -152,7 +152,7 @@
                                                                 <span @class(['tranche-bead block shrink-0 rounded-full transition-transform duration-150 ease-out group-hover/pill:scale-125', $beadClass[$state]]) style="width: {{ $size }}rem; height: {{ $size }}rem" aria-hidden="true"></span>
                                                                 <span
                                                                     @class([
-                                                                        'absolute start-full ms-1.5 rounded-full px-1.5 py-px text-[11px] leading-4 font-bold whitespace-nowrap tabular-nums',
+                                                                        'absolute start-full ms-1.5 rounded-full px-1.5 py-px text-xs leading-4 font-bold whitespace-nowrap tabular-nums',
                                                                         $tagClass[$state],
                                                                         'bottom-full mb-0.5 -ms-1' => $crowded,
                                                                     ])
@@ -161,7 +161,7 @@
                                                                 >{{ $shortAmount((float) $transfer->payment_amount) }}</span>
                                                             </button>
                                                             {{-- Tooltip: the tranche in words. --}}
-                                                            <span class="pointer-events-none invisible absolute top-full start-0 z-30 mt-3 w-max max-w-60 -translate-x-1/2 rounded-lg bg-secondary-dark px-2.5 py-2 text-start text-[11px] leading-snug text-white opacity-0 shadow-[0_8px_24px_-8px_rgb(0_0_0/0.4)] transition-opacity duration-150 group-hover/pill:visible group-hover/pill:opacity-100 group-focus-within/pill:visible group-focus-within/pill:opacity-100 rtl:translate-x-1/2 dark:bg-surface-3 dark:shadow-raised dark:text-ink" aria-hidden="true">
+                                                            <span class="pointer-events-none invisible absolute top-full start-0 z-30 mt-3 w-max max-w-60 -translate-x-1/2 rounded-lg bg-secondary-dark px-2.5 py-2 text-start text-xs leading-snug text-white opacity-0 shadow-[0_8px_24px_-8px_rgb(0_0_0/0.4)] transition-opacity duration-150 group-hover/pill:visible group-hover/pill:opacity-100 group-focus-within/pill:visible group-focus-within/pill:opacity-100 rtl:translate-x-1/2 dark:bg-surface-3 dark:shadow-raised dark:text-ink" aria-hidden="true">
                                                                 <span class="block text-xs font-bold tabular-nums">{{ $amount((float) $transfer->payment_amount) }} {{ $transfer->amount_transfered_currency->value }}</span>
                                                                 <span class="block tabular-nums opacity-80">{{ $transfer->scheduled_date->translatedFormat(__('formats.date')) }} · {{ $stateLabel }}</span>
                                                                 @if ($state === 'received' && $transfer->net_amount_received !== null)
@@ -185,7 +185,7 @@
                                                 @php
                                                     $state = $this->trancheState($transfer);
                                                 @endphp
-                                                <li class="inline-flex items-center gap-1.5 rounded-full py-0.5 ps-1.5 pe-2 text-[11px] font-bold tabular-nums {{ $tagClass[$state] }}" wire:key="chip-{{ $transfer->id }}">
+                                                <li class="inline-flex items-center gap-1.5 rounded-full py-0.5 ps-1.5 pe-2 text-xs font-bold tabular-nums {{ $tagClass[$state] }}" wire:key="chip-{{ $transfer->id }}">
                                                     <span class="size-2 shrink-0 rounded-full {{ $beadClass[$state] }}" aria-hidden="true"></span>
                                                     {{ $shortAmount((float) $transfer->payment_amount) }}
                                                     <span class="font-semibold opacity-80">{{ $transfer->scheduled_date->translatedFormat(__('formats.date_short')) }}</span>
@@ -261,7 +261,7 @@
                                                                         <th scope="col" class="pb-2 ps-4 text-start font-semibold">{{ __('funding_agreements.account') }}</th>
                                                                     </tr>
                                                                 </thead>
-                                                                <tbody class="[&>tr>td]:@max-xl:block [&>tr>td]:@max-xl:whitespace-normal [&>tr>td]:@max-xl:before:block [&>tr>td]:@max-xl:before:text-[11px] [&>tr>td]:@max-xl:before:font-semibold [&>tr>td]:@max-xl:before:content-[attr(data-label)] [&>tr>td]:@max-xl:before:text-secondary-medium dark:[&>tr>td]:@max-xl:before:text-secondary-soft [&>tr>td]:@max-xl:p-0 [&>tr]:@max-xl:grid [&>tr]:@max-xl:grid-cols-2 [&>tr]:@max-xl:gap-x-4 [&>tr]:@max-xl:gap-y-2 [&>tr]:@max-xl:py-3 @max-xl:block">
+                                                                <tbody class="[&>tr>td]:@max-xl:block [&>tr>td]:@max-xl:whitespace-normal [&>tr>td]:@max-xl:before:block [&>tr>td]:@max-xl:before:text-xs [&>tr>td]:@max-xl:before:font-semibold [&>tr>td]:@max-xl:before:content-[attr(data-label)] [&>tr>td]:@max-xl:before:text-secondary-medium dark:[&>tr>td]:@max-xl:before:text-secondary-soft [&>tr>td]:@max-xl:p-0 [&>tr]:@max-xl:grid [&>tr]:@max-xl:grid-cols-2 [&>tr]:@max-xl:gap-x-4 [&>tr]:@max-xl:gap-y-2 [&>tr]:@max-xl:py-3 @max-xl:block">
                                                                     @foreach ($agreement->transfers as $transfer)
                                                                         @php
                                                                             $state = $this->trancheState($transfer);
@@ -275,7 +275,7 @@
                                                                             <td data-label="{{ __('funding_agreements.due') }}" class="py-2 pe-3 font-semibold whitespace-nowrap tabular-nums {{ $inkText }}">{{ $transfer->scheduled_date?->translatedFormat(__('formats.date')) ?? '—' }}</td>
                                                                             <td data-label="{{ __('funding_agreements.amount') }}" class="py-2 pe-3 text-end font-bold whitespace-nowrap tabular-nums {{ $inkText }}">{{ $amount((float) $transfer->payment_amount) }} <span class="font-semibold {{ $mutedText }}">{{ $transfer->amount_transfered_currency->value }}</span></td>
                                                                             <td data-label="{{ __('common.status') }}" class="py-2 ps-4 pe-3 whitespace-nowrap">
-                                                                                <span class="inline-flex items-center gap-1.5 rounded-full py-0.5 ps-1.5 pe-2 text-[11px] font-bold {{ $tagClass[$state] }}">
+                                                                                <span class="inline-flex items-center gap-1.5 rounded-full py-0.5 ps-1.5 pe-2 text-xs font-bold {{ $tagClass[$state] }}">
                                                                                     <span class="size-2 rounded-full {{ $beadClass[$state] }}" aria-hidden="true"></span>{{ $trancheStateLabels[$state] }}
                                                                                 </span>
                                                                             </td>
@@ -284,10 +284,10 @@
                                                                                 @if ($state === 'received' && $transfer->net_amount_received !== null)
                                                                                     <span class="font-bold text-funding">{{ $amount((float) $transfer->net_amount_received) }} {{ $transfer->amount_received_currency->value }}</span>
                                                                                     @if ($transfer->amount_received !== null)
-                                                                                        <span class="block text-[11px] {{ $mutedText }}">{{ __('funding_agreements.gross_amount', ['amount' => $amount((float) $transfer->amount_received)]) }}</span>
+                                                                                        <span class="block text-xs {{ $mutedText }}">{{ __('funding_agreements.gross_amount', ['amount' => $amount((float) $transfer->amount_received)]) }}</span>
                                                                                     @endif
                                                                                     @if ((float) $transfer->fees > 0)
-                                                                                        <span class="block text-[11px] {{ $mutedText }}">{{ __('funding_agreements.fees_amount', ['amount' => $amount((float) $transfer->fees), 'currency' => $transfer->fees_currency->value]) }}</span>
+                                                                                        <span class="block text-xs {{ $mutedText }}">{{ __('funding_agreements.fees_amount', ['amount' => $amount((float) $transfer->fees), 'currency' => $transfer->fees_currency->value]) }}</span>
                                                                                     @endif
                                                                                 @elseif ($transfer->isMissingNetAmount())
                                                                                     <span class="font-semibold text-status-warn">{{ __('funding_agreements.net_not_recorded') }}</span>

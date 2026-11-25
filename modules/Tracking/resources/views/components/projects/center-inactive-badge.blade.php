@@ -10,7 +10,7 @@
 @endphp
 
 @if ($isInactive)
-    <span {{ $attributes->class('inline-flex items-center gap-1 rounded-full border border-status-warn bg-status-warn-soft px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-secondary-dark dark:text-ink') }} data-test="center-inactive-badge">
+    <span {{ $attributes->class('inline-flex items-center gap-1 rounded-full border border-status-warn bg-status-warn-soft px-2 py-0.5 text-xs font-bold whitespace-nowrap text-secondary-dark dark:text-ink') }} data-test="center-inactive-badge">
         <flux:icon name="pause-circle" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
         {{ __('projects.center_inactive_badge') }}
     </span>

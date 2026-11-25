@@ -38,20 +38,20 @@
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
                                 <x-ui.employee-chip link :employee="$row['employee']" compact />
-                                <span class="rounded-md border border-secondary-light px-2 py-0.5 text-[11px] font-semibold {{ $mutedText }}">{{ $row['slot']->label() }}</span>
+                                <span class="rounded-md border border-secondary-light px-2 py-0.5 text-xs font-semibold {{ $mutedText }}">{{ $row['slot']->label() }}</span>
                                 @if ($row['seenAt'] !== null)
-                                    <span class="inline-flex items-center gap-1 rounded-md bg-status-good-soft px-2 py-0.5 text-[11px] font-semibold text-status-good" data-reviewer-state="seen">
+                                    <span class="inline-flex items-center gap-1 rounded-md bg-status-good-soft px-2 py-0.5 text-xs font-semibold text-status-good" data-reviewer-state="seen">
                                         <flux:icon.check-circle variant="micro" class="size-3.5" aria-hidden="true" />
                                         {{ __('proposals.reviewer_seen_on', ['date' => $row['seenAt']->translatedFormat(__('formats.date'))]) }}
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 rounded-md bg-status-warn-soft px-2 py-0.5 text-[11px] font-semibold text-status-warn" data-reviewer-state="unseen">
+                                    <span class="inline-flex items-center gap-1 rounded-md bg-status-warn-soft px-2 py-0.5 text-xs font-semibold text-status-warn" data-reviewer-state="unseen">
                                         <flux:icon.eye-slash variant="micro" class="size-3.5" aria-hidden="true" />
                                         {{ __('proposals.reviewer_not_seen') }}
                                     </span>
                                 @endif
                                 @unless ($row['isActive'])
-                                    <span class="inline-flex items-center gap-1 rounded-md border border-secondary-light px-2 py-0.5 text-[11px] font-semibold {{ $mutedText }}" data-reviewer-inactive>
+                                    <span class="inline-flex items-center gap-1 rounded-md border border-secondary-light px-2 py-0.5 text-xs font-semibold {{ $mutedText }}" data-reviewer-inactive>
                                         <flux:icon.no-symbol variant="micro" class="size-3.5" aria-hidden="true" />
                                         {{ __('proposals.inactive_account') }}
                                     </span>
@@ -88,7 +88,7 @@
 
                 @foreach ($group['vacant'] as $vacant)
                     <li class="flex flex-wrap items-center gap-2 py-3" wire:key="vacant-{{ $group['stage']->value }}-{{ $vacant['slot']->value }}" data-vacant-slot="{{ $vacant['slot']->value }}" data-vacant-reason="{{ $vacant['isSet'] ? 'no-holder' : 'not-set' }}">
-                        <span class="inline-flex items-center gap-1 rounded-md bg-status-warn-soft px-2 py-0.5 text-[11px] font-semibold text-status-warn">
+                        <span class="inline-flex items-center gap-1 rounded-md bg-status-warn-soft px-2 py-0.5 text-xs font-semibold text-status-warn">
                             <flux:icon.exclamation-triangle variant="micro" class="size-3.5" aria-hidden="true" />
                             {{ $vacant['isSet'] ? __('proposals.position_vacant') : __('proposals.position_not_set') }}
                         </span>

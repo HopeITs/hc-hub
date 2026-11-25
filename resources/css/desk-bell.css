@@ -22,7 +22,7 @@
     .dk-nb-figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 6px; min-width: 0; }
     .dk-nb-figure strong { font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
     .dk-nb-figure > span { font-size: 13px; font-weight: 600; color: var(--ink-3); }
-    .dk-nb-figure .dk-nb-critical { display: inline-flex; align-items: center; gap: 6px; margin-inline-start: 6px; font-size: 12px; font-weight: 700; color: var(--bad); font-variant-numeric: tabular-nums; }
+    .dk-nb-figure .dk-nb-critical { display: inline-flex; align-items: center; gap: 6px; margin-inline-start: 6px; font-size: 12px; font-weight: 700; color: var(--bad-ink); font-variant-numeric: tabular-nums; }
     .dk-nb-critical > i { width: 10px; height: 10px; flex: none; border-radius: var(--radius-round); border: 3px solid var(--brand); }
     .dk-nb-figure .dk-nb-calm { font-size: 17px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); }
     .dk-nb-acts { display: flex; align-items: center; gap: 2px; flex: none; padding: 3px; border: 1px solid var(--line); border-radius: var(--radius-round); background: var(--paper); box-shadow: 0 1px 2px rgb(16 24 40 / .04); }
@@ -49,7 +49,7 @@
     .dk-nb-sec { display: flex; align-items: center; gap: 10px; padding: 16px 12px 6px; font-size: var(--text-caption); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
     [lang="ar"] .dk-nb-sec { font-size: 12px; letter-spacing: 0; }
     .dk-nb-sec::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-    .dk-nb-sec[data-bell-pinned] { color: var(--bad); }
+    .dk-nb-sec[data-bell-pinned] { color: var(--bad-ink); }
 
     /* The thread joins one row's icon ring to the next, as in the Ask bar's suggestions. */
     .dk-nb-thread { position: relative; display: grid; gap: 2px; }

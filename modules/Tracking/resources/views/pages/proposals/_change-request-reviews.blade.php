@@ -13,15 +13,15 @@
             <div class="flex flex-wrap items-center gap-2">
                 <span class="font-semibold text-secondary-dark dark:text-ink">{{ __('proposals.change.slot.'.$review->slot) }}</span>
                 @if ($review->verdict === null)
-                    <span class="inline-flex items-center gap-1 rounded-md bg-status-warn-soft px-2 py-0.5 text-[11px] font-semibold text-status-warn">
+                    <span class="inline-flex items-center gap-1 rounded-md bg-status-warn-soft px-2 py-0.5 text-xs font-semibold text-status-warn">
                         <flux:icon.clock variant="micro" class="size-3.5" aria-hidden="true" />
                         {{ __('proposals.change.review_waiting') }}
                     </span>
                 @elseif ($review->verdict === \Modules\Tracking\Enums\ChangeReviewVerdict::Skipped)
-                    <span class="rounded-md border border-secondary-light px-2 py-0.5 text-[11px] font-semibold text-secondary-medium dark:border-line dark:text-ink-muted">{{ $review->verdict->label() }}</span>
+                    <span class="rounded-md border border-secondary-light px-2 py-0.5 text-xs font-semibold text-secondary-medium dark:border-line dark:text-ink-muted">{{ $review->verdict->label() }}</span>
                 @else
                     <span @class([
-                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold',
+                        'inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold',
                         'bg-status-good-soft text-status-good' => $review->verdict === \Modules\Tracking\Enums\ChangeReviewVerdict::NoObjection,
                         'bg-status-warn-soft text-status-warn' => $review->verdict === \Modules\Tracking\Enums\ChangeReviewVerdict::Remarks,
                     ])>

@@ -745,7 +745,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
         default => '',
     };
     $monthFieldClass = 'block h-9 w-full min-w-0 touch-manipulation rounded-[10px] border border-(--line-2) bg-(--paper) px-2.5 text-[12.5px] font-semibold text-(--ink) hover:border-(--ink-3) max-[720px]:h-11 aria-invalid:border-status-critical';
-    $monthLabelClass = 'mb-1.5 block text-[11px] font-semibold uppercase leading-4 tracking-[0.1em] text-secondary-medium dark:text-ink-muted';
+    $monthLabelClass = 'mb-1.5 block text-xs font-semibold uppercase leading-4 tracking-[0.1em] text-secondary-medium dark:text-ink-muted';
 @endphp
 
 <x-desk.register

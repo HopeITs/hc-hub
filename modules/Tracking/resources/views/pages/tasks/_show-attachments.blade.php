@@ -6,7 +6,7 @@
             <x-slot:toolbar>
                 <div class="flex items-center gap-2">
                     @if ($this->task->evidence_required && $this->attachments->isEmpty())
-                        <span class="rounded-md border border-primary px-1.5 text-[11px] font-bold text-primary dark:border-brand-text dark:text-brand-text" data-test="task-proof-badge">{{ __('tasks.show.proof_before_done') }}</span>
+                        <span class="rounded-md border border-primary px-1.5 text-xs font-bold text-primary dark:border-brand-text dark:text-brand-text" data-test="task-proof-badge">{{ __('tasks.show.proof_before_done') }}</span>
                     @endif
                     @if ($canEditAttachments)
                         <x-ui.button size="sm" tone="primary" icon="arrow-up-tray" wire:click="openCreateFileModal" data-test="create-file-button">
@@ -39,7 +39,7 @@
                         @else
                             <span class="inline-flex size-10 shrink-0 flex-col items-center justify-center gap-0.5 rounded-xl border border-secondary-soft bg-board-head dark:border-line dark:bg-surface-2">
                                 <flux:icon :name="$fileIcon" variant="micro" class="size-3.5 text-secondary-medium dark:text-ink-muted" />
-                                <span class="text-[10px] font-bold text-secondary-dark dark:text-ink">{{ Str::upper($attachment->type->value) }}</span>
+                                <span class="text-xs font-bold text-secondary-dark dark:text-ink">{{ Str::upper($attachment->type->value) }}</span>
                             </span>
                         @endif
 
@@ -60,7 +60,7 @@
                                     <span class="truncate">{{ $attachment->uploader->name }}</span>
                                 @endif
                                 @unless ($isStored)
-                                    <span class="rounded-md border border-secondary-light px-1.5 text-[11px] font-semibold">{{ __('tasks.reference_only') }}</span>
+                                    <span class="rounded-md border border-secondary-light px-1.5 text-xs font-semibold">{{ __('tasks.reference_only') }}</span>
                                 @endunless
                             </p>
                         </div>

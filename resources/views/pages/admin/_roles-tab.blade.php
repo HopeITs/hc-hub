@@ -27,7 +27,7 @@
                                 <span class="absolute inset-y-2 start-0 w-0.5 rounded-full bg-primary dark:bg-brand" aria-hidden="true"></span>
                             @endif
                             <span class="min-w-0 truncate text-sm font-bold">{{ $roleRow->name }}</span>
-                            <span class="inline-flex min-w-6 shrink-0 items-center justify-center rounded-md border border-secondary-soft bg-white px-1.5 py-0.5 text-[0.65rem] font-semibold text-secondary-medium dark:border-line dark:bg-surface-1 dark:text-ink-muted">
+                            <span class="inline-flex min-w-6 shrink-0 items-center justify-center rounded-md border border-secondary-soft bg-white px-1.5 py-0.5 text-xs font-semibold text-secondary-medium dark:border-line dark:bg-surface-1 dark:text-ink-muted">
                                 {{ $roleRow->users_count }}
                             </span>
                         </button>
@@ -42,7 +42,7 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <h2 class="truncate text-xl font-bold text-secondary-dark dark:text-ink">{{ $this->selectedRole->name }}</h2>
                                 @if ($this->selectedRoleIsProtected)
-                                    <span class="rounded-md border border-primary px-2 py-1 text-[0.7rem] font-bold text-primary dark:text-brand-text">{{ __('roles.protected_role') }}</span>
+                                    <span class="rounded-md border border-primary px-2 py-1 text-xs font-bold text-primary dark:text-brand-text">{{ __('roles.protected_role') }}</span>
                                 @endif
                             </div>
                             <button type="button" wire:click="showAssignedUsers" class="group mt-1 inline-flex min-h-8 items-center gap-1.5 rounded-md text-sm font-semibold text-secondary-medium underline decoration-secondary-light underline-offset-4 transition hover:text-primary dark:hover:text-brand-text hover:decoration-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:text-ink-muted" aria-haspopup="dialog">

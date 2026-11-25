@@ -27,7 +27,7 @@
         <div class="min-w-0 flex-1 basis-64">
             <p class="font-semibold text-secondary-dark dark:text-ink" dir="auto">{{ $row['name'] }}</p>
             <p class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs {{ $mutedText }}">
-                <bdi dir="ltr" class="font-mono text-[11px]">{{ $row['code'] }}</bdi>
+                <bdi dir="ltr" class="font-mono text-xs">{{ $row['code'] }}</bdi>
                 <span aria-hidden="true">·</span>
                 <span>{{ __('monthly_reports.grid_target') }} <bdi dir="ltr" class="font-semibold tabular-nums text-secondary-dark dark:text-ink" data-target="{{ $id }}">{{ $row['target'] }}</bdi></span>
                 @if (($row['shared'] ?? null) !== null)

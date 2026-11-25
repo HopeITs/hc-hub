@@ -78,8 +78,8 @@
                         >
                             <span class="rounded-lg bg-secondary-dark px-3 py-1.5 text-start whitespace-nowrap shadow-lg dark:bg-surface-3 dark:shadow-raised">
                                 <span class="block text-xs font-bold text-white dark:text-ink">{{ $city['name'] }}</span>
-                                <span class="block text-[11px] text-secondary-soft dark:text-ink-muted" dir="auto">{{ $city['secondaryName'] }}</span>
-                                <span class="block text-[11px] text-secondary-soft dark:text-ink-muted">{{ $city['statusLabel'] }} · {{ $city['projectsLabel'] }}</span>
+                                <span class="block text-xs text-secondary-soft dark:text-ink-muted" dir="auto">{{ $city['secondaryName'] }}</span>
+                                <span class="block text-xs text-secondary-soft dark:text-ink-muted">{{ $city['statusLabel'] }} · {{ $city['projectsLabel'] }}</span>
                             </span>
                             <span class="-mt-1 size-2 rotate-45 bg-secondary-dark dark:bg-surface-3"></span>
                         </span>
@@ -97,7 +97,7 @@
         </div>
 
         <x-slot:footer>
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-secondary-medium dark:text-ink-muted">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-secondary-medium dark:text-ink-muted">
                 <span class="flex items-center gap-1.5">
                     <span class="size-2.5 rounded-full border-2 border-status-good bg-secondary-soft dark:bg-line-strong"></span>
                     {{ __('cities.hr_open') }}
@@ -141,9 +141,9 @@
                         <p class="truncate text-xs text-secondary-medium dark:text-ink-muted" dir="auto">{{ $city['secondaryName'] }}</p>
                     </div>
                     <span @class([
-                        'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap',
+                        'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap',
                         'bg-status-good-soft text-status-good' => $city['isActive'],
-                        'bg-secondary-soft text-secondary-medium dark:bg-surface-2 dark:text-ink-muted' => ! $city['isActive'],
+                        'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink-muted' => ! $city['isActive'],
                     ]) title="{{ $city['statusLabel'] }}">{{ $city['statusShort'] }}</span>
                 </div>
 
@@ -168,7 +168,7 @@
                             <div class="h-full bg-status-active" style="width: {{ $city['openPct'] }}%"></div>
                             <div class="h-full bg-secondary-light dark:bg-ink-faint/60" style="width: {{ 100 - $city['openPct'] }}%"></div>
                         </div>
-                        <div class="mt-1 flex items-center justify-between text-[11px] text-secondary-medium dark:text-ink-muted">
+                        <div class="mt-1 flex items-center justify-between text-xs text-secondary-medium dark:text-ink-muted">
                             <span>{{ $city['open'] }} {{ __('cities.open') }}</span>
                             <span>{{ $city['closed'] }} {{ __('cities.closed') }}</span>
                         </div>

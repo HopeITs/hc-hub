@@ -62,7 +62,7 @@
                     </span>
                 @endif
                 @if ($task->delivery_state !== null)
-                    <x-ui.enum-badge :case="$task->delivery_state" class="py-0! text-[11px]!" />
+                    <x-ui.enum-badge :case="$task->delivery_state" class="py-0! text-xs!" />
                 @endif
             @endif
             @if ($daysLeft !== null && $daysLeft <= 7)
@@ -122,7 +122,7 @@
             @else
                 <time datetime="{{ $task->due_date->toDateString() }}" @class(['font-bold text-status-critical' => $isOverdue, $inkText => ! $isOverdue])>{{ $task->due_date->translatedFormat(__('formats.date')) }}</time>
                 @if ($isOverdue)
-                    <span class="block text-[10px] font-bold tracking-wide text-status-critical uppercase">{{ __('proposals.overdue') }}</span>
+                    <span class="block text-xs font-bold tracking-wide text-status-critical uppercase">{{ __('proposals.overdue') }}</span>
                 @endif
             @endif
         </span>

@@ -208,7 +208,7 @@
         grid-column: 1 / -1;
         margin-top: 0.25rem;
         font-size: 0.875rem;
-        color: var(--color-status-critical);
+        color: var(--color-status-critical-text);
     }
 
     @container rules (max-width: 26rem) {
@@ -650,7 +650,7 @@
         gap: 0.25rem;
         font-size: 0.75rem;
         font-weight: 700;
-        color: var(--color-status-critical);
+        color: var(--color-status-critical-text);
     }
 
     .rules-event-fixed {

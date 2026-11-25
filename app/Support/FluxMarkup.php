@@ -85,7 +85,7 @@ final class FluxMarkup
         // smaller chip, so a column of statuses reads calmly when scanned.
         $shape = $quiet
             ? 'gap-1 px-2 py-0.5 text-xs font-medium'
-            : 'gap-1.5 px-2.5 py-1 text-[11px] font-bold tracking-wide uppercase';
+            : 'gap-1.5 px-2.5 py-1 text-xs font-bold tracking-wide uppercase';
 
         return new HtmlString(
             '<span class="inline-flex max-w-full items-center rounded-full border whitespace-nowrap '.$shape.' '.$case->tone()->badgeClasses().($extraClass === '' ? '' : ' '.e($extraClass)).'" data-tone="'.$case->tone()->value.'">'

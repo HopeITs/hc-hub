@@ -218,12 +218,12 @@
                                             ])></span>
                                         </span>
                                         <span @class([
-                                            'mt-1 truncate text-[11px] leading-tight font-semibold',
+                                            'mt-1 truncate text-xs leading-tight font-semibold',
                                             'text-status-critical' => in_array($stop['state'], ['late', 'failed'], true),
                                             $inkText => $stop['state'] === 'done',
                                             $mutedText => $stop['state'] === 'ahead',
                                         ])>{{ $stop['label'] }}</span>
-                                        <span class="truncate text-[11px] leading-tight tabular-nums {{ $mutedText }}">
+                                        <span class="truncate text-xs leading-tight tabular-nums {{ $mutedText }}">
                                             @if ($stop['detail'] !== null)
                                                 {{ $stop['detail'] }}
                                             @elseif ($stop['key'] === 'account')

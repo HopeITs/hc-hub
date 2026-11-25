@@ -13,7 +13,7 @@
                     <div class="flex items-center gap-2">
                         <p class="truncate text-base font-bold text-secondary-dark dark:text-ink">{{ $title }}</p>
                         @if ($count !== null)
-                            <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-secondary-soft px-2 py-0.5 text-[11px] font-semibold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ $count }}</span>
+                            <span class="inline-flex min-w-6 items-center justify-center rounded-full bg-secondary-soft px-2 py-0.5 text-xs font-semibold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ $count }}</span>
                         @endif
                     </div>
                 @endif
