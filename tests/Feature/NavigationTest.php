@@ -76,7 +76,7 @@ test('HR pages sit in groups named by the work, leave management with the people
     $groups = app(Destinations::class)->sidebarFor(User::factory()->role('Super Admin')->create());
     $routesOf = fn (string $group): array => array_column(collect($groups)->firstWhere('group', $group)['items'], 'route');
 
-    expect($routesOf('people'))->toBe(['hr.employees.index', 'hr.contracts.index', 'hr.positions.index', 'hr.positions.team', 'hr.badges.index', 'hr.leave.team', 'hr.leave.balances', 'hr.leave.holidays', 'hr.statistics.general'])
+    expect($routesOf('people'))->toBe(['hr.employees.index', 'hr.contracts.index', 'hr.positions.index', 'hr.positions.team', 'hr.badges.index', 'hr.leave.team', 'hr.leave.balances', 'hr.leave.holidays', 'hr.statistics.general', 'hr.reports.index'])
         ->and($routesOf('recruitment'))->toContain('hr.recruitment.requests.index', 'hr.recruitment.campaigns.index', 'hr.recruitment.applicants.index')
         ->and($routesOf('workspace'))->toContain('tasks.index', 'calendar.index', 'hr.leave.team-calendar', 'hr.checklists.index', 'hr.news.index')
         ->and($routesOf('administration'))->toContain('activity.index', 'hr.settings.index')
@@ -103,7 +103,7 @@ test('no page a viewer may open falls out of the sidebar, whatever their role', 
     $this->seed(RolesAndPermissionsSeeder::class);
 
     $destinations = app(Destinations::class);
-    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index', 'hr.attendance.upload'];
+    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index', 'hr.attendance.upload', 'hr.reports.leaving-reasons', 'hr.reports.recruitment-funnel', 'hr.reports.leave', 'hr.reports.vacancies', 'hr.reports.training', 'hr.reports.profile-completeness'];
 
     foreach ($destinations->routes() as $route) {
         expect(Destinations::Groups)->toContain($destinations->find($route)['group']);
