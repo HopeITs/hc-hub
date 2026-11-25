@@ -110,6 +110,14 @@ return [
 
     'mutes_versus_matrix' => 'Muting a topic stops its team-wide updates everywhere; anything addressed to you still arrives. The table above only chooses the place.',
 
+    // The folded parts of the page: a title and one line on what is inside.
+    'more' => [
+        'by_topic' => ['title' => 'By topic', 'hint' => 'Choose the place for each topic, or mute one.'],
+        'more' => ['title' => 'More options', 'hint' => 'Sound, popups, summaries and time zone.'],
+        'devices' => ['title' => 'Devices and app', 'hint' => 'Install the app, manage your devices and send a test.'],
+        'rules' => ['title' => 'Organization rules', 'hint' => 'Deadlines, reminders and events, for everyone.'],
+    ],
+
     'schedule' => [
         'title' => 'Quiet hours and working days',
         'lead' => 'During quiet hours and on days off, computer, phone and email notifications wait and arrive afterwards. Notifications inside HC Hub always arrive.',

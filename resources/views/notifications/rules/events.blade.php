@@ -12,10 +12,11 @@
     $searchTerms = collect($eventGroups)->flatMap(fn (array $group): array => array_map(fn (array $row): string => mb_strtolower($group['label'].' '.$row['title'].' '.$row['key']), $group['rows']))->values()->all();
 @endphp
 
-<section
+<details
     id="rules-events"
     aria-labelledby="rules-events-heading"
-    class="rules-group mt-12"
+    class="rules-group group/rule border-t border-secondary-soft dark:border-line"
+    wire:ignore.self
     data-rule-field
     data-tour="notification-events"
     x-data="{
@@ -25,9 +26,13 @@
         get anyMatch() { return this.terms.some((text) => this.matches(text)); },
     }"
 >
+    <summary class="flex min-h-12 cursor-pointer touch-manipulation list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
+        <flux:icon.chevron-right variant="micro" class="shrink-0 transition-transform group-open/rule:rotate-90 rtl:-scale-x-100" />
+        <h2 id="rules-events-heading" class="rules-group-title">{{ __('notifications.settings.events.title') }}</h2>
+    </summary>
+
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div class="min-w-0">
-            <h2 id="rules-events-heading" class="rules-group-title">{{ __('notifications.settings.events.title') }}</h2>
             <p class="rules-group-hint">{{ __('notifications.settings.events.hint') }}</p>
         </div>
 
@@ -57,7 +62,7 @@
         </div>
     @endif
 
-    <div class="mt-6 grid gap-10">
+    <div class="mt-6 grid gap-10 pb-6">
         @foreach ($eventGroups as $group)
             @php
                 $groupTerms = array_map(fn (array $row): string => mb_strtolower($group['label'].' '.$row['title'].' '.$row['key']), $group['rows']);
@@ -151,4 +156,4 @@
 
         <p class="rules-group-hint" x-show="! anyMatch" x-cloak role="status">{{ __('notifications.settings.events.no_match') }}</p>
     </div>
-</section>
+</details>

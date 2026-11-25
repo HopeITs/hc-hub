@@ -438,12 +438,15 @@ new class extends Component {
 <div class="rules-page @container/rules" x-data="notificationRules({{ \Illuminate\Support\Js::from($this->clientConfig())->toHtml() }})" data-notification-rules>
 
     <form x-on:submit.prevent="save()" class="flex flex-1 flex-col" novalidate>
-        <div class="grid items-start gap-x-16 gap-y-12 @5xl/rules:grid-cols-2">
-            <div class="grid gap-12">
+        <div>
+            <div>
                 @include('notifications.rules.week')
 
-                <section id="rules-deadlines" aria-labelledby="rules-deadlines-heading" class="rules-group">
-                    <h2 id="rules-deadlines-heading" class="rules-group-title">{{ __('notifications.admin.sections.deadlines') }}</h2>
+                <details id="rules-deadlines" aria-labelledby="rules-deadlines-heading" class="rules-group group/rule border-t border-secondary-soft dark:border-line" wire:ignore.self>
+                    <summary class="flex min-h-12 cursor-pointer touch-manipulation list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
+                        <flux:icon.chevron-right variant="micro" class="shrink-0 transition-transform group-open/rule:rotate-90 rtl:-scale-x-100" />
+                        <h2 id="rules-deadlines-heading" class="rules-group-title">{{ __('notifications.admin.sections.deadlines') }}</h2>
+                    </summary>
                     <p class="rules-group-hint">{{ __('notifications.admin.deadlines_hint') }}</p>
 
                     <ol class="rules-flow" aria-label="{{ __('notifications.admin.flow_label') }}">
@@ -455,7 +458,7 @@ new class extends Component {
                         </template>
                     </ol>
 
-                    <div class="rules-rows">
+                    <div class="rules-rows pb-6">
                         @include('notifications.rules.warnings')
                         @include('notifications.rules.row', ['property' => 'overdueRepeat', 'label' => __('notifications.admin.remind_every'), 'hint' => __('notifications.admin.remind_every_hint')])
                         @include('notifications.rules.row', ['property' => 'departmentTaskDue', 'label' => __('notifications.admin.department_task_due'), 'hint' => __('notifications.admin.department_task_due_hint')])
@@ -464,15 +467,18 @@ new class extends Component {
                         @include('notifications.rules.row', ['property' => 'escalateTopAfter', 'label' => __('notifications.admin.top_after'), 'hint' => __('notifications.admin.top_after_hint')])
                         @include('notifications.rules.row', ['property' => 'escalationCatchUp', 'label' => __('notifications.admin.escalation_window'), 'hint' => __('notifications.admin.escalation_window_hint')])
                     </div>
-                </section>
+                </details>
             </div>
 
-            <div class="grid gap-12">
-                <section id="rules-stalled" aria-labelledby="rules-stalled-heading" class="rules-group">
-                    <h2 id="rules-stalled-heading" class="rules-group-title">{{ __('notifications.admin.sections.stalled') }}</h2>
+            <div>
+                <details id="rules-stalled" aria-labelledby="rules-stalled-heading" class="rules-group group/rule border-t border-secondary-soft dark:border-line" wire:ignore.self>
+                    <summary class="flex min-h-12 cursor-pointer touch-manipulation list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
+                        <flux:icon.chevron-right variant="micro" class="shrink-0 transition-transform group-open/rule:rotate-90 rtl:-scale-x-100" />
+                        <h2 id="rules-stalled-heading" class="rules-group-title">{{ __('notifications.admin.sections.stalled') }}</h2>
+                    </summary>
                     <p class="rules-group-hint">{{ __('notifications.admin.stalled_hint') }}</p>
 
-                    <div class="rules-rows">
+                    <div class="rules-rows pb-6">
                         @include('notifications.rules.row', ['property' => 'stalledTaskInProgress', 'label' => __('notifications.admin.stalled_task_in_progress')])
                         @include('notifications.rules.row', ['property' => 'stalledTaskUnderReview', 'label' => __('notifications.admin.stalled_task_under_review')])
                         @include('notifications.rules.row', ['property' => 'stalledReportDraft', 'label' => __('notifications.admin.stalled_report_draft')])
@@ -480,17 +486,20 @@ new class extends Component {
                         @include('notifications.rules.row', ['property' => 'stalledProposal', 'label' => __('notifications.admin.stalled_proposal')])
                         @include('notifications.rules.row', ['property' => 'extensionLead', 'label' => __('notifications.admin.extension_lead'), 'hint' => __('notifications.admin.extension_lead_help')])
                     </div>
-                </section>
+                </details>
 
-                <section id="rules-digests" aria-labelledby="rules-digests-heading" class="rules-group">
-                    <h2 id="rules-digests-heading" class="rules-group-title">{{ __('notifications.admin.sections.digests') }}</h2>
+                <details id="rules-digests" aria-labelledby="rules-digests-heading" class="rules-group group/rule border-t border-secondary-soft dark:border-line" wire:ignore.self>
+                    <summary class="flex min-h-12 cursor-pointer touch-manipulation list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
+                        <flux:icon.chevron-right variant="micro" class="shrink-0 transition-transform group-open/rule:rotate-90 rtl:-scale-x-100" />
+                        <h2 id="rules-digests-heading" class="rules-group-title">{{ __('notifications.admin.sections.digests') }}</h2>
+                    </summary>
 
-                    <div class="rules-rows">
+                    <div class="rules-rows pb-6">
                         @include('notifications.rules.row', ['property' => 'offTrackPace', 'label' => __('notifications.admin.off_track'), 'hint' => __('notifications.admin.off_track_hint'), 'unit' => '%'])
                         @include('notifications.rules.row', ['property' => 'dailyBriefTime', 'label' => __('notifications.admin.daily_brief'), 'hint' => __('notifications.admin.daily_brief_hint'), 'type' => 'time'])
                         @include('notifications.rules.row', ['property' => 'weeklyDigestTime', 'label' => __('notifications.admin.weekly_digest'), 'liveHint' => 'weeklyDigestHint', 'type' => 'time'])
                     </div>
-                </section>
+                </details>
             </div>
         </div>
 

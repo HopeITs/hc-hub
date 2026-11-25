@@ -4,11 +4,12 @@
     $weekdayShort = $this->weekdayNames('D');
 @endphp
 
-<section id="rules-week" aria-labelledby="rules-week-heading" class="rules-group" data-rule-field>
-    <div class="flex items-baseline justify-between gap-4">
+<details id="rules-week" aria-labelledby="rules-week-heading" class="rules-group group/rule border-t border-secondary-soft dark:border-line pb-6" wire:ignore.self open data-rule-field>
+    <summary class="flex min-h-12 cursor-pointer touch-manipulation list-none items-center gap-2 py-3 [&::-webkit-details-marker]:hidden">
+        <flux:icon.chevron-right variant="micro" class="shrink-0 transition-transform group-open/rule:rotate-90 rtl:-scale-x-100" />
         <h2 id="rules-week-heading" class="rules-group-title">{{ __('notifications.admin.sections.week') }}</h2>
-        <p class="text-sm font-semibold tabular-nums text-secondary-medium dark:text-ink-muted" aria-live="polite" x-text="workingCountLabel">{{ count($workingDays) }} {{ trans_choice('notifications.admin.working_days_unit', count($workingDays)) }}</p>
-    </div>
+        <p class="ms-auto text-sm font-semibold tabular-nums text-secondary-medium dark:text-ink-muted" aria-live="polite" x-text="workingCountLabel">{{ count($workingDays) }} {{ trans_choice('notifications.admin.working_days_unit', count($workingDays)) }}</p>
+    </summary>
     <p class="rules-group-hint">{{ __('notifications.admin.week_hint') }}</p>
 
     <fieldset class="mt-4">
@@ -29,4 +30,4 @@
     </fieldset>
 
     <button type="button" class="rules-default mt-2" x-show="isCustom('workingDays')" x-cloak x-on:click="useDefault('workingDays')">{{ __('notifications.admin.use_default_week') }}</button>
-</section>
+</details>

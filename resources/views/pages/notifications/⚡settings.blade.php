@@ -16,7 +16,6 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
@@ -45,10 +44,6 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
 
     /** Test sends per person per minute: each one is a real push or email. */
     private const int TEST_LIMIT = 5;
-
-    /** `personal` (default) or `rules`; rules is only for holders of notification-settings.manage. */
-    #[Url(except: 'personal')]
-    public string $tab = 'personal';
 
     public bool $popups = false;
 
@@ -304,12 +299,6 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
         return auth()->user()->can('notification-settings.manage');
     }
 
-    #[Computed]
-    public function activeTab(): string
-    {
-        return $this->tab === 'rules' && $this->canManageRules ? 'rules' : 'personal';
-    }
-
     public function updatedPopups(): void
     {
         auth()->user()->forceFill(['notification_popups' => $this->popups])->save();
@@ -451,6 +440,7 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
     $presenter = app(\App\Notifications\NotificationPresenter::class);
     $channels = NotificationChannel::cases();
     $pushChannels = [NotificationChannel::Desktop, NotificationChannel::Mobile];
+    $channelIcons = ['in_app' => 'bell', 'desktop' => 'computer-desktop', 'mobile' => 'device-phone-mobile', 'email' => 'envelope'];
     $paused = ! $prefs['enabled'];
     $weekOrder = app()->getLocale() === 'ar' ? [6, 0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6];
     $deviceName = fn (PushSubscription $device): string => filled($device->device_name)
@@ -460,397 +450,120 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
             : __('notification_settings.devices.unknown'));
     $muted_text = 'text-sm text-secondary-medium dark:text-ink-muted';
     $section = 'grid gap-3';
+    $switch = 'relative h-6 w-11 shrink-0 cursor-pointer appearance-none rounded-full bg-secondary-soft transition-colors after:absolute after:start-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:shadow-sm after:transition-transform checked:bg-primary checked:after:translate-x-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 rtl:checked:after:-translate-x-5 dark:bg-surface-3 dark:checked:bg-brand';
+    $chip = 'inline-flex min-h-11 cursor-pointer touch-manipulation items-center gap-2 rounded-xl border border-secondary-soft px-3 text-sm font-medium text-secondary-medium transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:text-secondary-dark has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary dark:border-line dark:text-ink-muted dark:has-[:checked]:border-brand-text dark:has-[:checked]:bg-surface-2 dark:has-[:checked]:text-ink';
+    $more = 'group/set scroll-mt-24 border-t border-secondary-soft dark:border-line';
+    $moreSummary = 'flex min-h-14 cursor-pointer touch-manipulation list-none items-center gap-3 py-3 [&::-webkit-details-marker]:hidden';
+    $moreSections = [
+        'by-topic' => 'by_topic',
+        'more-options' => 'more',
+        'devices' => 'devices',
+    ];
 @endphp
 
 <x-desk.register class="@container/directory" heading-id="notification-settings-heading" :title="__('notifications.settings_link')">
-    @if ($this->canManageRules)
-        <nav class="mb-10 flex flex-wrap items-center gap-1 border-b border-secondary-soft dark:border-line" aria-label="{{ __('notifications.settings_link') }}" data-settings-tabs>
-            @foreach (['personal', 'rules'] as $key)
-                <a
-                    href="{{ route('notification-settings.edit', $key === 'rules' ? ['tab' => 'rules'] : []) }}"
-                    wire:navigate
-                    @if ($this->activeTab === $key) aria-current="page" @endif
-                    @class([
-                        'inline-flex min-h-11 touch-manipulation items-center gap-1.5 border-b-2 px-3 text-sm font-medium transition-colors sm:min-h-10',
-                        'border-primary text-secondary-dark dark:text-ink' => $this->activeTab === $key,
-                        'border-transparent text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink' => $this->activeTab !== $key,
-                    ])
-                    data-settings-tab="{{ $key }}"
-                >{{ __("notifications.settings_tabs.{$key}") }}</a>
-            @endforeach
-        </nav>
-    @endif
+    {{-- One page: what matters is in sight, the rest opens on demand. An address like #desktop-app opens the part it names. --}}
+    <div
+        class="max-w-3xl"
+        x-data="{
+            reveal() {
+                const target = location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null;
 
-    @if ($this->activeTab === 'rules')
-        <livewire:notifications.rules />
-    @else
-        <p class="{{ $muted_text }}">{{ __('notification_settings.lead') }}</p>
+                if (! target) {
+                    return;
+                }
 
-        {{-- Every save is acknowledged here, politely, without moving focus. --}}
-        <p class="mt-1 min-h-5 text-sm font-semibold" role="status" aria-live="polite" data-save-status="{{ $saveState }}" wire:key="save-status-{{ $saveTick }}">
-            @if ($saveState === 'saved')
-                <span class="text-status-good">{{ __('notification_settings.status.saved') }}</span>
-            @elseif ($saveState === 'error')
-                <span class="text-status-critical">{{ __('notification_settings.status.error') }}</span>
-            @endif
-        </p>
+                for (let fold = target.closest('details'); fold; fold = fold.parentElement?.closest('details')) {
+                    fold.open = true;
+                }
 
-        <div class="grid max-w-2xl gap-14">
+                this.$nextTick(() => target.scrollIntoView({ block: 'start' }));
+            },
+        }"
+        x-init="reveal()"
+        x-on:hashchange.window="reveal()"
+        data-notification-settings
+    >
+        <div class="grid gap-10 pb-10">
+            {{-- The master switch, and the four places a notification can reach me. --}}
+            <section aria-labelledby="general-settings-heading" class="grid gap-5" data-general-settings>
+                <h2 id="general-settings-heading" class="sr-only">{{ __('notification_settings.general.title') }}</h2>
 
-            {{-- The installable app: its own window, Start-menu entry and branded notifications. --}}
-            @php
-                $installPlatforms = ['desktop_chromium', 'desktop_safari', 'android', 'ios', 'ios_non_safari', 'firefox_android', 'firefox', 'other'];
-            @endphp
-
-            <section
-                id="desktop-app"
-                aria-labelledby="desktop-app-heading"
-                class="grid scroll-mt-24 gap-3"
-                x-data="{
-                    state: window.hcApp?.state() ?? 'unavailable',
-                    platform: window.hcApp?.platform() ?? 'other',
-                    init() {
-                        window.addEventListener('hc-app-install-change', (event) => (this.state = event.detail));
-                    },
-                }"
-                data-desktop-app
-            >
-                <div class="flex items-start gap-4">
-                    <img src="{{ asset('app-icons/icon-192.png') }}" alt="" width="48" height="48" class="size-12 shrink-0 rounded-full" data-no-dim />
-                    <div class="min-w-0">
-                        <h2 id="desktop-app-heading" class="text-base font-bold">{{ __('notifications.app.heading') }}</h2>
-                        <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('notifications.app.help') }}</p>
-                    </div>
-                </div>
-
-                <div class="grid gap-4 ps-16">
-                    <p x-show="state === 'installed'" x-cloak class="inline-flex items-center gap-2 text-sm font-semibold text-status-good" data-app-installed>
-                        <flux:icon.check-circle variant="mini" />
-                        {{ __('notifications.app.installed') }}
-                    </p>
-
-                    <div x-show="state === 'available'" x-cloak>
-                        <x-ui.button tone="primary" size="sm" icon="arrow-down-tray" x-on:click="$flux.modal('install-app').show()" aria-haspopup="dialog" data-test="install-app-button">
-                            {{ __('notifications.app.install') }}
-                        </x-ui.button>
-                    </div>
-
-                    {{-- No browser prompt: the steps for this device. --}}
-                    <div x-show="state === 'unavailable'" class="grid gap-1" data-app-install-hint>
-                        <p class="text-sm font-semibold">{{ __('notifications.app.this_device') }}</p>
-                        @foreach ($installPlatforms as $installPlatform)
-                            <div x-show="platform === '{{ $installPlatform }}'" x-cloak data-install-steps="{{ $installPlatform }}">
-                                @include('pages.notifications._install-steps', ['platform' => $installPlatform])
-                            </div>
-                        @endforeach
-                    </div>
-
-                    <details x-show="state !== 'installed'" x-cloak class="group grid gap-3" data-install-other-devices>
-                        <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold">
-                            <flux:icon.chevron-right variant="micro" class="transition-transform group-open:rotate-90 rtl:-scale-x-100" />
-                            {{ __('notifications.app.other_devices') }}
-                        </summary>
-                        <div class="mt-3 grid gap-5">
-                            @foreach ($installPlatforms as $installPlatform)
-                                <div x-show="platform !== '{{ $installPlatform }}'" x-cloak data-install-steps="{{ $installPlatform }}">
-                                    @include('pages.notifications._install-steps', ['platform' => $installPlatform])
-                                </div>
-                            @endforeach
-                        </div>
-                    </details>
-                </div>
-            </section>
-
-            {{-- This device: permission and this browser's own push subscription (pushDevice, push-notifications.js). --}}
-            <section
-                id="this-device"
-                aria-labelledby="this-device-heading"
-                class="{{ $section }} scroll-mt-24"
-                x-data="pushDevice"
-                x-on:push-device-removed.window="if ($event.detail.id === subscriptionId) { disable() }"
-                data-push-device
-                data-local-title="{{ __('notification_settings.device.local_title') }}"
-                data-local-body="{{ __('notification_settings.device.local_body') }}"
-                data-push-configured="{{ $pushConfigured ? 'yes' : 'no' }}"
-            >
-                <h2 id="this-device-heading" class="text-base font-bold">{{ __('notification_settings.device.title') }}</h2>
-                <p class="{{ $muted_text }}">{{ __('notification_settings.device.lead') }}</p>
-
-                @if (! $pushConfigured)
-                    <p class="text-sm font-semibold text-status-critical" data-push-not-configured>{{ __('notification_settings.device.not_configured') }}</p>
-                @else
-                    <p class="text-sm font-semibold" role="status" data-push-device-state>
-                        <span x-show="subscribed && known" x-cloak class="text-status-good">{{ __('notification_settings.device.state.on') }}</span>
-                        <span x-show="!(subscribed && known) && !blocker()">{{ __('notification_settings.device.state.off') }}</span>
-                        @foreach (['denied', 'unsupported', 'insecure', 'ios_install'] as $blocker)
-                            <span x-show="!(subscribed && known) && blocker() === '{{ $blocker }}'" x-cloak class="text-status-critical">{{ __('notification_settings.device.state.'.$blocker) }}</span>
-                        @endforeach
-                        <span x-show="standalone" x-cloak class="{{ $muted_text }} font-normal">· {{ __('notification_settings.devices.installed') }}</span>
-                    </p>
-
-                    <p x-show="subscribed && !known" x-cloak class="{{ $muted_text }}" data-push-device-unknown>{{ __('notification_settings.device.unknown') }}</p>
-
-                    <p x-show="iosNeedsInstall" x-cloak class="{{ $muted_text }}">
-                        {{ __('notification_settings.device.ios_install') }}
-                        <a href="#desktop-app" class="font-semibold underline">{{ __('notification_settings.device.ios_install_link') }}</a>
-                    </p>
-
-                    <div class="flex flex-wrap items-center gap-3">
-                        <span x-show="!(subscribed && known)">
-                            <x-ui.button tone="primary" size="sm" icon="bell-alert" x-on:click="enable()" x-bind:disabled="busy || ['unsupported', 'insecure', 'ios_install'].includes(blocker())" data-test="push-enable">{{ __('notification_settings.device.enable') }}</x-ui.button>
-                        </span>
-                        <span x-show="subscribed && known" x-cloak>
-                            <x-ui.button tone="secondary" size="sm" icon="bell-slash" x-on:click="disable()" x-bind:disabled="busy" data-test="push-disable">{{ __('notification_settings.device.disable') }}</x-ui.button>
-                        </span>
-                        <span x-show="permission === 'granted'" x-cloak>
-                            <x-ui.button tone="ghost" size="sm" x-on:click="localTest($root.dataset.localTitle, $root.dataset.localBody)" data-test="push-local-test">{{ __('notification_settings.device.local_test') }}</x-ui.button>
-                        </span>
-                        <span x-show="busy" x-cloak class="{{ $muted_text }}" role="status">{{ __('notification_settings.device.working') }}</span>
-                    </div>
-
-                    <div role="alert">
-                        @foreach (['denied', 'unsupported', 'not_configured', 'insecure', 'network', 'failed', 'ios_install'] as $code)
-                            <p x-show="error === '{{ $code }}'" x-cloak class="text-sm text-status-critical">{{ __('notification_settings.device.errors.'.$code) }}</p>
-                        @endforeach
-                    </div>
-
-                    <div role="status">
-                        @foreach (['shown', 'denied', 'unsupported', 'failed'] as $result)
-                            <p x-show="testResult === '{{ $result }}'" x-cloak class="{{ $muted_text }}">{{ __('notification_settings.device.local_result.'.$result) }}</p>
-                        @endforeach
-                    </div>
-
-                    <p class="{{ $muted_text }}">{{ __('notification_settings.device.os_note') }}</p>
-                @endif
-            </section>
-
-            {{-- General: the master switch, the four channels, sound, details and how often. --}}
-            <section aria-labelledby="general-settings-heading" class="{{ $section }}" data-general-settings>
-                <h2 id="general-settings-heading" class="text-base font-bold">{{ __('notification_settings.general.title') }}</h2>
-
-                <label class="flex items-start gap-3">
-                    <input type="checkbox" wire:model.live="prefs.enabled" class="mt-1 size-4 accent-primary" data-test="pref-enabled" />
-                    <span>
-                        <span class="block text-sm font-semibold">{{ __('notification_settings.general.master_label') }}</span>
-                        <span class="block {{ $muted_text }}">{{ __('notification_settings.general.master_help') }}</span>
+                <label class="flex cursor-pointer items-center justify-between gap-4">
+                    <span class="min-w-0">
+                        <span class="block text-base font-bold">{{ __('notification_settings.general.master_label') }}</span>
+                        <span class="block {{ $muted_text }}">{{ __('notification_settings.lead') }}</span>
                     </span>
+                    <input type="checkbox" role="switch" wire:model.live="prefs.enabled" class="{{ $switch }}" data-test="pref-enabled" />
                 </label>
+
+                {{-- Every save is acknowledged here, politely, without moving focus. --}}
+                <p class="-mt-3 min-h-5 text-sm font-semibold" role="status" aria-live="polite" data-save-status="{{ $saveState }}" wire:key="save-status-{{ $saveTick }}">
+                    @if ($saveState === 'saved')
+                        <span class="text-status-good">{{ __('notification_settings.status.saved') }}</span>
+                    @elseif ($saveState === 'error')
+                        <span class="text-status-critical">{{ __('notification_settings.status.error') }}</span>
+                    @endif
+                </p>
+
                 @if ($paused)
-                    <p class="ps-7 text-sm font-semibold text-status-critical" data-notifications-paused>{{ __('notification_settings.general.paused') }}</p>
+                    <p class="-mt-3 text-sm font-semibold text-status-critical" data-notifications-paused>{{ __('notification_settings.general.paused') }}</p>
                 @endif
 
-                <fieldset class="mt-2 grid gap-3" @disabled($paused)>
-                    <legend class="mb-2 text-sm font-bold">{{ __('notification_settings.general.channels') }}</legend>
-                    @foreach ($channels as $channel)
-                        <label class="flex items-start gap-3" wire:key="channel-{{ $channel->value }}">
-                            <input
-                                type="checkbox"
-                                wire:model.live="prefs.{{ $channel->value }}"
-                                @disabled(! $pushConfigured && in_array($channel, $pushChannels, true))
-                                class="mt-1 size-4 accent-primary"
-                                data-test="pref-{{ $channel->value }}"
-                            />
-                            <span>
-                                <span class="block text-sm font-semibold">{{ $channel->label() }}</span>
-                                <span class="block {{ $muted_text }}">{{ __('notification_settings.general.channel_help.'.$channel->value) }}</span>
-                            </span>
-                        </label>
-                    @endforeach
-                    @if (! $pushConfigured)
-                        <p class="ps-7 {{ $muted_text }}">{{ __('notification_settings.general.push_off') }}</p>
-                    @endif
-                </fieldset>
-
-                <fieldset class="mt-2 grid gap-3" @disabled($paused)>
-                    @foreach (['sound' => ['sound_label', 'sound_help'], 'previews' => ['previews_label', 'previews_help']] as $field => [$label, $help])
-                        <label class="flex items-start gap-3" wire:key="pref-{{ $field }}">
-                            <input type="checkbox" wire:model.live="prefs.{{ $field }}" class="mt-1 size-4 accent-primary" data-test="pref-{{ $field }}" />
-                            <span>
-                                <span class="block text-sm font-semibold">{{ __('notification_settings.general.'.$label) }}</span>
-                                <span class="block {{ $muted_text }}">{{ __('notification_settings.general.'.$help) }}</span>
-                            </span>
-                        </label>
-                    @endforeach
-                </fieldset>
-
-                <div class="mt-2 grid gap-3 sm:grid-cols-2">
-                    <x-ui.form-select wire:model.live="prefs.frequency" :label="__('notification_settings.general.frequency_label')" :help="__('notification_settings.general.frequency_help')" :disabled="$paused" data-test="pref-frequency">
-                        @foreach (NotificationPreference::FREQUENCIES as $frequency)
-                            <option value="{{ $frequency }}">{{ __('notification_settings.general.frequency.'.$frequency) }}</option>
-                        @endforeach
-                    </x-ui.form-select>
-
-                    @if ($prefs['frequency'] === 'daily')
-                        <flux:input type="time" wire:model.blur="prefs.digest_time" :label="__('notification_settings.general.digest_time')" :disabled="$paused" data-test="pref-digest_time" />
-                    @endif
-                </div>
-                @error('prefs.frequency') <p class="text-sm text-status-critical">{{ $message }}</p> @enderror
-            </section>
-
-            {{-- Desktop popups for important and critical notifications. --}}
-            <section
-                aria-labelledby="desktop-popups-heading"
-                class="grid gap-2 border-t border-secondary-soft pt-8 dark:border-line"
-                x-data="{
-                    permission: 'Notification' in window ? Notification.permission : 'unsupported',
-                    testing: false,
-                    async ask() {
-                        if (this.permission === 'default') {
-                            this.permission = await Notification.requestPermission();
-                        }
-                    },
-                    async testPopup() {
-                        await this.ask();
-
-                        if (this.permission !== 'granted') {
-                            return;
-                        }
-
-                        this.testing = true;
-                        window.setTimeout(async () => {
-                            await window.hcShowDesktopPopup?.({
-                                id: 'test-' + Date.now(),
-                                module_label: @js(__('notifications.modules.system')),
-                                text: @js(__('notifications.test_message')),
-                                priority: 'important',
-                                url: @js(route('notification-settings.edit')),
-                                read_url: null,
-                                icon: @js(app(\App\Notifications\NotificationPresenter::class)->desktopIcon('system', 'important')),
-                                image: @js(app(\App\Notifications\NotificationPresenter::class)->desktopBanner('system', 'important', app()->getLocale())),
-                                created_at: new Date().toISOString(),
-                            });
-                            this.testing = false;
-                        }, 5000);
-                    },
-                }"
-                data-popup-preference
-            >
-                <h2 id="desktop-popups-heading" class="sr-only">{{ __('notifications.popups_label') }}</h2>
-                <label class="flex items-start gap-3">
-                    <input
-                        type="checkbox"
-                        wire:model.live="popups"
-                        x-on:change="document.body.dataset.notificationPopups = $event.target.checked ? 'on' : 'off'; if ($event.target.checked) { ask() }"
-                        class="mt-1 size-4 accent-primary"
-                        data-test="notification-popups-toggle"
-                    />
-                    <span>
-                        <span class="block text-sm font-semibold">{{ __('notifications.popups_label') }}</span>
-                        <span class="block text-sm text-secondary-medium dark:text-ink-muted">{{ __('notifications.popups_help') }}</span>
-                    </span>
-                </label>
-                <p x-show="permission === 'denied'" x-cloak class="ps-7 text-sm text-status-critical">{{ __('notifications.popups_blocked') }}</p>
-                <p x-show="permission === 'unsupported'" x-cloak class="ps-7 text-sm text-secondary-medium dark:text-ink-muted">{{ __('notifications.popups_unsupported') }}</p>
-
-                <div x-show="permission !== 'unsupported' && permission !== 'denied'" class="mt-2 flex flex-wrap items-center gap-3 ps-7">
-                    <x-ui.button tone="ghost" size="sm" icon="bell-alert" x-on:click="testPopup()" x-bind:disabled="testing" data-test="notification-popup-test">{{ __('notifications.popup_test') }}</x-ui.button>
-                    <span x-show="testing" x-cloak class="text-sm text-secondary-medium dark:text-ink-muted" role="status">{{ __('notifications.popup_test_waiting') }}</span>
-                </div>
-            </section>
-
-            {{-- Module x channel: only chooses the place. Mutes (below) are a different thing. --}}
-            <section aria-labelledby="module-channels-heading" class="{{ $section }}" data-module-channels>
-                <h2 id="module-channels-heading" class="text-base font-bold">{{ __('notification_settings.matrix.title') }}</h2>
-                <p class="{{ $muted_text }}">{{ __('notification_settings.matrix.help') }}</p>
-                @error('matrix') <p class="text-sm text-status-critical" role="alert">{{ $message }}</p> @enderror
-
-                @foreach ($channels as $channel)
-                    @if (! $prefs[$channel->value])
-                        <p class="{{ $muted_text }}" wire:key="matrix-off-{{ $channel->value }}">{{ __('notification_settings.matrix.channel_off', ['channel' => $channel->label()]) }}</p>
-                    @endif
-                @endforeach
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-secondary-soft text-start dark:border-line">
-                                <th scope="col" class="py-2 text-start font-semibold">{{ __('notification_settings.matrix.topic') }}</th>
-                                @foreach ($channels as $channel)
-                                    <th scope="col" class="px-2 py-2 text-center font-semibold">{{ $channel->label() }}</th>
-                                @endforeach
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-secondary-soft dark:divide-line">
-                            @foreach ($this->matrixModules as $module)
-                                <tr wire:key="matrix-{{ $module }}">
-                                    <th scope="row" class="py-2.5 text-start font-medium">{{ $presenter->moduleLabel($module) }}</th>
-                                    @foreach ($channels as $channel)
-                                        <td class="px-2 py-2.5 text-center">
-                                            <input
-                                                type="checkbox"
-                                                wire:change="setModuleChannel('{{ $module }}', '{{ $channel->value }}', $event.target.checked)"
-                                                @checked($matrix[$module][$channel->value] ?? false)
-                                                @disabled($paused || ! $prefs[$channel->value] || (! $pushConfigured && in_array($channel, $pushChannels, true)))
-                                                aria-label="{{ __('notification_settings.matrix.cell', ['module' => $presenter->moduleLabel($module), 'channel' => $channel->label()]) }}"
-                                                class="size-4 accent-primary"
-                                                data-matrix-cell="{{ $module }}.{{ $channel->value }}"
-                                            />
-                                        </td>
-                                    @endforeach
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            {{-- Module mutes: team-wide updates only; anything addressed to me always arrives. --}}
-            <section aria-labelledby="module-mutes-heading" class="grid gap-2" data-module-mutes>
-                <h2 id="module-mutes-heading" class="text-base font-bold">{{ __('notifications.mutes_label') }}</h2>
-                <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('notifications.mutes_help') }}</p>
-                <p class="text-sm text-secondary-medium dark:text-ink-muted" data-mutes-versus-matrix>{{ __('notification_settings.mutes_versus_matrix') }}</p>
-
-                <ul class="mt-2 divide-y divide-secondary-soft dark:divide-line">
-                    @forelse ($this->mutableModules as $module)
-                        <li class="flex items-center justify-between gap-3 py-2.5" wire:key="mute-{{ $module }}">
-                            <span @class(['text-sm font-medium', 'text-secondary-light line-through' => in_array($module, $muted, true)])>{{ app(\App\Notifications\NotificationPresenter::class)->moduleLabel($module) }}</span>
-                            <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-secondary-medium dark:text-ink-muted">
-                                <input type="checkbox" wire:click="toggleMute('{{ $module }}')" @checked(in_array($module, $muted, true)) aria-label="{{ __('notifications.mute_toggle', ['module' => app(\App\Notifications\NotificationPresenter::class)->moduleLabel($module)]) }}" class="size-4 accent-primary" data-mute-toggle="{{ $module }}" />
-                                {{ __('notifications.muted') }}
+                <fieldset class="grid gap-3" @disabled($paused)>
+                    <legend class="mb-3 text-sm font-bold">{{ __('notification_settings.general.channels') }}</legend>
+                    <div class="grid grid-cols-2 gap-2 @2xl/directory:grid-cols-4">
+                        @foreach ($channels as $channel)
+                            <label class="{{ $chip }}" title="{{ __('notification_settings.general.channel_help.'.$channel->value) }}" wire:key="channel-{{ $channel->value }}">
+                                <input
+                                    type="checkbox"
+                                    wire:model.live="prefs.{{ $channel->value }}"
+                                    @disabled(! $pushConfigured && in_array($channel, $pushChannels, true))
+                                    class="size-4 accent-primary"
+                                    data-test="pref-{{ $channel->value }}"
+                                />
+                                <flux:icon :name="$channelIcons[$channel->value]" variant="mini" class="shrink-0" />
+                                <span class="truncate">{{ $channel->label() }}</span>
                             </label>
-                        </li>
-                    @empty
-                        <li class="py-2.5 text-sm text-secondary-medium dark:text-ink-muted" data-mutes-empty>{{ __('notifications.mutes_empty') }}</li>
-                    @endforelse
-                </ul>
+                        @endforeach
+                    </div>
+                    @if (! $pushConfigured)
+                        <p class="{{ $muted_text }}">{{ __('notification_settings.general.push_off') }}</p>
+                    @endif
+                </fieldset>
             </section>
 
-            {{-- Quiet hours, working days and the time zone they are read in. --}}
-            <section aria-labelledby="schedule-heading" class="{{ $section }}" data-schedule-settings>
-                <h2 id="schedule-heading" class="text-base font-bold">{{ __('notification_settings.schedule.title') }}</h2>
-                <p class="{{ $muted_text }}">{{ __('notification_settings.schedule.lead') }}</p>
-
+            {{-- Quiet hours and working days. --}}
+            <section aria-labelledby="schedule-heading" class="grid gap-4" data-schedule-settings>
                 <fieldset class="grid gap-4" @disabled($paused)>
-                    <label class="flex items-start gap-3">
-                        <input type="checkbox" wire:model.live="prefs.quiet_hours" class="mt-1 size-4 accent-primary" data-test="pref-quiet_hours" />
-                        <span>
-                            <span class="block text-sm font-semibold">{{ __('notification_settings.schedule.quiet_label') }}</span>
+                    <label class="flex cursor-pointer items-center justify-between gap-4">
+                        <span class="min-w-0">
+                            <span id="schedule-heading" class="block text-sm font-bold">{{ __('notification_settings.schedule.quiet_label') }}</span>
                             <span class="block {{ $muted_text }}">{{ __('notification_settings.schedule.quiet_help') }}</span>
                         </span>
+                        <input type="checkbox" role="switch" wire:model.live="prefs.quiet_hours" class="{{ $switch }}" data-test="pref-quiet_hours" />
                     </label>
 
                     @if ($prefs['quiet_hours'])
-                        <div class="grid gap-3 ps-7 sm:grid-cols-2">
-                            <flux:input type="time" wire:model.blur="prefs.quiet_start" :label="__('notification_settings.schedule.start')" data-test="pref-quiet_start" />
-                            <flux:input type="time" wire:model.blur="prefs.quiet_end" :label="__('notification_settings.schedule.end')" data-test="pref-quiet_end" />
+                        <div class="flex flex-wrap items-end gap-3">
+                            <div class="w-36"><flux:input type="time" wire:model.blur="prefs.quiet_start" :label="__('notification_settings.schedule.start')" data-test="pref-quiet_start" /></div>
+                            <div class="w-36"><flux:input type="time" wire:model.blur="prefs.quiet_end" :label="__('notification_settings.schedule.end')" data-test="pref-quiet_end" /></div>
+                            <label class="{{ $chip }}" title="{{ __('notification_settings.schedule.urgent_help') }}">
+                                <input type="checkbox" wire:model.live="prefs.urgent_bypass" class="size-4 accent-primary" data-test="pref-urgent_bypass" />
+                                {{ __('notification_settings.schedule.urgent_label') }}
+                            </label>
                         </div>
-
-                        <label class="flex items-start gap-3 ps-7">
-                            <input type="checkbox" wire:model.live="prefs.urgent_bypass" class="mt-1 size-4 accent-primary" data-test="pref-urgent_bypass" />
-                            <span>
-                                <span class="block text-sm font-semibold">{{ __('notification_settings.schedule.urgent_label') }}</span>
-                                <span class="block {{ $muted_text }}">{{ __('notification_settings.schedule.urgent_help') }}</span>
-                            </span>
-                        </label>
+                        @foreach (['quiet_start', 'quiet_end'] as $field)
+                            @error('prefs.'.$field) <p class="text-sm text-status-critical" role="alert">{{ $message }}</p> @enderror
+                        @endforeach
                     @endif
 
                     <div>
-                        <p class="text-sm font-semibold" id="working-days-label">{{ __('notification_settings.schedule.days') }}</p>
-                        <p class="{{ $muted_text }}">{{ __('notification_settings.schedule.days_help') }}</p>
-                        <div class="mt-2 flex flex-wrap gap-x-5 gap-y-2" role="group" aria-labelledby="working-days-label">
+                        <p class="text-sm font-bold" id="working-days-label" title="{{ __('notification_settings.schedule.days_help') }}">{{ __('notification_settings.schedule.days') }}</p>
+                        <div class="mt-3 flex flex-wrap gap-2" role="group" aria-labelledby="working-days-label">
                             @foreach ($weekOrder as $day)
-                                <label class="inline-flex items-center gap-2 text-sm" wire:key="day-{{ $day }}">
-                                    <input type="checkbox" value="{{ $day }}" wire:model.live="workingDays" class="size-4 accent-primary" data-working-day="{{ $day }}" />
+                                <label class="{{ $chip }}" wire:key="day-{{ $day }}">
+                                    <input type="checkbox" value="{{ $day }}" wire:model.live="workingDays" class="sr-only" data-working-day="{{ $day }}" />
                                     {{ __('notification_settings.days.'.$day) }}
                                 </label>
                             @endforeach
@@ -858,112 +571,57 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
                         @error('workingDays') <p class="mt-1 text-sm text-status-critical" role="alert">{{ $message }}</p> @enderror
                     </div>
                 </fieldset>
-
-                <div class="sm:max-w-sm">
-                    <x-ui.form-select wire:model.live="prefs.timezone" :label="__('notification_settings.schedule.timezone')" :disabled="$paused" searchable data-test="pref-timezone">
-                        <option value="">{{ __('notification_settings.schedule.timezone_default', ['zone' => config('app.timezone')]) }}</option>
-                        @foreach (DateTimeZone::listIdentifiers() as $zone)
-                            <option value="{{ $zone }}">{{ $zone }}</option>
-                        @endforeach
-                    </x-ui.form-select>
-                </div>
-                @foreach (['quiet_start', 'quiet_end', 'digest_time', 'timezone'] as $field)
-                    @error('prefs.'.$field) <p class="text-sm text-status-critical" role="alert">{{ $message }}</p> @enderror
-                @endforeach
-            </section>
-
-            {{-- My devices: always the signed-in person's own push subscriptions. --}}
-            <section aria-labelledby="devices-heading" class="{{ $section }}" x-data="pushDevice" data-push-devices>
-                <h2 id="devices-heading" class="text-base font-bold">{{ __('notification_settings.devices.title') }}</h2>
-                <p class="{{ $muted_text }}">{{ __('notification_settings.devices.lead') }}</p>
-
-                <ul class="divide-y divide-secondary-soft dark:divide-line">
-                    @forelse ($this->devices as $device)
-                        @php
-                            $name = $deviceName($device);
-                            $state = match (true) {
-                                $device->isExpired() => 'expired',
-                                ! $device->enabled => 'off',
-                                $device->failure_count > 0 => 'failing',
-                                default => 'active',
-                            };
-                        @endphp
-                        <li class="grid gap-2 py-3" wire:key="device-{{ $device->id }}" x-data="{ editing: false, name: @js((string) $device->device_name) }" data-device="{{ $device->id }}">
-                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                                <span class="text-sm font-semibold" x-show="!editing">{{ $name }}</span>
-                                <span x-show="subscriptionId === {{ $device->id }}" x-cloak class="text-sm font-semibold text-status-good">{{ __('notification_settings.devices.this_device') }}</span>
-                                <span class="{{ $muted_text }}">
-                                    {{ __('notification_settings.devices.type.'.(in_array($device->device_type, PushSubscription::TYPES, true) ? $device->device_type : 'desktop')) }}
-                                    @if ($device->standalone) · {{ __('notification_settings.devices.installed') }} @endif
-                                    · {{ __('notification_settings.devices.state.'.$state) }}
-                                    · {{ $device->last_seen_at ? __('notification_settings.devices.last_active', ['time' => $device->last_seen_at->diffForHumans()]) : __('notification_settings.devices.never') }}
-                                </span>
-                            </div>
-
-                            <div x-show="editing" x-cloak class="flex flex-wrap items-end gap-2">
-                                <flux:input size="sm" x-model="name" maxlength="80" :aria-label="__('notification_settings.devices.name')" x-on:keydown.enter.prevent="$wire.renameDevice({{ $device->id }}, name).then((saved) => { if (saved) { editing = false } })" x-on:keydown.escape="editing = false" />
-                                <x-ui.button tone="primary" size="sm" x-on:click="$wire.renameDevice({{ $device->id }}, name).then((saved) => { if (saved) { editing = false } })">{{ __('notification_settings.devices.save') }}</x-ui.button>
-                                <x-ui.button tone="ghost" size="sm" x-on:click="editing = false">{{ __('common.cancel') }}</x-ui.button>
-                            </div>
-                            @error('device.'.$device->id) <p class="text-sm text-status-critical" role="alert">{{ $message }}</p> @enderror
-
-                            <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
-                                <label class="inline-flex items-center gap-2 text-sm">
-                                    <input type="checkbox" wire:change="setDeviceEnabled({{ $device->id }}, $event.target.checked)" @checked($device->enabled) aria-label="{{ __('notification_settings.devices.enabled_label', ['name' => $name]) }}" class="size-4 accent-primary" data-device-enabled="{{ $device->id }}" />
-                                    {{ __('notification_settings.devices.enabled') }}
-                                </label>
-                                <label class="inline-flex items-center gap-2 text-sm">
-                                    <input type="checkbox" wire:change="setDeviceUrgentOnly({{ $device->id }}, $event.target.checked)" @checked($device->urgent_only) aria-label="{{ __('notification_settings.devices.urgent_only_label', ['name' => $name]) }}" class="size-4 accent-primary" data-device-urgent-only="{{ $device->id }}" />
-                                    {{ __('notification_settings.devices.urgent_only') }}
-                                </label>
-                                <span class="flex flex-wrap items-center gap-1">
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil" x-on:click="editing = true" :aria-label="__('notification_settings.devices.rename_label', ['name' => $name])">{{ __('notification_settings.devices.rename') }}</x-ui.button>
-                                    <x-ui.button tone="ghost" size="sm" icon="paper-airplane" wire:click="testDevice({{ $device->id }})" :disabled="! $pushConfigured" :aria-label="__('notification_settings.devices.test_label', ['name' => $name])">{{ __('notification_settings.devices.test') }}</x-ui.button>
-                                    <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="confirmRemoveDevice({{ $device->id }})" :aria-label="__('notification_settings.devices.remove_label', ['name' => $name])" data-device-remove="{{ $device->id }}">{{ __('notification_settings.devices.remove') }}</x-ui.button>
-                                </span>
-                            </div>
-                        </li>
-                    @empty
-                        <li class="py-2.5 {{ $muted_text }}" data-devices-empty>{{ __('notification_settings.devices.empty') }}</li>
-                    @endforelse
-                </ul>
-                @if ($this->devices->isNotEmpty())
-                    <p class="{{ $muted_text }}">{{ __('notification_settings.devices.urgent_only_help') }}</p>
-                @endif
-            </section>
-
-            {{-- A real test through the real path. --}}
-            <section aria-labelledby="test-send-heading" class="{{ $section }}" x-data="pushDevice" data-test-send>
-                <h2 id="test-send-heading" class="text-base font-bold">{{ __('notification_settings.test.title') }}</h2>
-                <p class="{{ $muted_text }}">{{ __('notification_settings.test.lead') }}</p>
-
-                <div class="flex flex-wrap items-end gap-3">
-                    <div class="min-w-56">
-                        <x-ui.form-select wire:model="testTarget" :label="__('notification_settings.test.target')" data-test="test-target">
-                            @foreach (NotificationTester::TARGETS as $target)
-                                <option value="{{ $target }}">{{ __('notification_settings.test.targets.'.$target) }}</option>
-                            @endforeach
-                        </x-ui.form-select>
-                    </div>
-                    <x-ui.button tone="primary" size="sm" icon="paper-airplane" x-on:click="$wire.sendTest(subscriptionId)" wire:loading.attr="disabled" wire:target="sendTest" data-test="send-test">{{ __('notification_settings.test.send') }}</x-ui.button>
-                </div>
-
-                <div role="status" aria-live="polite" data-test-result>
-                    @if ($testResult !== null)
-                        <p @class(['text-sm font-semibold', 'text-status-good' => $testResult['ok'], 'text-status-critical' => ! $testResult['ok']])>{{ $testResult['message'] }}</p>
-                    @endif
-                </div>
             </section>
         </div>
 
-        <x-ui.confirm-modal
-            wire:model="showRemoveDevice"
-            close="cancelRemoveDevice"
-            :title="__('notification_settings.devices.remove_title')"
-            :message="__('notification_settings.devices.remove_message')"
-            confirm="removeDevice"
-            :confirm-label="__('notification_settings.devices.remove_confirm')"
-            confirm-test="confirm-remove-device"
-        />
-    @endif
+        {{-- Everything else, folded away. --}}
+        @foreach ($moreSections as $id => $key)
+            <details id="{{ $id }}" class="{{ $more }}" wire:ignore.self wire:key="more-{{ $id }}">
+                <summary class="{{ $moreSummary }}">
+                    <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-bold">{{ __("notification_settings.more.{$key}.title") }}</span>
+                        <span class="block {{ $muted_text }}">{{ __("notification_settings.more.{$key}.hint") }}</span>
+                    </span>
+                    <flux:icon.chevron-right variant="micro" class="shrink-0 transition-transform group-open/set:rotate-90 rtl:-scale-x-100" />
+                </summary>
+
+                <div class="grid gap-10 pt-3 pb-10">
+                    @if ($id === 'by-topic')
+                        @include('pages.notifications._topics')
+                    @elseif ($id === 'more-options')
+                        @include('pages.notifications._options')
+                    @else
+                        @include('pages.notifications._devices')
+                    @endif
+                </div>
+            </details>
+        @endforeach
+
+        {{-- The organization's own rules, for the people who manage them. Loaded when first opened. --}}
+        @if ($this->canManageRules)
+            <details id="organization-rules" class="{{ $more }}" wire:ignore.self data-org-rules>
+                <summary class="{{ $moreSummary }}">
+                    <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-bold">{{ __('notification_settings.more.rules.title') }}</span>
+                        <span class="block {{ $muted_text }}">{{ __('notification_settings.more.rules.hint') }}</span>
+                    </span>
+                    <flux:icon.chevron-right variant="micro" class="shrink-0 transition-transform group-open/set:rotate-90 rtl:-scale-x-100" />
+                </summary>
+
+                <div class="pt-3 pb-10">
+                    <livewire:notifications.rules lazy />
+                </div>
+            </details>
+        @endif
+    </div>
+
+    <x-ui.confirm-modal
+        wire:model="showRemoveDevice"
+        close="cancelRemoveDevice"
+        :title="__('notification_settings.devices.remove_title')"
+        :message="__('notification_settings.devices.remove_message')"
+        confirm="removeDevice"
+        :confirm-label="__('notification_settings.devices.remove_confirm')"
+        confirm-test="confirm-remove-device"
+    />
 </x-desk.register>
