@@ -113,7 +113,9 @@ test('the request form lists and validates the alternative for the dates typed',
         ->set('endAt', '2026-11-03')
         ->set('reason', 'Cover by someone who is away.');
 
-    expect(array_keys($page->instance()->alternativeOptions))->toContain($this->free->id)->not->toContain($this->busy->id);
+    expect(array_keys($page->instance()->alternativeOptions))->toContain($this->free->id)->not->toContain($this->busy->id)
+        // Each colleague's position goes with the name: two of them may share one.
+        ->and($page->instance()->alternativeOptions[$this->free->id])->toContain($this->free->name)->toContain(' · ');
 
     $page->set('alternativeEmployee', (string) $this->busy->id)
         ->call('saveRequest')

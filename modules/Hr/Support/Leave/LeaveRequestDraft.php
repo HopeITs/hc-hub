@@ -91,9 +91,10 @@ final class LeaveRequestDraft
      * pricing service's errors).
      *
      * @param  list<int>  $alternativeIds
+     * @param  bool  $mayBackdate  HR recording a daily leave for someone else may date it before today
      * @return array<string, mixed>
      */
-    public function rules(?int $contractId, array $alternativeIds, ?\Closure $eligibility = null): array
+    public function rules(?int $contractId, array $alternativeIds, ?\Closure $eligibility = null, bool $mayBackdate = false): array
     {
         $rules = [
             'type' => ['required', Rule::in([LeaveWindow::DAY, LeaveWindow::HOUR])],
@@ -121,7 +122,11 @@ final class LeaveRequestDraft
                 },
             ];
         } else {
-            $rules['start_at'] = ['required', 'date', 'after_or_equal:'.today()->format('Y-m-d')];
+            // HR recording a leave for someone else may date it in the past (a sick day filed
+            // afterwards); everyone else starts today at the earliest.
+            $rules['start_at'] = $mayBackdate
+                ? ['required', 'date']
+                : ['required', 'date', 'after_or_equal:'.today()->format('Y-m-d')];
             $rules['end_at'] = [
                 'required',
                 'date',

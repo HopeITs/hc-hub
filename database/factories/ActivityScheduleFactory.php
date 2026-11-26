@@ -7,6 +7,7 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Models\ActivitySchedule;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Result;
 
 /**
@@ -26,5 +27,17 @@ class ActivityScheduleFactory extends Factory
             'result_id' => fn (): int => Result::factory()->activity(Result::factory()->type(ResultType::Output)->create())->create()->id,
             'month' => fake()->dateTimeBetween('-1 year', '+1 year')->format('Y-m-01'),
         ];
+    }
+
+    /**
+     * A month of the row's own calendar (an override, Y-15), with the row's
+     * project still written until Y-18.
+     */
+    public function forLocation(ProposalLocation $row): static
+    {
+        return $this->state([
+            'proposal_location_id' => $row->id,
+            'project_id' => $row->project_id,
+        ]);
     }
 }

@@ -10,19 +10,16 @@ use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\LibraryIndicator;
-use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\MonthlyReportLine;
 use Modules\Tracking\Models\MonthlyReportLineShare;
 use Modules\Tracking\Models\PlanIndicator;
-use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\ReportTemplateLine;
 use Modules\Tracking\Models\StrategicPillar;
 use Modules\Tracking\Support\Reporting\ExtractionFilter;
-use Modules\Tracking\Support\Reporting\PlaceBridge;
 use Modules\Tracking\Support\Reporting\ReportExtraction;
 use Modules\Tracking\Support\Reporting\ReportPlace;
 
@@ -329,14 +326,20 @@ test('an open window runs from the first reported month to this month', function
 test('my places follow the viewer\'s MEAL coverage', function () {
     ['places' => $places, 'count' => $count] = $this->rx;
     $employee = insertHrEmployee();
-    $project = Activity::withoutRecording(fn (): Project => Project::factory()->create(['city_id' => $this->rx['homs'], 'program_id' => $this->rx['split']->id, 'center_id' => $this->rx['centerThree']]));
-    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forProject($project->id)->create(['employee_id' => $employee]));
+    $place = $places['c3split'];
+    DB::table('meal_coverages')->insert([
+        'scope_type' => 'place',
+        'scope_key' => 'place:'.$place->key(),
+        'city_id' => $place->cityId,
+        'program_id' => $place->programId,
+        'center_id' => $place->centerId,
+        'city_wide' => $place->cityWide,
+        'employee_id' => $employee,
+    ]);
 
     $this->actingAs(userWithRole('MEAL', $employee));
 
-    expect(app(PlaceBridge::class)->placesOfProjects([$project->id]))->toEqual([$places['c3split']])
-        ->and(app(PlaceBridge::class)->placeOfProject($project->id))->toEqual($places['c3split'])
-        ->and(rxCenter(new ExtractionFilter(mine: true)))->toEqual([rxKey($places['c3split'], $count) => [40.0, 2.0]]);
+    expect(rxCenter(new ExtractionFilter(mine: true)))->toEqual([rxKey($place, $count) => [40.0, 2.0]]);
 
     $this->actingAs(userWithRole('MEAL', insertHrEmployee()));
 

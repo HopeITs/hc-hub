@@ -6,6 +6,8 @@ use Modules\Core\Models\User;
 use App\Notifications\ActivityPresenter;
 use App\Notifications\NotificationPresenter;
 use App\Notifications\SubjectLinks;
+use App\Support\ActivityReport;
+use App\Support\CsvExport;
 use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,6 +19,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Component {
     use WithPagination;
@@ -41,6 +44,74 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
 
     #[Url(except: 'desc')]
     public string $sortDirection = 'desc';
+
+    /** The usage report above the log: who uses the hub most, when and where. */
+    #[Url(as: 'report', except: false)]
+    public bool $showReport = false;
+
+    #[Url(as: 'period', except: 30)]
+    public int $reportDays = 30;
+
+    public function mount(): void
+    {
+        $this->reportDays = ActivityReport::normaliseDays($this->reportDays);
+    }
+
+    public function toggleReport(): void
+    {
+        $this->showReport = ! $this->showReport;
+    }
+
+    public function setReportDays(int $days): void
+    {
+        $this->reportDays = ActivityReport::normaliseDays($days);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    #[Computed]
+    public function report(): array
+    {
+        return (new ActivityReport($this->reportDays))->build();
+    }
+
+    /**
+     * The report as a file: one block after another, the same figures as the page.
+     */
+    public function exportReport(): StreamedResponse
+    {
+        abort_unless(auth()->user()?->can('activity-log.view'), 403);
+
+        $report = (new ActivityReport($this->reportDays))->build(PHP_INT_MAX);
+        $rows = [
+            [__('activity.report.title'), __('activity.report.days_count', ['n' => $report['days']])],
+            [__('activity.report.total'), $report['total']],
+            [__('activity.report.active_users'), $report['activeUsers']],
+        ];
+
+        foreach ($report['topUsers'] as $user) {
+            $rows[] = [__('activity.report.top_users'), $user['name'], $user['actions'], (string) $user['last']];
+        }
+
+        foreach ($report['daily'] as $day) {
+            $rows[] = [__('activity.report.daily'), $day['date'], $day['actions']];
+        }
+
+        foreach ($report['hours'] as $hour) {
+            $rows[] = [__('activity.report.hours'), sprintf('%02d:00', $hour['hour']), $hour['actions']];
+        }
+
+        foreach ($report['cities'] as $city) {
+            $rows[] = [__('activity.report.cities'), $city['name'], $city['actions'], $city['users']];
+        }
+
+        foreach ($report['inactive'] as $user) {
+            $rows[] = [__('activity.report.inactive'), $user['name'], $user['last_seen']?->toDateTimeString() ?? ''];
+        }
+
+        return CsvExport::download('activity_report_'.now()->format('Y-m-d').'.csv', [__('activity.report.block'), __('activity.report.name'), __('activity.report.count'), __('activity.report.extra')], $rows);
+    }
 
     public function updated(string $property): void
     {
@@ -385,6 +456,16 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
             </button>
         @endforeach
     </div>
+
+    <div class="flex flex-wrap items-center justify-between gap-2">
+        <x-ui.button size="sm" icon="chart-bar" wire:click="toggleReport" aria-expanded="{{ $showReport ? 'true' : 'false' }}" data-activity-report-toggle>
+            {{ $showReport ? __('activity.report.hide') : __('activity.report.show') }}
+        </x-ui.button>
+    </div>
+
+    @if ($showReport)
+        @include('pages.activity._report', ['r' => $this->report])
+    @endif
 
     @if ($this->activities->isEmpty())
         <x-ui.empty-state icon="document-text" :heading="$this->hasFilters() ? __('activity.empty_filtered') : __('activity.empty')" :body="$this->rangeIsBackwards() ? __('activity.range_backwards') : null">

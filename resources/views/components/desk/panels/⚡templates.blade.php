@@ -80,11 +80,13 @@ new class extends Component {
     #[Computed]
     public function officers(): array
     {
-        $byProject = $this->rows->mapWithKeys(fn (array $row): array => [$row['project']->id => MealCoverage::responsibleFor($row['project'])]);
-        $names = Employee::query()->whereKey($byProject->filter()->unique()->values()->all())->get(Employee::NameColumns)
-            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->name]);
+        $byProject = $this->rows->mapWithKeys(fn (array $row): array => [
+            $row['project']->id => MealCoverage::officersForLegacyProject($row['project']->id),
+        ]);
+        $names = Employee::query()->whereKey($byProject->flatten()->unique()->values()->all())
+            ->get(Employee::NameColumns)->pluck('name', 'id');
 
-        return $byProject->map(fn (?int $employeeId): string => $employeeId === null ? '' : (string) $names->get($employeeId, ''))->all();
+        return $byProject->map(fn (array $ids): string => $names->only($ids)->implode(', '))->all();
     }
 
     /**

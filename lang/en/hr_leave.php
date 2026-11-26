@@ -60,6 +60,7 @@ return [
         'max-hours' => 'The duration must not exceed :max.',
         'max-days' => 'The total leave duration (:days) exceeds the allowed maximum (:max).',
         'range-too-long' => 'A single request can cover at most :days days. Split it into shorter requests.',
+        'start-in-past' => 'A leave cannot start on a day that has passed. Choose today or a later date; for past sick leave, ask HR.',
         'end-before-start' => 'The end date is before the start date. Choose an end date on or after the start date.',
         'overlap' => 'You already have a :status leave request for :period. Change these dates, or edit that request instead.',
         'no-employee' => 'Your account is not linked to an employee record, so no leave can be requested for it.',

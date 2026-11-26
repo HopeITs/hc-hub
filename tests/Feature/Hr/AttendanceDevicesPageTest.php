@@ -14,6 +14,9 @@ use Spatie\Permission\Models\Permission;
 */
 
 beforeEach(function () {
+    // The page is hidden by default (config/attendance.php devices_page); these tests are about the page itself.
+    config(['attendance.devices_page' => true]);
+
     foreach (['attendance.view-own', 'attendance.view', 'attendance.manage'] as $permission) {
         Permission::findOrCreate($permission, 'web');
     }
@@ -30,6 +33,14 @@ beforeEach(function () {
 
         return $user->refresh();
     };
+});
+
+test('the device page is hidden until it is turned on', function () {
+    config(['attendance.devices_page' => false]);
+    $hr = ($this->hr)($this->city);
+
+    $this->actingAs($hr)->get(route('hr.attendance.devices'))->assertNotFound();
+    $this->actingAs($hr)->get(route('hr.attendance.upload'))->assertOk()->assertDontSee(route('hr.attendance.devices'));
 });
 
 test('only those who manage attendance open the device list', function () {

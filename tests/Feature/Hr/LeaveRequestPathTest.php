@@ -114,3 +114,31 @@ test('someone who is not the manager cannot decide the request', function () {
     expect($leave->fresh()->status)->toBe(LeaveRequestStatus::Pending->value)
         ->and((float) $this->balance->fresh()->used)->toBe(0.0);
 });
+
+test('hr filing a daily leave for someone else may date it before today, an employee may not', function () {
+    $hr = User::factory()->role('HR-SYR')->create();
+    $hr->givePermissionTo(Permission::findOrCreate('leaves.create', 'web'));
+    $hr = $hr->fresh();
+
+    // "Today" is Wednesday 21 October: Monday the 19th is in the past.
+    $leave = app(SaveLeaveRequest::class)->create($hr, $this->employee->id, ($this->dayLeave)('2026-10-19'));
+
+    expect($leave->start_at->toDateString())->toBe('2026-10-19');
+
+    expect(fn () => app(SaveLeaveRequest::class)->create($this->requester, null, ($this->dayLeave)('2026-10-19')))
+        ->toThrow(ValidationException::class);
+
+    expect(LeaveRequest::query()->count())->toBe(1);
+});
+
+test('a start date in the past says so in plain words', function () {
+    try {
+        app(SaveLeaveRequest::class)->create($this->requester, null, ($this->dayLeave)('2026-10-19'));
+    } catch (ValidationException $invalid) {
+        expect($invalid->errors()['start_at'][0])->toBe(__('hr_leave.validation.start-in-past'));
+
+        return;
+    }
+
+    $this->fail('A leave dated in the past was accepted.');
+});

@@ -20,7 +20,6 @@ use Modules\Core\Models\User;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Support\MealCoverage;
 use Modules\Tracking\Support\MonthlyReportNames;
-use Modules\Tracking\Support\Reporting\PlaceBridge;
 
 /**
  * One template's report for one month (contracts §13, D-76). Its lines come
@@ -191,17 +190,10 @@ class MonthlyReport extends Model implements TracksActivity
     }
 
     /**
-     * Reports of the templates this user validates (contracts §13.1 item 6),
-     * reached through each template's legacy project (PlaceBridge) until MEAL
-     * coverage moves to places, or, for a template with no legacy project
-     * (unset center, no project_id), through the report's own project_id
-     * mirror, minus the ones they prepared or submitted. Feeds T17B's "To validate"
-     * queue (add `status = submitted`) and T18. Same rule as
-     * MonthlyReportPolicy::validate(), without the status:
-     * - the MEAL Manager slot holder: every project;
-     * - a MEAL officer: MealCoverage::projectsCoveredBy();
-     * - a MEAL role holder: also the projects nobody is responsible for.
-     * Never the General Manager; nobody without reports.approve.
+     * Reports this user may validate based on the template place. Excludes
+     * reports they prepared or submitted. The MEAL Manager sees every place,
+     * and the MEAL role can also validate places without a responsible officer.
+     * The queue applies its submitted status filter separately.
      *
      * @param  Builder<self>  $query
      */
@@ -221,28 +213,13 @@ class MonthlyReport extends Model implements TracksActivity
             return;
         }
 
-        $projectIds = $user->employee_id === null ? [] : MealCoverage::projectsCoveredBy($user->employee_id);
-        $bridge = app(PlaceBridge::class);
-        $legacy = $bridge->legacyProjectIdsFor(ReportTemplate::query()->whereIn('id', self::query()->select('report_template_id'))->get());
-        $unbridgedTemplateIds = array_keys(array_filter($legacy, fn (?int $id): bool => $id === null));
+        $templates = MealCoverage::scopeCoveredBy(
+            ReportTemplate::query(),
+            (int) $user->employee_id,
+            includeUnassigned: $user->hasRole('MEAL'),
+        );
 
-        if ($user->hasRole('MEAL')) {
-            $reportProjectIds = $unbridgedTemplateIds === [] ? [] : self::query()
-                ->whereIn('report_template_id', $unbridgedTemplateIds)
-                ->whereNotNull('project_id')
-                ->distinct()
-                ->pluck('project_id')
-                ->map(fn (mixed $id): int => (int) $id)
-                ->all();
-            $candidateIds = array_values(array_diff(array_unique([...array_filter($legacy, fn (?int $id): bool => $id !== null), ...$reportProjectIds]), $projectIds));
-            $unassigned = $bridge->projectsByIds($candidateIds)->filter(fn (Project $project): bool => MealCoverage::responsibleFor($project) === null)->keys()->all();
-            $projectIds = [...$projectIds, ...$unassigned];
-        }
-
-        $templateIds = array_keys(array_filter($legacy, fn (?int $id): bool => $id !== null && in_array($id, $projectIds, true)));
-
-        $query->where(fn (Builder $covered) => $covered->whereIn('report_template_id', $templateIds)
-            ->orWhere(fn (Builder $mirrored) => $mirrored->whereIn('report_template_id', $unbridgedTemplateIds)->whereIn('project_id', $projectIds)));
+        $query->whereIn('report_template_id', $templates->select('id'));
     }
 
     /**

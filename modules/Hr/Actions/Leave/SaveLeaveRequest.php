@@ -113,7 +113,7 @@ final class SaveLeaveRequest
 
         $employee = $current->leaveBalance->contract->employee;
         $draft = LeaveRequestDraft::fromArray($input);
-        $contract = $this->validate($draft, $employee, $current);
+        $contract = $this->validate($draft, $employee, $current, $this->mayBackdate($actor, $employee));
         $balance = $this->balanceOf($contract, $draft);
         $window = $this->requireWindow($draft);
 
@@ -205,7 +205,7 @@ final class SaveLeaveRequest
         }
 
         $draft = LeaveRequestDraft::fromArray($input);
-        $contract = $this->validate($draft, $employee, null);
+        $contract = $this->validate($draft, $employee, null, $this->mayBackdate($actor, $employee));
         $balance = $this->balanceOf($contract, $draft);
         $window = $this->requireWindow($draft);
         [$start, $end] = $draft->storedPeriod();
@@ -254,7 +254,7 @@ final class SaveLeaveRequest
     /**
      * Shape validation; returns the employee's current contract (balances loaded).
      */
-    private function validate(LeaveRequestDraft $draft, Employee $employee, ?LeaveRequest $editing): Contract
+    private function validate(LeaveRequestDraft $draft, Employee $employee, ?LeaveRequest $editing, bool $mayBackdate = false): Contract
     {
         $contract = LeaveContext::contractOf((int) $employee->id);
         $alternatives = array_map(intval(...), app(LeaveAlternativeEmployees::class)
@@ -277,8 +277,11 @@ final class SaveLeaveRequest
 
         Validator::make(
             $draft->data() + ['is_exceptional' => $draft->isExceptional],
-            $draft->rules($contract?->id, $alternatives, $eligibility),
-            ['end_at.after_or_equal' => __('hr_leave.validation.end-before-start')],
+            $draft->rules($contract?->id, $alternatives, $eligibility, $mayBackdate),
+            [
+                'end_at.after_or_equal' => __('hr_leave.validation.end-before-start'),
+                'start_at.after_or_equal' => __('hr_leave.validation.start-in-past'),
+            ],
             __('hr_leave.fields'),
         )->validate();
 
@@ -287,6 +290,16 @@ final class SaveLeaveRequest
         }
 
         return $contract;
+    }
+
+    /**
+     * May this daily request start before today? Only for HR filing or editing a request for
+     * someone else (a sick day recorded afterwards), never for a person's own request.
+     */
+    private function mayBackdate(User $actor, Employee $employee): bool
+    {
+        return (int) $employee->id !== (int) $actor->employee_id
+            && Gate::forUser($actor)->allows('createForOthers', LeaveRequest::class);
     }
 
     private function balanceOf(Contract $contract, LeaveRequestDraft $draft): LeaveBalance

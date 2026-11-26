@@ -4,23 +4,26 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Admin;
 
-use App\Support\Like;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
+use Modules\Core\Models\Program;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Cities\AssignMealCoverage;
 use Modules\Tracking\Enums\MealCoverageScope;
 use Modules\Tracking\Models\MealCoverageAssignment;
-use Modules\Tracking\Models\Project;
-use Modules\Tracking\Support\MealCoverage;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 /**
  * MEAL coverage on the cities page (contracts §12.3, D-12/D-12a): each
- * governorate's officer, the Project officers section, and the assign/change
+ * governorate's officer, the place officers section, and the assign/change
  * dialog. Writes go through AssignMealCoverage, which authorizes itself; the
  * dialog actions also check MealCoverageAssignmentPolicy first.
  *
@@ -32,13 +35,13 @@ use Modules\Tracking\Support\MealCoverage;
  * @property-read Collection<int, MealCoverageAssignment> $mealCoverages  #[Computed] mealCoverages()
  * @property-read Collection<int, Employee> $mealOfficers  #[Computed] mealOfficers()
  * @property-read array<int, array{name: string, inactive: bool}> $cityOfficers  #[Computed] cityOfficers()
- * @property-read Collection<int, array{id: int, name: string, city: string|null, officer: array{name: string, inactive: bool}|null, inherited: bool, noGovernorate: bool}> $projectOfficers  #[Computed] projectOfficers()
+ * @property-read Collection<int, array{id: int, name: string, city: string|null, officer: array{name: string, inactive: bool}|null, inherited: bool, noGovernorate: bool}> $placeOfficers  #[Computed] placeOfficers()
  * @property-read array{name: string, inactiveCity: bool}|null $mealTarget  #[Computed] mealTarget()
  */
 trait ManagesMealCoverage
 {
     /**
-     * How many projects the Project officers section lists at once; the
+     * How many projects the place officers section lists at once; the
      * search narrows it down.
      */
     private const ProjectOfficerLimit = 12;
@@ -48,11 +51,11 @@ trait ManagesMealCoverage
     public bool $showMealModal = false;
 
     /**
-     * 'city' or 'project' — see {@see MealCoverageScope}.
+     * 'city' or 'place' — see {@see MealCoverageScope}.
      */
     public string $mealScope = 'city';
 
-    public ?int $mealTargetId = null;
+    public int|string|null $mealTargetId = null;
 
     public ?string $mealEmployeeId = null;
 
@@ -68,7 +71,7 @@ trait ManagesMealCoverage
 
     /**
      * Every MEAL coverage row, in one query (the table holds at most one row
-     * per city and per project).
+     * per governorate and per place).
      *
      * @return Collection<int, MealCoverageAssignment>
      */
@@ -76,7 +79,7 @@ trait ManagesMealCoverage
     public function mealCoverages(): Collection
     {
         return MealCoverageAssignment::query()
-            ->select(['id', 'scope_type', 'city_id', 'project_id', 'employee_id'])
+            ->select(['id', 'scope_type', 'city_id', 'scope_key', 'employee_id'])
             ->get();
     }
 
@@ -115,50 +118,63 @@ trait ManagesMealCoverage
     }
 
     /**
-     * The projects matching the project search, each with its own officer or
-     * the one it inherits from its governorate (its center's city).
+     * Every reporting place a template or a location row reports from, keyed
+     * by its place key.
      *
-     * @return Collection<int, array{id: int, name: string, city: string|null, officer: array{name: string, inactive: bool}|null, inherited: bool, noGovernorate: bool}>
+     * @return Collection<string, ReportPlace>
      */
     #[Computed]
-    public function projectOfficers(): Collection
+    public function coveragePlaces(): Collection
     {
-        if (! auth()->user()?->can('projects.view')) {
-            return collect();
+        $places = ReportTemplate::query()->get()->map(fn (ReportTemplate $template) => $template->place());
+        foreach (ProposalLocation::query()->whereNotNull('program_id')->with('centers')->get() as $row) {
+            $centers = $row->city_wide ? [null] : $row->centers->pluck('center_id')->all();
+            foreach ($centers as $center) {
+                $places->push(new ReportPlace($row->city_id, $row->program_id, $center, $row->city_wide));
+            }
         }
 
-        $search = trim($this->projectSearch);
-        $projectOfficerIds = $this->mealCoverages->where('scope_type', MealCoverageScope::Project)->pluck('employee_id', 'project_id');
-        $cityOfficerIds = $this->mealCoverages->where('scope_type', MealCoverageScope::City)->pluck('employee_id', 'city_id');
-        $cities = $this->allCities->keyBy('id');
-
-        return Project::query()
-            ->select(['id', 'name', 'city_id', 'center_id'])
-            ->when($search !== '', fn ($query) => $query->where(Like::matches('name', $search)))
-            ->orderBy('name')
-            ->orderBy('id')
-            ->limit(self::ProjectOfficerLimit)
-            ->get()
-            ->map(function (Project $project) use ($projectOfficerIds, $cityOfficerIds, $cities): array {
-                $cityId = MealCoverage::cityIdOf($project);
-                $ownOfficerId = $projectOfficerIds->get($project->id);
-                $cityName = $cityId === null ? null : $cities->get($cityId)?->name;
-
-                return [
-                    'id' => $project->id,
-                    'name' => $project->name,
-                    'city' => $cityName,
-                    'officer' => $this->officerCard($ownOfficerId ?? ($cityName === null ? null : $cityOfficerIds->get($cityId))),
-                    // Nothing to inherit from without a governorate HR knows (page review 6 Nov 2026).
-                    'inherited' => $ownOfficerId === null && $cityName !== null,
-                    'noGovernorate' => $ownOfficerId === null && $cityName === null,
-                ];
-            })
-            ->values();
+        return $places->reject(fn (ReportPlace $place): bool => $place->isUnset())->keyBy(fn (ReportPlace $place): string => $place->key());
     }
 
     /**
-     * The governorate or project the open dialog assigns an officer to.
+     * The places matching the search, each with its own officer or the one it
+     * inherits from its governorate.
+     *
+     * @return Collection<string, array{id: string, name: string, city: string|null, officer: array{name: string, inactive: bool}|null, inherited: bool, noGovernorate: bool}>
+     */
+    #[Computed]
+    public function placeOfficers(): Collection
+    {
+        $places = $this->coveragePlaces;
+        $programs = Program::namesById();
+        $centers = Center::query()->whereKey($places->pluck('centerId')->filter()->unique()->all())->get()->keyBy('id');
+        $cities = $this->allCities->keyBy('id');
+        $direct = $this->mealCoverages->where('scope_type', MealCoverageScope::Place)->keyBy('scope_key');
+        $governorate = $this->mealCoverages->where('scope_type', MealCoverageScope::City)->keyBy('city_id');
+        $search = trim($this->projectSearch);
+
+        return $places->map(function (ReportPlace $place) use ($programs, $centers, $cities, $direct, $governorate): array {
+            $assignment = $direct->get('place:'.$place->key());
+            $cityName = $cities->get($place->cityId)?->name;
+            $fallback = $cityName === null ? null : $governorate->get($place->cityId);
+            $site = $place->cityWide ? __('cities.meal_field_work') : ($centers->get($place->centerId)?->name ?? '#'.$place->centerId);
+
+            return [
+                'id' => $place->key(),
+                'name' => ($programs[$place->programId] ?? '#'.$place->programId).' · '.$site,
+                'city' => $cityName,
+                'officer' => $this->officerCard(($assignment ?? $fallback)?->employee_id),
+                'inherited' => $assignment === null && $fallback !== null,
+                // Nothing to inherit from without a governorate HR knows (page review 6 Nov 2026).
+                'noGovernorate' => $assignment === null && $cityName === null,
+            ];
+        })->filter(fn (array $row): bool => $search === '' || mb_stripos($row['name'].' '.$row['city'], $search) !== false)
+            ->sortBy(['city', 'name']);
+    }
+
+    /**
+     * The governorate or place the open dialog assigns an officer to.
      *
      * @return array{name: string, inactiveCity: bool}|null
      */
@@ -169,10 +185,10 @@ trait ManagesMealCoverage
             return null;
         }
 
-        if ($this->mealScope === MealCoverageScope::Project->value) {
-            $name = Project::query()->whereKey($this->mealTargetId)->value('name');
+        if ($this->mealScope === MealCoverageScope::Place->value) {
+            $place = $this->placeOfficers->get($this->mealTargetId);
 
-            return $name === null ? null : ['name' => (string) $name, 'inactiveCity' => false];
+            return $place === null ? null : ['name' => $place['name'], 'inactiveCity' => false];
         }
 
         $city = City::query()->select(['id', 'name_en', 'name_ar', 'is_active'])->find($this->mealTargetId);
@@ -182,22 +198,23 @@ trait ManagesMealCoverage
 
     public function updatedProjectSearch(): void
     {
-        unset($this->projectOfficers);
+        unset($this->placeOfficers);
     }
 
     /**
-     * Open the assign/change dialog for a governorate ('city') or a project,
+     * Open the assign/change dialog for a governorate or reporting place,
      * preselecting its current officer.
      */
-    public function openMealModal(string $scope, int $targetId): void
+    public function openMealModal(string $scope, int|string $targetId): void
     {
         Gate::authorize('manage', MealCoverageAssignment::class);
 
         $coverageScope = MealCoverageScope::from($scope);
         $current = $this->mealCoverages->first(fn (MealCoverageAssignment $coverage): bool => $coverage->scope_type === $coverageScope
             && match ($coverageScope) {
-                MealCoverageScope::City => $coverage->city_id === $targetId,
-                MealCoverageScope::Project => $coverage->project_id === $targetId,
+                MealCoverageScope::City => $coverage->city_id === (int) $targetId,
+                MealCoverageScope::Place => $coverage->scope_key === 'place:'.$targetId,
+                default => false,
             });
 
         $this->resetErrorBag();
@@ -220,17 +237,26 @@ trait ManagesMealCoverage
 
         $this->validate([
             'mealScope' => ['required', Rule::enum(MealCoverageScope::class)],
-            'mealTargetId' => ['required', 'integer'],
+            'mealTargetId' => ['required'],
             'mealEmployeeId' => ['required', 'integer'],
         ], [
             'mealEmployeeId.required' => __('cities.choose_an_active_employee'),
             'mealEmployeeId.integer' => __('cities.choose_an_active_employee'),
         ]);
 
-        $assignMealCoverage->handle(MealCoverageScope::from($this->mealScope), (int) $this->mealTargetId, (int) $this->mealEmployeeId);
+        $scope = MealCoverageScope::from($this->mealScope);
+        $target = (int) $this->mealTargetId;
+        if ($scope === MealCoverageScope::Place) {
+            $place = $this->coveragePlaces->get($this->mealTargetId);
+            if ($place === null) {
+                throw ValidationException::withMessages(['mealTargetId' => __('cities.meal_place_invalid')]);
+            }
+            $target = ['city_id' => $place->cityId, 'program_id' => $place->programId, 'center_id' => $place->centerId, 'city_wide' => $place->cityWide];
+        }
+        $assignMealCoverage->handle($scope, $target, (int) $this->mealEmployeeId);
 
         $this->closeMealModal();
-        unset($this->mealCoverages, $this->mealOfficers, $this->cityOfficers, $this->projectOfficers, $this->mapCities);
+        unset($this->mealCoverages, $this->mealOfficers, $this->cityOfficers, $this->placeOfficers, $this->mapCities);
 
         Flux::toast(variant: 'success', text: __('cities.meal_officer_saved'));
     }

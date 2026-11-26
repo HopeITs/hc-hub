@@ -74,6 +74,13 @@ test('a contract term longer than a year is refused and nothing is saved', funct
         ->and((int) DB::table('positions')->where('id', $this->position->id)->value('exist_emp'))->toBe(0);
 });
 
+test('a first shift that ends before it starts is refused and nothing is saved', function () {
+    expect(fn () => app(SaveContract::class)->handle(null, ($this->form)(['work_hours_from' => '09:00', 'work_hours_to' => '01:00']), [], $this->hr))
+        ->toThrow(ValidationException::class);
+
+    expect(Contract::query()->count())->toBe(0);
+});
+
 test('working days picked one by one replace the range, and never include the centers day off', function () {
     $center = Center::factory()->create(['weekends' => '5']);
     $this->position->update(['center_id' => $center->id]);
