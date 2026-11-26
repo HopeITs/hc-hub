@@ -17,12 +17,15 @@ This command replaces the session-orchestrator start steps 3–5: do not look fo
 
 ## 1. Pick the task(s)
 
-Run these two commands, nothing more:
+Run these three commands, nothing more:
 
 ```
 grep -nE "^### " docs/superpowers/plans/2026-11-20-ui-ux-prompts.md
 git log --oneline -E --grep="\(UI [0-9]"
+git status -s
 ```
+
+If the third prints any tracked change (` M`, `M `, `A `…), someone may be mid-task in this checkout: list the files, ask the user whether that work is the task you were about to start, and stop until they answer. Untracked files (`??`) alone do not block.
 
 The first gives each block's line and model (`### 2.4 — opus`; no model named = sonnet). Tasks 3.1–3.4 share the block `### 3.1–3.4` (opus). Tasks 4.1–4.11 share the block `### 4.x`: opus for 4.1–4.3, sonnet for 4.4–4.11.
 
@@ -67,7 +70,7 @@ If an agent fails the same task twice, retry once on opus. If that fails, stop a
 
 ## 4. Check, commit, close
 
-1. `git diff --stat` of the agent's branch. Unclear report → one follow-up message to that agent.
+1. Re-run the `git log` command from step 1. If the task's id is there now, another session finished it while the agent ran: do not merge or commit, tell the user where the agent's copy is, and skip to step 6. Otherwise `git diff --stat` of the agent's branch. Unclear report → one follow-up message to that agent.
 2. Merge the worktree branch into the current branch.
 3. Visual task: open one changed page on `http://hc-hub.test` at 1366 and 375 wide. Read the page as text first; take at most one screenshot per width. Say plainly which of EN/AR and light/dark you did not check. Never change the user's language or theme setting.
 4. One commit per task: `<feat|fix|refactor>(ui): <what changed> (UI <id>)`. The `(UI <id>)` tag is what step 1 reads, so never leave it out. Do not push.
