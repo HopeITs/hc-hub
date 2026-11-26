@@ -93,6 +93,11 @@ trait BuildsProposalHead
                 $add('edit', __('proposals.edit_details'), "openEditModal({$id})");
             }
 
+            // Older grants were approved without their actual dates; donor reports need them (SetGrantDates).
+            if ($proposal->status->isApprovedByDonor() && $proposal->lacksGrantDates()) {
+                $add('grant-dates', __('proposals.set_grant_dates'), 'openGrantDatesModal');
+            }
+
             if ($this->canRecordAgreement) {
                 $add('agreement', __('funding_agreements.record_agreement'), 'openAgreementCreate');
             }
