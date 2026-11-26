@@ -480,6 +480,7 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
         </div>
     @endif
 
+    <div class="relative" wire:loading.delay.attr="aria-busy" wire:target="search,status,seenByMeal,author,project,target,overdue,focus,view,clearFilters,gotoPage,nextPage,previousPage" data-loading-region>
     @if ($view === 'portfolio')
         @include('tracking::pages.reports._index-portfolio')
     @elseif ($view === 'board')
@@ -489,6 +490,11 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
     @else
         @include('tracking::pages.reports._index-list')
     @endif
+        {{-- Loading recipe (x-ui.skeleton): after the delay a skeleton covers the stale list, so the page never shifts. --}}
+        <div class="hidden" wire:loading.delay.class.remove="hidden" wire:target="search,status,seenByMeal,author,project,target,overdue,focus,view,clearFilters,gotoPage,nextPage,previousPage">
+            <x-ui.skeleton variant="row" :count="4" class="absolute inset-0 z-10 overflow-hidden rounded-xl bg-ground/90 p-4 dark:bg-surface-1/90" />
+        </div>
+    </div>
 
     <x-tracking::reports.form-modal
         :open="$showReportModal"

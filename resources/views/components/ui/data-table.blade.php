@@ -18,7 +18,7 @@
             {{ $slot }}
             @if ($loadingTarget)
                 {{-- Opt-in skeleton (see x-ui.skeleton for the recipe): shown after the delay while the named Livewire action runs. --}}
-                <tr wire:loading.delay wire:target="{{ $loadingTarget }}" data-data-table-loading>
+                <tr class="hidden" wire:loading.delay.class.remove="hidden" wire:target="{{ $loadingTarget }}" data-data-table-loading>
                     <td colspan="99" class="px-3.5 py-2"><x-ui.skeleton variant="row" :count="3" /></td>
                 </tr>
             @endif

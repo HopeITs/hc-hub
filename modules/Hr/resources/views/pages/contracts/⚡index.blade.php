@@ -184,5 +184,11 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.index')] class extends
         @endcan
     </x-slot:actions>
 
+    <div class="relative" wire:loading.delay.attr="aria-busy" wire:target="search,view,city,program,type,clearFilters,gotoPage,nextPage,previousPage" data-loading-region>
     @include('hr::pages.contracts._index-table', ['contracts' => $contracts, 'hasFilters' => $hasFilters])
+        {{-- Loading recipe (x-ui.skeleton): after the delay a skeleton covers the stale list, so the page never shifts. --}}
+        <div class="hidden" wire:loading.delay.class.remove="hidden" wire:target="search,view,city,program,type,clearFilters,gotoPage,nextPage,previousPage">
+            <x-ui.skeleton variant="row" :count="4" class="absolute inset-0 z-10 overflow-hidden rounded-xl bg-ground/90 p-4 dark:bg-surface-1/90" />
+        </div>
+    </div>
 </x-desk.register>

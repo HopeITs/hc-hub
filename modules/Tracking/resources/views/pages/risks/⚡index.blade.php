@@ -614,7 +614,7 @@ new #[Layout('layouts::desk'), Title('titles.risks')] class extends Component {
             @endforeach
         </x-desk.board>
     @else
-    <x-ui.panel :subtitle="trans_choice('risks.count_matching_risk', $this->risks->total(), ['count' => $this->risks->total()])">
+    <x-ui.panel loading-target="search,location,materialisedOnly,unmitigated,high,view,clearFilters,gotoPage,nextPage,previousPage" <x-ui.panel :subtitle="trans_choice('risks.count_matching_risk', $this->risks->total(), ['count' => $this->risks->total()])">
         <x-slot:toolbar>
             @if ($filtersAreActive)
                 <flux:button size="sm" variant="ghost" class="text-secondary-medium! hover:bg-secondary-soft! dark:text-ink-muted!" wire:click="clearFilters">{{ __('common.reset_filters') }}</flux:button>

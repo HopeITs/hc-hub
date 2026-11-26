@@ -258,6 +258,7 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
     
     @include('tracking::pages.indicators._index-focus-bar')
 
+    <div class="relative" wire:loading.delay.attr="aria-busy" wire:target="search,program,donor,result,level,measure,rag,focus,clearFilters,gotoPage,nextPage,previousPage" data-loading-region>
     @if ($paged->isEmpty())
         <x-ui.panel>
             <x-ui.empty-state
@@ -275,6 +276,11 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
     @else
         @include('tracking::pages.indicators._index-list')
     @endif
+        {{-- Loading recipe (x-ui.skeleton): after the delay a skeleton covers the stale list, so the page never shifts. --}}
+        <div class="hidden" wire:loading.delay.class.remove="hidden" wire:target="search,program,donor,result,level,measure,rag,focus,clearFilters,gotoPage,nextPage,previousPage">
+            <x-ui.skeleton variant="row" :count="4" class="absolute inset-0 z-10 overflow-hidden rounded-xl bg-ground/90 p-4 dark:bg-surface-1/90" />
+        </div>
+    </div>
 
     @include('tracking::pages.indicators._index-inspect-modal')
 

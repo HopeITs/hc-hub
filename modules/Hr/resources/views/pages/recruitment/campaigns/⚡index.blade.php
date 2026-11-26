@@ -136,7 +136,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.campaigns')] cla
     @if ($rows->isEmpty())
         <x-ui.empty-state icon="megaphone" :heading="$search === '' && $status === '' && $mode === '' ? __('hr_recruitment.hub.none') : __('hr_recruitment.hub.no_matching')" />
     @else
-        <x-ui.data-table :caption="__('hr_recruitment.hub.titles.campaigns')">
+        <x-ui.data-table loading-target="search,status,mode,gotoPage,nextPage,previousPage,clearFilters" :caption="__('hr_recruitment.hub.titles.campaigns')">
             <x-slot:head>
                 <th>{{ __('hr_recruitment.campaign_ui.position') }}</th>
                 <th>{{ __('hr_recruitment.campaign_ui.request') }}</th>

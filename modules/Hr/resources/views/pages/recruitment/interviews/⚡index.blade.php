@@ -423,7 +423,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.interviews')] cl
         @if ($rows->isEmpty())
             <x-ui.empty-state icon="calendar-days" :heading="$filtering ? __($t.'board.no_match') : __($t.'none_yet')" />
         @else
-            <x-ui.data-table :caption="__('hr_recruitment.hub.titles.interviews')">
+            <x-ui.data-table loading-target="search,type,campaign,participant,dateFrom,dateTo,mine,gotoPage,nextPage,previousPage,clearFilters" :caption="__('hr_recruitment.hub.titles.interviews')">
                 <x-slot:head>
                     <th>{{ __('hr_recruitment.applicant_ui.name') }}</th>
                     <th>{{ __('hr_recruitment.campaign_ui.position') }}</th>

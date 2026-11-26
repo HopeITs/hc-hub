@@ -174,7 +174,13 @@ new #[Layout('layouts::desk'), Title('titles.indicator_library')] class extends 
             </x-slot:action>
         </x-ui.empty-state>
     @else
+        <div class="relative" wire:loading.delay.attr="aria-busy" wire:target="search,program,level,measure,collector,focus,english,clearFilters,gotoPage,nextPage,previousPage" data-loading-region>
         @include('tracking::pages.indicator-library._index-entries')
+            {{-- Loading recipe (x-ui.skeleton): after the delay a skeleton covers the stale list, so the page never shifts. --}}
+            <div class="hidden" wire:loading.delay.class.remove="hidden" wire:target="search,program,level,measure,collector,focus,english,clearFilters,gotoPage,nextPage,previousPage">
+                <x-ui.skeleton variant="row" :count="4" class="absolute inset-0 z-10 overflow-hidden rounded-xl bg-ground/90 p-4 dark:bg-surface-1/90" />
+            </div>
+        </div>
 
         @if ($paged->hasPages())
             <flux:pagination :paginator="$paged" class="text-secondary-medium! dark:text-ink-muted!" scroll-to="#indicator-library-heading" />

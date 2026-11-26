@@ -206,6 +206,7 @@ new #[Layout('layouts::desk'), Title('hr_checklists.titles.index')] class extend
         </nav>
     @endif
 
+    <div class="relative" wire:loading.delay.attr="aria-busy" wire:target="list,search,action,item,person,clearFilters,gotoPage,nextPage,previousPage" data-loading-region>
     @if ($list !== 'done' && ! $hasEmployee)
         <x-ui.empty-state icon="user" :heading="__('hr_checklists.no_employee_heading')" :body="__('hr_checklists.no_employee_body')" />
     @elseif ($list === 'mine')
@@ -231,4 +232,9 @@ new #[Layout('layouts::desk'), Title('hr_checklists.titles.index')] class extend
     @else
         @include('hr::pages.checklists._index-done', ['filtersActive' => $filtersActive])
     @endif
+        {{-- Loading recipe (x-ui.skeleton): after the delay a skeleton covers the stale list, so the page never shifts. --}}
+        <div class="hidden" wire:loading.delay.class.remove="hidden" wire:target="list,search,action,item,person,clearFilters,gotoPage,nextPage,previousPage">
+            <x-ui.skeleton variant="row" :count="4" class="absolute inset-0 z-10 overflow-hidden rounded-xl bg-ground/90 p-4 dark:bg-surface-1/90" />
+        </div>
+    </div>
 </x-desk.register>

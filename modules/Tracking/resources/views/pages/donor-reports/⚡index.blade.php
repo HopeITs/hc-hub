@@ -223,7 +223,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_reports')] class extends Comp
             </x-slot:action>
         </x-ui.empty-state>
     @else
-        <x-ui.data-table :caption="__('titles.donor_reports')" data-tour="donor-reports-list">
+        <x-ui.data-table loading-target="search,donor,proposal,state,gotoPage,nextPage,previousPage,clearFilters" :caption="__('titles.donor_reports')" data-tour="donor-reports-list">
             <x-slot:head>
                 <th>{{ __('common.proposal') }}</th>
                 <th class="w-40!">{{ __('funding_agreements.donor') }}</th>

@@ -181,7 +181,13 @@ new #[Layout('layouts::desk'), Title('titles.targets')] class extends Component 
     {{-- Headline: one sentence and three buttons that filter the list. --}}
     @include('tracking::pages.targets._index-pulse')
 
+    <div class="relative" wire:loading.delay.attr="aria-busy" wire:target="search,sourceType,project,period,status,donor,program,year,indicator,result,clearFilters,gotoPage,nextPage,previousPage" data-loading-region>
     @include('tracking::pages.targets._index-list')
+        {{-- Loading recipe (x-ui.skeleton): after the delay a skeleton covers the stale list, so the page never shifts. --}}
+        <div class="hidden" wire:loading.delay.class.remove="hidden" wire:target="search,sourceType,project,period,status,donor,program,year,indicator,result,clearFilters,gotoPage,nextPage,previousPage">
+            <x-ui.skeleton variant="row" :count="4" class="absolute inset-0 z-10 overflow-hidden rounded-xl bg-ground/90 p-4 dark:bg-surface-1/90" />
+        </div>
+    </div>
 
     @include('tracking::pages.targets._index-target-modal')
 

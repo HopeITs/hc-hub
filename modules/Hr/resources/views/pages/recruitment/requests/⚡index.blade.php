@@ -222,7 +222,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.requests')] clas
     @if ($rows->isEmpty())
         <x-ui.empty-state icon="briefcase" :heading="$search === '' && $status === '' && $type === '' ? __('hr_recruitment.hub.none') : __('hr_recruitment.hub.no_matching')" :body="__('hr_recruitment.list_description')" />
     @else
-        <x-ui.data-table :caption="__('hr_recruitment.hub.titles.requests')">
+        <x-ui.data-table loading-target="search,viewFilter,status,type,gotoPage,nextPage,previousPage,clearFilters" :caption="__('hr_recruitment.hub.titles.requests')">
             <x-slot:head>
                 <th>{{ __('hr_recruitment.number') }}</th>
                 <th>{{ __('hr_recruitment.type') }}</th>

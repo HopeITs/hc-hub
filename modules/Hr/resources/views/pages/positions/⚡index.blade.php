@@ -215,7 +215,7 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.index')] class extends
             $canHire = \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.view')
                 && \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.manage');
         @endphp
-        <x-ui.data-table :caption="__('hr_positions.titles.index')">
+        <x-ui.data-table loading-target="search,status,seats,city,program,department,gotoPage,nextPage,previousPage,clearFilters" :caption="__('hr_positions.titles.index')">
             <x-slot:head>
                 <th>{{ __('hr_positions.fields.title') }}</th>
                 <th>{{ __('common.program') }}</th>

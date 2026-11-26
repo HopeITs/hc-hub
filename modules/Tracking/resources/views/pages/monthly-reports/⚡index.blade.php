@@ -808,6 +808,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
                     <input id="monthly-reports-to" type="month" wire:model.live="to" class="{{ $monthFieldClass }}" dir="ltr" />
                 </div>
 
+                <div class="relative" wire:loading.delay.attr="aria-busy" wire:target="tab,proposal,city,program,center,from,to,month,project,status,showOnly,clearFilters,gotoPage,nextPage,previousPage" data-loading-region>
                 @if ($tab === 'validate')
                     <x-ui.header-filter-select :label="__('common.status')" wire:model.live="status" :value="$this->selectedStatus?->value ?? 'all'">
                         <option value="submitted">{{ __('monthly_reports.status_to_validate') }}</option>
@@ -815,6 +816,11 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
                         <option value="all">{{ __('monthly_reports.status_all') }}</option>
                     </x-ui.header-filter-select>
                 @endif
+                    {{-- Loading recipe (x-ui.skeleton): after the delay a skeleton covers the stale list, so the page never shifts. --}}
+                    <div class="hidden" wire:loading.delay.class.remove="hidden" wire:target="tab,proposal,city,program,center,from,to,month,project,status,showOnly,clearFilters,gotoPage,nextPage,previousPage">
+                        <x-ui.skeleton variant="row" :count="4" class="absolute inset-0 z-10 overflow-hidden rounded-xl bg-ground/90 p-4 dark:bg-surface-1/90" />
+                    </div>
+                </div>
 
                 @if ($filtersAreActive)
                     <div class="flex items-end">

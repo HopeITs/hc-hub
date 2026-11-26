@@ -986,3 +986,46 @@ test('the skeleton renders each variant with a screen-reader loading label', fun
         ->and($html)->toContain(__('common.loading'))
         ->and(substr_count($html, 'rounded-inset'))->toBeGreaterThan(0);
 })->with(['row', 'card', 'panel']);
+
+test('the skeleton shows in a data table only when a loading target is set', function () {
+    $with = Blade::render('<x-ui.data-table loading-target="search,gotoPage"><x-slot:head><th>A</th></x-slot:head></x-ui.data-table>');
+    $without = Blade::render('<x-ui.data-table><x-slot:head><th>A</th></x-slot:head></x-ui.data-table>');
+
+    expect($with)->toContain('data-data-table-loading')
+        ->and($with)->toContain('data-ui-skeleton')
+        ->and($with)->toContain('wire:target="search,gotoPage"')
+        ->and($with)->toContain('wire:loading.delay.class.remove="hidden"')
+        ->and($without)->not->toContain('data-data-table-loading');
+});
+
+test('the skeleton overlay in a panel is opt in and marks the panel busy while loading', function () {
+    $with = Blade::render('<x-ui.panel loading-target="search">Body</x-ui.panel>');
+    $without = Blade::render('<x-ui.panel>Body</x-ui.panel>');
+
+    expect($with)->toContain('data-ui-panel-loading')
+        ->and($with)->toContain('wire:loading.delay.attr="aria-busy"')
+        ->and($with)->toContain('wire:target="search"')
+        ->and($with)->toContain('data-ui-skeleton')
+        ->and($without)->not->toContain('data-ui-panel-loading')
+        ->and($without)->not->toContain('data-ui-skeleton');
+});
+
+test('the skeleton loading recipe is wired into the thirteen list pages', function (string $page) {
+    $source = file_get_contents(base_path($page));
+
+    expect($source)->toMatch('/loading-target="|data-loading-region/');
+})->with([
+    'modules/Tracking/resources/views/pages/donor-reports/⚡index.blade.php',
+    'modules/Tracking/resources/views/pages/indicators/⚡index.blade.php',
+    'modules/Tracking/resources/views/pages/indicator-library/⚡index.blade.php',
+    'modules/Tracking/resources/views/pages/monthly-reports/⚡index.blade.php',
+    'modules/Tracking/resources/views/pages/reports/⚡index.blade.php',
+    'modules/Tracking/resources/views/pages/risks/⚡index.blade.php',
+    'modules/Tracking/resources/views/pages/targets/⚡index.blade.php',
+    'modules/Hr/resources/views/pages/checklists/⚡index.blade.php',
+    'modules/Hr/resources/views/pages/contracts/⚡index.blade.php',
+    'modules/Hr/resources/views/pages/positions/⚡index.blade.php',
+    'modules/Hr/resources/views/pages/recruitment/campaigns/⚡index.blade.php',
+    'modules/Hr/resources/views/pages/recruitment/interviews/⚡index.blade.php',
+    'modules/Hr/resources/views/pages/recruitment/requests/⚡index.blade.php',
+]);
