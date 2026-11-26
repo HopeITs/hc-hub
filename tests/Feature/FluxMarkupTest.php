@@ -24,12 +24,13 @@ test('the status pill shows the label and a status icon', function (TaskStatus $
         ->and($html)->toContain('shrink-0');
 })->with(TaskStatus::cases());
 
-test('the quiet status pill drops the uppercase badge styling but keeps its tone', function () {
+test('the quiet status pill is the smaller tag shape but keeps its tone', function () {
     $loud = (string) FluxMarkup::statusPill(TaskStatus::InProgress);
     $quiet = (string) FluxMarkup::statusPill(TaskStatus::InProgress, quiet: true);
 
-    expect($loud)->toContain('uppercase')
-        ->and($quiet)->not->toContain('uppercase')
+    expect($loud)->toContain('ui-chip')
+        ->and($quiet)->toContain('ui-tag')
+        ->and($quiet)->not->toContain('ui-chip')
         ->and($quiet)->toContain('data-tone="'.TaskStatus::InProgress->tone()->value.'"')
         ->and($quiet)->toContain(e(TaskStatus::InProgress->label()));
 });

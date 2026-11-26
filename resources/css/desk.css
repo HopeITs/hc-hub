@@ -287,10 +287,6 @@
 .dk-ladder i{ width:10px;height:10px;border-radius:50%;border:2px solid var(--money) }
 .dk-ladder .dk-received i{ background:var(--money) }
 .dk-ladder .dk-late i{ border-color:var(--bad);background:var(--bad) }
-.dk-tag{ font-size:12px;font-weight:800;padding:2px 8px;border-radius:var(--radius-control);white-space:nowrap }
-.dk-tag.dk-received{ color:var(--money);background:var(--money-soft) }
-.dk-tag.dk-expected{ color:var(--ink-3);background:var(--sunk) }
-.dk-tag.dk-late{ color:var(--bad-ink);background:var(--bad-soft) }
 .dk-tasks>li{ display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding-block:9px;border-bottom:1px solid var(--line) }
 .dk-tasks label{ display:contents;cursor:pointer }
 .dk-tasks input[type="checkbox"]{ width:18px;height:18px;accent-color:var(--brand);margin:0;justify-self:center }
@@ -462,13 +458,19 @@
 .dk-warn{ color:var(--warn) }
 .dk-is{ display:block;font-size:12.5px;color:var(--ink-3);font-weight:400;margin-top:2px;line-height:1.4 }
 .dk-is a{ color:inherit }
-.dk-pill{ display:inline-flex;align-items:center;height:22px;padding-inline:8px;border-radius:var(--radius-control);font-size:var(--text-caption);font-weight:800;white-space:nowrap;background:var(--sunk);color:var(--ink-2) }
-.dk-pill.dk-good{ background:var(--good-soft);color:var(--good) }
-.dk-pill.dk-warn{ background:var(--warn-soft);color:var(--warn) }
-.dk-pill.dk-bad{ background:var(--bad-soft);color:var(--bad-ink) }
-.dk-pill.dk-act{ background:var(--active-soft);color:var(--active) }
-.dk-pill.dk-money{ background:var(--money-soft);color:var(--money) }
-.dk-pill.dk-mute{ background:var(--sunk);color:var(--ink-2) }
+/* .dk-pill and .dk-tag are aliases of the shared status chip and tag (plan task 2.4, chip.css):
+   the same shape, and each Desk tone is a StatusTone, its classes copied verbatim from
+   StatusTone::badgeClasses() (ChipTest checks they agree). Untoned is neutral; the other tones
+   reset the neutral dashed border to solid.
+   good: dk-good, dk-money, dk-mxp-validated, dk-received · warn: dk-warn, dk-mxp-returned
+   critical: dk-bad, dk-mxp-late, dk-late · active: dk-act, dk-mxp-submitted
+   neutral: untoned, dk-mute, dk-mxp-draft, dk-expected */
+.dk-pill{ @apply ui-chip border-dashed border-secondary-light bg-transparent text-secondary-medium dark:border-ink-faint dark:text-ink-muted }
+.dk-tag{ @apply ui-tag border-dashed border-secondary-light bg-transparent text-secondary-medium dark:border-ink-faint dark:text-ink-muted }
+:is(.dk-pill.dk-good,.dk-pill.dk-money,.dk-pill.dk-mxp-validated,.dk-tag.dk-received){ @apply border-solid border-status-good bg-status-good text-white dark:text-surface-0 }
+:is(.dk-pill.dk-warn,.dk-pill.dk-mxp-returned){ @apply border-solid border-status-warn/40 bg-status-warn-soft text-status-warn }
+:is(.dk-pill.dk-bad,.dk-pill.dk-mxp-late,.dk-tag.dk-late){ @apply border-solid border-status-critical bg-status-critical text-white }
+:is(.dk-pill.dk-act,.dk-pill.dk-mxp-submitted){ @apply border-solid border-status-active bg-status-active-soft text-status-active }
 .dk-btn.dk-sm{ height:var(--control-h-compact);padding-inline:10px;font-size:12.5px;border-radius:var(--radius-control) }
 .dk-iconbtn.dk-sm{ min-width:30px;height:30px;padding-inline:4px;border-radius:var(--radius-control) }
 .dk-iconbtn[aria-disabled="true"]{ opacity:.35;cursor:default }
@@ -699,11 +701,6 @@ button.dk-step.dk-go:hover,button.dk-step.dk-go:focus-visible{ background:var(--
 .dk-mx-list>li:last-child{ border-bottom:0 }
 .dk-mx-ln{ min-width:0;font-size:14px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
 .dk-mx-list .dk-is{ grid-column:1 / -1;margin:0;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
-.dk-mxp-late{ color:var(--bad-ink);background:var(--bad-soft) }
-.dk-mxp-returned{ color:var(--warn);background:var(--warn-soft) }
-.dk-mxp-submitted{ color:var(--active);background:var(--active-soft) }
-.dk-mxp-validated{ color:var(--good);background:var(--good-soft) }
-.dk-mxp-draft{ color:var(--ink-3);background:var(--sunk) }
 .dk-legend button{ display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:3px 6px;margin-inline:-6px 0;border-radius:var(--radius-round);font:inherit;font-size:12.5px;color:var(--ink-3);cursor:pointer }
 .dk-legend button:hover{ background:var(--sunk) }
 .dk-legend button.dk-on{ background:var(--sunk);color:var(--ink);font-weight:700 }

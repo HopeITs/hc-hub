@@ -1,0 +1,40 @@
+/*
+ * The two small labels (plan task 2.4): the status chip and the tag. Shape only;
+ * the colours are a StatusTone's badgeClasses() (app/Enums/StatusTone.php), so a
+ * tone reads the same on every chip, tag and Desk pill.
+ *
+ *  ui-chip  a status: pill (radius-round), 14px, 1.5px border, icon + label. x-ui.chip,
+ *           FluxMarkup::statusPill() and the Desk .dk-pill alias (desk.css).
+ *  ui-tag   a word that is not a status (a type, a count, a group): 13px, inset radius.
+ *           x-ui.tag, the quiet task status and the Desk .dk-tag alias.
+ *
+ * Declared with @utility so the Desk aliases can @apply them and they sort with
+ * the tone utilities they sit beside.
+ */
+@utility ui-chip {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.125rem 0.625rem;
+    border-width: 1.5px;
+    border-radius: var(--radius-round);
+    font-size: var(--text-small);
+    line-height: 1.25rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+@utility ui-tag {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: 0.3125rem;
+    padding: 0.0625rem 0.5rem;
+    border-width: 1px;
+    border-radius: var(--radius-inset);
+    font-size: var(--text-th);
+    line-height: 1.125rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
