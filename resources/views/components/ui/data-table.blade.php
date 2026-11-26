@@ -1,5 +1,6 @@
 @props([
     'caption' => null,
+    'loadingTarget' => null,
 ])
 
 <div data-data-table {{ $attributes->class('@container overflow-x-auto rounded-xl border border-board-line bg-board shadow-card dark:shadow-raised dark:border-transparent') }}>
@@ -15,6 +16,12 @@
         {{-- While the page waits on the server for more than a moment (filter, sort, next page) the rows dim, so stale rows never look final. --}}
         <tbody wire:loading.class.delay="opacity-60" class="transition-opacity duration-150 motion-reduce:transition-none divide-y divide-board-line [&>tr]:@max-3xl:flex [&>tr]:@max-3xl:flex-col [&>tr]:@max-3xl:gap-1.5 [&>tr]:@max-3xl:p-3 [&>tr:hover]:bg-ground [&>tr]:transition-colors">
             {{ $slot }}
+            @if ($loadingTarget)
+                {{-- Opt-in skeleton (see x-ui.skeleton for the recipe): shown after the delay while the named Livewire action runs. --}}
+                <tr wire:loading.delay wire:target="{{ $loadingTarget }}" data-data-table-loading>
+                    <td colspan="99" class="px-3.5 py-2"><x-ui.skeleton variant="row" :count="3" /></td>
+                </tr>
+            @endif
         </tbody>
     </table>
 </div>

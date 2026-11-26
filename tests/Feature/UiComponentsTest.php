@@ -944,3 +944,36 @@ test('a locked segmented field disables every choice and says why', function () 
     expect($xpath->query('//*[@role="radio" and @disabled]')->length)->toBe(2)
         ->and(trim($xpath->query('//*[@id="'.$group->getAttribute('id').'-help"]')->item(0)->textContent))->toBe('Completed tasks cannot change status.');
 });
+
+test('the alert renders every tone with its icon and the right live-region role', function (string $tone, string $role) {
+    $html = Blade::render('<x-ui.alert :tone="$tone" title="Heads up" data-test="x">Body</x-ui.alert>', ['tone' => $tone]);
+
+    expect($html)->toContain('role="'.$role.'"')
+        ->and($html)->toContain('data-tone="'.$tone.'"')
+        ->and($html)->toContain('data-test="x"')
+        ->and($html)->toContain('Heads up')
+        ->and($html)->toContain('Body')
+        ->and($html)->toContain('<svg')
+        ->and($html)->not->toContain('data-ui-alert-dismiss');
+})->with([
+    'info' => ['info', 'status'],
+    'success' => ['success', 'status'],
+    'warning' => ['warning', 'alert'],
+    'danger' => ['danger', 'alert'],
+]);
+
+test('the alert offers a dismiss button only when asked', function () {
+    $html = Blade::render('<x-ui.alert dismissible>Body</x-ui.alert>');
+
+    expect($html)->toContain('data-ui-alert-dismiss')->and($html)->toContain('role="status"');
+});
+
+test('the skeleton renders each variant with a screen-reader loading label', function (string $variant) {
+    $html = Blade::render('<x-ui.skeleton :variant="$variant" :count="2" />', ['variant' => $variant]);
+
+    expect($html)->toContain('data-variant="'.$variant.'"')
+        ->and($html)->toContain('role="status"')
+        ->and($html)->toContain('motion-reduce:animate-none')
+        ->and($html)->toContain(__('common.loading'))
+        ->and(substr_count($html, 'rounded-inset'))->toBeGreaterThan(0);
+})->with(['row', 'card', 'panel']);

@@ -16,13 +16,13 @@
     >
         @if ($showAcceptanceModal)
             @if ($errors->has('finalReportGate'))
-                <div class="mb-4 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="final-report-gate-alert">
+                <x-ui.alert tone="danger" class="mb-4" data-test="final-report-gate-alert">
                     <ul class="list-disc ps-5 font-semibold">
                         @foreach ($errors->get('finalReportGate') as $gateMessage)
                             <li>{{ $gateMessage }}</li>
                         @endforeach
                     </ul>
-                </div>
+                </x-ui.alert>
             @endif
 
             <div class="grid gap-y-4">

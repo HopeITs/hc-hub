@@ -138,6 +138,7 @@ return [
     'zoom_out' => 'تصغير',
     'delete' => 'حذف',
     'close' => 'إغلاق',
+    'dismiss' => 'إخفاء',
     'hr_unavailable' => 'تعذّر تحميل بيانات HR',
     'no_active_position' => 'لا منصب نشط',
     'back' => 'رجوع',
