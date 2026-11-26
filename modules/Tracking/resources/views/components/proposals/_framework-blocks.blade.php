@@ -7,7 +7,7 @@
 <div class="pp-blocks">
     @if (($only === null || in_array('indicators', $only, true)) && ($layers['indicators'] ?? false))
         <div class="pp-block">
-            <div class="pp-block-h"><b>{{ __('proposals.framework.layer_indicators') }} · {{ count($node['indicators']) }}</b>@if ($canEdit)<button type="button" class="pp-link" wire:click="$dispatch('add-indicator', { resultId: {{ $resultId }} })">+ {{ __('proposals.framework.add') }}</button>@endif</div>
+            <div class="pp-block-h"><b>{{ __('proposals.framework.layer_indicators') }} · {{ count($node['indicators']) }}</b>@if ($canEdit)<x-ui.button tone="ghost" size="sm" type="button" class="pp-link" wire:click="$dispatch('add-indicator', { resultId: {{ $resultId }} })">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif</div>
             @forelse ($node['indicators'] as $indicator)
                 <div class="pp-li" role="button" tabindex="0" wire:click="$dispatch('edit-indicator', { indicatorId: {{ $indicator['id'] }} })" wire:key="ind-{{ $indicator['id'] }}">
                     <span class="pp-li-t" dir="auto">{{ $indicator['name'] }}</span>
@@ -25,7 +25,7 @@
                                 <span>{{ __('proposals.framework.no_centre_targets') }}</span>
                             @endforelse
                             @if ($canEditTargets)
-                                <button type="button" class="pp-link" wire:click.stop="openCentreTargets({{ $indicator['id'] }})" data-test="edit-centre-targets-{{ $indicator['id'] }}">{{ __('proposals.framework.edit_targets') }}</button>
+                                <x-ui.button tone="ghost" size="sm" type="button" class="pp-link" wire:click.stop="openCentreTargets({{ $indicator['id'] }})" data-test="edit-centre-targets-{{ $indicator['id'] }}">{{ __('proposals.framework.edit_targets') }}</x-ui.button>
                             @endif
                         </span>
                     @endif
@@ -38,7 +38,7 @@
 
     @if (($only === null || in_array('activities', $only, true)) && ($layers['activities'] ?? false) && $node['type'] === \Modules\Tracking\Enums\ResultType::Output)
         <div class="pp-block">
-            <div class="pp-block-h"><b>{{ __('proposals.framework.layer_activities') }} · {{ count($node['activities']) }}</b><span class="pp-block-acts"><button type="button" class="pp-link" wire:click="setLayout('board')">{{ __('proposals.framework.edit_on_board') }}</button>@if ($canEdit)<button type="button" class="pp-link" wire:click="openCreateModal({{ $resultId }})" data-test="add-child-result-{{ $resultId }}">+ {{ __('proposals.framework.add') }}</button>@endif</span></div>
+            <div class="pp-block-h"><b>{{ __('proposals.framework.layer_activities') }} · {{ count($node['activities']) }}</b><span class="pp-block-acts"><x-ui.button tone="ghost" size="sm" type="button" class="pp-link" wire:click="setLayout('board')">{{ __('proposals.framework.edit_on_board') }}</x-ui.button>@if ($canEdit)<x-ui.button tone="ghost" size="sm" type="button" class="pp-link" wire:click="openCreateModal({{ $resultId }})" data-test="add-child-result-{{ $resultId }}">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif</span></div>
             @forelse ($node['activities'] as $activityId)
                 @php $activity = $fw['activities'][$activityId]; @endphp
                 <div class="pp-li" wire:key="act-{{ $activityId }}">
@@ -58,7 +58,7 @@
 
     @if (($only === null || in_array('risks', $only, true)) && ($layers['risks'] ?? false))
         <div class="pp-block">
-            <div class="pp-block-h"><b>{{ __('proposals.framework.layer_risks') }} · {{ count($node['risks']) }}</b>@if ($this->canManageRisks && in_array($node['type'], [\Modules\Tracking\Enums\ResultType::Outcome, \Modules\Tracking\Enums\ResultType::Output], true))<button type="button" class="pp-link" wire:click="openRisks({{ $resultId }})" data-test="result-risks-{{ $resultId }}">+ {{ __('proposals.framework.add') }}</button>@endif</div>
+            <div class="pp-block-h"><b>{{ __('proposals.framework.layer_risks') }} · {{ count($node['risks']) }}</b>@if ($this->canManageRisks && in_array($node['type'], [\Modules\Tracking\Enums\ResultType::Outcome, \Modules\Tracking\Enums\ResultType::Output], true))<x-ui.button tone="ghost" size="sm" type="button" class="pp-link" wire:click="openRisks({{ $resultId }})" data-test="result-risks-{{ $resultId }}">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif</div>
             @forelse ($node['risks'] as $risk)
                 <div class="pp-li" wire:key="risk-{{ $risk['id'] }}">
                     <span class="pp-li-t" dir="auto">{{ $risk['name'] }}</span>
@@ -76,7 +76,7 @@
 
     @if (($only === null || in_array('assumptions', $only, true)) && ($layers['assumptions'] ?? false))
         <div class="pp-block">
-            <div class="pp-block-h"><b>{{ __('proposals.framework.layer_assumptions') }} · {{ count($node['assumptions']) }}</b>@if ($canEdit)<button type="button" class="pp-link" wire:click="openAssumption(null, {{ $resultId }})" data-test="add-assumption-{{ $resultId }}">+ {{ __('proposals.framework.add') }}</button>@endif</div>
+            <div class="pp-block-h"><b>{{ __('proposals.framework.layer_assumptions') }} · {{ count($node['assumptions']) }}</b>@if ($canEdit)<x-ui.button tone="ghost" size="sm" type="button" class="pp-link" wire:click="openAssumption(null, {{ $resultId }})" data-test="add-assumption-{{ $resultId }}">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif</div>
             @forelse ($node['assumptions'] as $assumption)
                 <div class="pp-li" wire:key="asm-{{ $assumption['id'] }}">
                     <span class="pp-li-t" dir="auto" @if ($canEdit) role="button" tabindex="0" wire:click="openAssumption({{ $assumption['id'] }})" @endif>{{ $assumption['statement'] }}</span>

@@ -12,10 +12,10 @@
 <article class="pp-record" id="card" data-test="proposal-card">
     <div class="pp-title-row">
         @include('tracking::pages.proposals._show-card-field', ['field' => 'title', 'display' => $cardProposal->name, 'big' => true])
-        <button type="button" class="pp-see-more" wire:click="$toggle('cardMore')" aria-expanded="{{ $cardMore ? 'true' : 'false' }}" aria-controls="pp-more" data-test="card-see-more">
+        <x-ui.button tone="ghost" size="sm" type="button" class="pp-see-more" wire:click="$toggle('cardMore')" aria-expanded="{{ $cardMore ? 'true' : 'false' }}" aria-controls="pp-more" data-test="card-see-more">
             {{ $cardMore ? __('proposals.page.see_less') : __('proposals.page.see_more') }}
             <svg @class(['pp-chev', 'pp-chev-up' => $cardMore]) width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
+        </x-ui.button>
     </div>
 
     @if ($cardMore)
@@ -46,7 +46,7 @@
             <div class="pp-kv pp-kv-wide"><div class="pp-k">{{ __('proposals.page.kv_summary') }}</div><div class="pp-v" dir="auto">{{ $cardProposal->notes ?: __('proposals.page.no_summary') }}</div></div>
             @if ($this->canEditCardField('title'))
                 <div class="pp-fold-acts">
-                    <button type="button" class="pp-btn pp-btn-sm" wire:click="openEditModal({{ $cardProposal->id }})">{{ __('proposals.edit_details') }}</button>
+                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="openEditModal({{ $cardProposal->id }})">{{ __('proposals.edit_details') }}</x-ui.button>
                 </div>
             @endif
         </div>

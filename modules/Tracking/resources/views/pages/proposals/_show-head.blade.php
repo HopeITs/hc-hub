@@ -39,10 +39,10 @@
         @endif
 
         @if ($menuActions !== [])
-            <button type="button" class="pp-btn" x-on:click="open = ! open" x-bind:aria-expanded="open" aria-haspopup="menu" data-test="head-more">
+            <x-ui.button tone="ghost" size="sm" type="button" x-on:click="open = ! open" x-bind:aria-expanded="open" aria-haspopup="menu" data-test="head-more">
                 {{ __('proposals.page.more_actions') }}
                 <svg class="pp-chev" x-bind:class="open && 'pp-chev-up'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-            </button>
+            </x-ui.button>
             <div class="pp-menu" role="menu" x-show="open" x-cloak x-transition.opacity.duration.100ms>
                 @foreach ($menuActions as $action)
                     <button type="button" role="menuitem" wire:click="{{ $action['call'] }}" x-on:click="open = false" @disabled($action['disabled']) data-test="{{ $hookFor($action) }}">

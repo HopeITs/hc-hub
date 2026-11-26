@@ -783,12 +783,12 @@ new class extends Component {
                             $nodeInstances = $instancesByResult->get($result->id, collect());
                         @endphp
                         <li class="px-4 py-3" wire:key="node-{{ $result->id }}" data-node="{{ $result->id }}" x-data="{ open: false }">
-                            <button type="button" class="flex w-full cursor-pointer items-start gap-2 text-start" x-on:click="open = ! open" x-bind:aria-expanded="open" data-node-toggle>
+                            <x-ui.button tone="ghost" size="sm" type="button" class="flex w-full cursor-pointer items-start gap-2 text-start" x-on:click="open = ! open" x-bind:aria-expanded="open" data-node-toggle>
                                 <x-ui.enum-badge :case="$result->type" />
                                 <span class="min-w-0 flex-1 text-sm font-semibold {{ $inkText }}" dir="auto">{{ $result->statement }}</span>
                                 <span class="shrink-0 rounded-full bg-secondary-soft px-2 py-0.5 text-xs font-semibold tabular-nums {{ $inkText }} dark:bg-surface-2" data-node-count>{{ $nodeInstances->count() }}</span>
                                 <flux:icon.chevron-down variant="micro" class="mt-0.5 size-4 shrink-0 transition-transform {{ $mutedText }}" x-bind:class="open ? 'rotate-180' : ''" aria-hidden="true" />
-                            </button>
+                            </x-ui.button>
 
                             <div x-show="open" x-collapse x-cloak>
                             @if ($nodeInstances->isEmpty())
@@ -919,7 +919,7 @@ new class extends Component {
                 <p class="flex items-center gap-1.5 font-semibold"><flux:icon.exclamation-triangle variant="micro" class="size-4 shrink-0" />{{ $message }}</p>
                 @if ($isStale)
                     <p class="mt-1">{{ __('targets.cell_stale') }}
-                        <button type="button" class="ms-1 font-semibold underline underline-offset-2" wire:click="reloadGrid">{{ __('targets.reload_grid') }}</button>
+                        <x-ui.button tone="ghost" size="sm" type="button" class="ms-1 font-semibold underline underline-offset-2" wire:click="reloadGrid">{{ __('targets.reload_grid') }}</x-ui.button>
                     </p>
                 @endif
             </div>

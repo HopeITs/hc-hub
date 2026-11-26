@@ -30,7 +30,7 @@
                     @endif
                 </span>
                 <span class="flex items-center gap-2">
-                    <span class="min-w-0 flex-1 truncate text-[12px] text-ink-muted" dir="auto">
+                    <span class="min-w-0 flex-1 truncate text-xs text-ink-muted" dir="auto">
                         @if ($item['last_mine'])<span class="text-ink-faint">{{ __('hr_chat.ui.you') }}:</span>@endif
                         {{ $item['last_preview'] }}
                     </span>

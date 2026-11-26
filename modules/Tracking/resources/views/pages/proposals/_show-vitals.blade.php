@@ -12,16 +12,7 @@
         data-bench
     >
         @foreach ($this->vitals as $reading)
-            <button
-                type="button"
-                wire:click="$set('tab', '{{ $reading['tab'] }}')"
-                aria-controls="tab-panel"
-                class="logframe-reveal group -mx-2 flex min-w-0 touch-manipulation flex-col px-2 text-start focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-secondary-medium"
-                style="--logframe-order: {{ $loop->index }}"
-                wire:key="vital-{{ $reading['key'] }}"
-                data-vital="{{ $reading['key'] }}"
-                data-test="vital-{{ $reading['key'] }}"
-            >
+            <x-ui.button tone="ghost" size="sm" type="button" wire:click="$set('tab', '{{ $reading['tab'] }}')" aria-controls="tab-panel" class="logframe-reveal group -mx-2 flex min-w-0 touch-manipulation flex-col px-2 text-start focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-secondary-medium" style="--logframe-order: {{ $loop->index }}" wire:key="vital-{{ $reading['key'] }}" data-vital="{{ $reading['key'] }}" data-test="vital-{{ $reading['key'] }}">
                 <span class="type-label {{ $mutedText }}">{{ $reading['label'] }}</span>
 
                 <span @class([
@@ -50,6 +41,6 @@
                         <span class="money-grow h-full first:rounded-s-full {{ $segment['class'] }}" style="width: {{ $segment['width'] }}%"></span>
                     @endforeach
                 </span>
-            </button>
+            </x-ui.button>
         @endforeach
     </div>

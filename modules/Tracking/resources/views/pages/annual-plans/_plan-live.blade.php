@@ -64,7 +64,7 @@
         <span><i class="ap-lg is-off-dot"></i>{{ __('annual_plans.live.off_plan') }}</span>
         <span><i class="ap-lg is-today"></i>{{ __('annual_plans.live.this_week') }}</span>
     </div>
-    <div class="ap-row"><button type="button" class="dk-chip" wire:click="$toggle('attentionOnly')" aria-pressed="{{ $this->attentionOnly ? 'true' : 'false' }}" data-test="attention-filter">{{ $this->attentionOnly ? __('annual_plans.live.attention_on') : __('annual_plans.live.attention') }}</button></div>
+    <div class="ap-row"><x-ui.button tone="ghost" size="sm" type="button" class="dk-chip" wire:click="$toggle('attentionOnly')" aria-pressed="{{ $this->attentionOnly ? 'true' : 'false' }}" data-test="attention-filter">{{ $this->attentionOnly ? __('annual_plans.live.attention_on') : __('annual_plans.live.attention') }}</x-ui.button></div>
 
     <div class="ap-acts">
         @forelse ($items as $item)

@@ -388,10 +388,10 @@ new class extends Component {
             <p class="type-meta text-secondary-medium dark:text-ink-muted">{{ __('results_framework.calendar_intro') }}</p>
         </div>
 
-        <button type="button" class="dk-btn dk-sm" x-on:click="calendarOpen = ! calendarOpen" x-bind:aria-expanded="calendarOpen.toString()" aria-controls="activity-calendar-body" data-test="calendar-toggle">
+        <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-sm" x-on:click="calendarOpen = ! calendarOpen" x-bind:aria-expanded="calendarOpen.toString()" aria-controls="activity-calendar-body" data-test="calendar-toggle">
             <span x-show="! calendarOpen">{{ __('results_framework.calendar_show', ['count' => collect($groups)->sum(fn (array $group): int => count($group['rows']))]) }}</span>
             <span x-show="calendarOpen" x-cloak>{{ __('results_framework.calendar_hide') }}</span>
-        </button>
+        </x-ui.button>
 
         <p class="type-meta text-secondary-medium dark:text-ink-muted" role="status" aria-live="polite" data-test="calendar-save-state">
             <span wire:loading wire:target="{{ $writeTargets }}">{{ __('results_framework.calendar_saving') }}</span>

@@ -49,7 +49,7 @@
             </div>
             <div class="pp-lf-tools">
                 @if ($canCreate)
-                    <button type="button" class="pp-btn pp-btn-sm" wire:click="openPicker" data-test="start-from-program-framework">{!! $svg('tree') !!} {{ __('proposals.framework.start_from_program') }}</button>
+                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="openPicker" data-test="start-from-program-framework">{!! $svg('tree') !!} {{ __('proposals.framework.start_from_program') }}</x-ui.button>
                 @endif
                 <span class="pp-switch" role="group" aria-label="{{ __('proposals.framework.layout') }}">
                     <button type="button" @class(['pp-on' => $layout === 'chain']) wire:click="setLayout('chain')" aria-pressed="{{ $layout === 'chain' ? 'true' : 'false' }}" data-test="layout-chain">{!! $svg('tree') !!} {{ __('proposals.framework.layout_chain') }}</button>
@@ -57,7 +57,7 @@
                     <button type="button" @class(['pp-on' => $layout === 'board']) wire:click="setLayout('board')" aria-pressed="{{ $layout === 'board' ? 'true' : 'false' }}" data-test="layout-board" @if ($looseIds !== []) title="{{ trans_choice('proposals.framework.loose_banner', count($looseIds), ['count' => count($looseIds)]) }} {{ __('proposals.framework.loose_tab_help') }}" @endif>{!! $svg('task') !!} {{ __('proposals.framework.layout_board') }}@if ($looseIds !== [])<span class="pp-tab-badge" data-test="loose-badge"><span class="sr-only">{{ trans_choice('proposals.framework.loose_banner', count($looseIds), ['count' => count($looseIds)]) }}</span><span aria-hidden="true">{{ count($looseIds) }}</span></span>@endif</button>
                 </span>
                 <span class="pp-rel" x-data="{ open: false }" x-on:click.outside="open = false" x-on:keydown.escape.window="open = false">
-                    <button type="button" class="pp-btn pp-btn-sm" x-on:click="open = ! open" x-bind:aria-expanded="open" data-test="customize">{!! $svg('sliders') !!} {{ __('proposals.framework.customize') }}</button>
+                    <x-ui.button tone="ghost" size="sm" type="button" x-on:click="open = ! open" x-bind:aria-expanded="open" data-test="customize">{!! $svg('sliders') !!} {{ __('proposals.framework.customize') }}</x-ui.button>
                     <div class="pp-pop" role="dialog" aria-label="{{ __('proposals.framework.customize') }}" x-show="open" x-cloak>
                         <h4>{{ __('proposals.framework.show_under_each') }}</h4>
                         @foreach ($this::LAYERS as $layer)
@@ -70,8 +70,8 @@
                         <label><input type="radio" name="pp-layout" @checked($layout === 'chain') wire:click="setLayout('chain')"> {{ __('proposals.framework.layout_chain_long') }}</label>
                         <label><input type="radio" name="pp-layout" @checked($layout === 'matrix') wire:click="setLayout('matrix')"> {{ __('proposals.framework.layout_matrix_long') }}</label>
                         <div class="pp-pop-foot">
-                            <button type="button" class="pp-link" wire:click="resetPrefs">{{ __('proposals.framework.reset_default') }}</button>
-                            <button type="button" class="pp-btn pp-btn-sm" x-on:click="open = false">{{ __('proposals.framework.close_customize') }}</button>
+                            <x-ui.button tone="ghost" size="sm" type="button" class="pp-link" wire:click="resetPrefs">{{ __('proposals.framework.reset_default') }}</x-ui.button>
+                            <x-ui.button tone="ghost" size="sm" type="button" x-on:click="open = false">{{ __('proposals.framework.close_customize') }}</x-ui.button>
                         </div>
                         <span class="pp-small">{{ __('proposals.framework.remembered') }}</span>
                     </div>
@@ -101,7 +101,7 @@
             </span>
             <span class="pp-lf-bar-r">
                 @if ($canCreate)
-                    <button type="button" class="pp-btn pp-btn-sm pp-btn-primary" wire:click="openCreateModal" data-test="create-logframe-result">{!! $svg('plus') !!} {{ __('proposals.framework.add_result') }}</button>
+                    <x-ui.button tone="primary" size="sm" type="button" wire:click="openCreateModal" data-test="create-logframe-result">{!! $svg('plus') !!} {{ __('proposals.framework.add_result') }}</x-ui.button>
                 @endif
             </span>
         </div>

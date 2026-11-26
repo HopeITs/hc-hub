@@ -43,8 +43,8 @@
                 }">
                 <div class="pp-pk-tools">
                     <span class="pp-pk-sel" role="group" aria-label="{{ __('proposals.picker.select') }}">
-                        <button type="button" class="pp-pk-pill" x-on:click="all(true)" x-bind:disabled="! anyNew()">{{ __('proposals.picker.tick_all_new') }}</button>
-                        <button type="button" class="pp-pk-pill" x-on:click="all(false)">{{ __('proposals.picker.untick_all') }}</button>
+                        <x-ui.button tone="ghost" size="sm" type="button" class="pp-pk-pill" x-on:click="all(true)" x-bind:disabled="! anyNew()">{{ __('proposals.picker.tick_all_new') }}</x-ui.button>
+                        <x-ui.button tone="ghost" size="sm" type="button" class="pp-pk-pill" x-on:click="all(false)">{{ __('proposals.picker.untick_all') }}</x-ui.button>
                     </span>
                     <label class="pp-pk-opt" x-show="fillable() > 0">
                         <input type="checkbox" class="pp-pk-box" x-model="targets" data-test="picker-targets">

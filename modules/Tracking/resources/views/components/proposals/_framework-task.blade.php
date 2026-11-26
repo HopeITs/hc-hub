@@ -30,7 +30,7 @@
                 </span>
             </span>
             @if ($people['mayReopen'])
-                <button type="button" class="pp-btn pp-btn-sm" wire:click="reopenTask" data-test="framework-reopen">{{ __('proposals.framework.reopen') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" wire:click="reopenTask" data-test="framework-reopen">{{ __('proposals.framework.reopen') }}</x-ui.button>
             @endif
         </div>
     </div>
@@ -46,9 +46,9 @@
                 @foreach ($checks as $check)<i @class(['pp-ok' => $check['ok']])></i>@endforeach
             </span>
             <span class="pp-small">{{ __('proposals.framework.n_of_4', ['count' => $readyCount]) }}</span>
-            <button type="button" class="pp-btn pp-btn-sm" wire:click="$toggle('checksOpen')" aria-expanded="{{ $checksOpen ? 'true' : 'false' }}" data-test="framework-checks-toggle">{{ $checksOpen ? __('proposals.framework.hide_checklist') : __('proposals.framework.whats_left') }}</button>
+            <x-ui.button tone="ghost" size="sm" type="button" wire:click="$toggle('checksOpen')" aria-expanded="{{ $checksOpen ? 'true' : 'false' }}" data-test="framework-checks-toggle">{{ $checksOpen ? __('proposals.framework.hide_checklist') : __('proposals.framework.whats_left') }}</x-ui.button>
             @can('results.create')
-                <button type="button" class="pp-btn pp-btn-sm pp-btn-primary" wire:click="openDoneModal" data-test="framework-mark-done">{{ __('proposals.framework.mark_done') }}</button>
+                <x-ui.button tone="primary" size="sm" type="button" wire:click="openDoneModal" data-test="framework-mark-done">{{ __('proposals.framework.mark_done') }}</x-ui.button>
             @endcan
         </div>
         @if ($checksOpen)

@@ -23,9 +23,9 @@
     <div class="pp-empty" data-money-empty>
         {{ __('proposals.sections.money_empty') }}
         @if ($this->canRecordAgreement)
-            <button type="button" class="pp-btn pp-btn-sm pp-btn-primary" wire:click="openAgreementCreate" data-test="record-agreement">
+            <x-ui.button tone="primary" size="sm" type="button" wire:click="openAgreementCreate" data-test="record-agreement">
                 <flux:icon.plus variant="micro" class="size-4" aria-hidden="true" />{{ __('funding_agreements.record_agreement') }}
-            </button>
+            </x-ui.button>
         @endif
     </div>
 @else
@@ -130,7 +130,7 @@
                             </span>
                             <span class="pp-lrow-r">
                                 @can('transfers.update')
-                                    <button type="button" class="pp-status {{ $trancheStates[$state]['class'] }}" wire:click="openTransferEdit({{ $transfer->id }})" aria-label="{{ __('proposals.edit_tranche') }}: {{ $trancheStates[$state]['label'] }}" data-test="edit-transfer-{{ $transfer->id }}">{{ $trancheStates[$state]['label'] }}</button>
+                                    <x-ui.button tone="ghost" size="sm" type="button" class="pp-status {{ $trancheStates[$state]['class'] }}" wire:click="openTransferEdit({{ $transfer->id }})" aria-label="{{ __('proposals.edit_tranche') }}: {{ $trancheStates[$state]['label'] }}" data-test="edit-transfer-{{ $transfer->id }}">{{ $trancheStates[$state]['label'] }}</x-ui.button>
                                 @else
                                     <span class="pp-status {{ $trancheStates[$state]['class'] }}">{{ $trancheStates[$state]['label'] }}</span>
                                 @endcan
@@ -143,12 +143,12 @@
 
                 <div class="pp-row-acts">
                     @can('transfers.create')
-                        <button type="button" class="pp-btn pp-btn-sm" wire:click="openTransferCreate({{ $agreement->id }})" data-test="schedule-tranche-{{ $agreement->id }}">
+                        <x-ui.button tone="ghost" size="sm" type="button" wire:click="openTransferCreate({{ $agreement->id }})" data-test="schedule-tranche-{{ $agreement->id }}">
                             <flux:icon.plus variant="micro" class="size-4" aria-hidden="true" />{{ __('proposals.schedule_tranche') }}
-                        </button>
+                        </x-ui.button>
                     @endcan
                     @can('funding-agreements.update')
-                        <button type="button" class="pp-btn pp-btn-sm" wire:click="openAgreementEdit({{ $agreement->id }})" data-test="edit-agreement-{{ $agreement->id }}">{{ __('funding_agreements.edit_agreement') }}</button>
+                        <x-ui.button tone="ghost" size="sm" type="button" wire:click="openAgreementEdit({{ $agreement->id }})" data-test="edit-agreement-{{ $agreement->id }}">{{ __('funding_agreements.edit_agreement') }}</x-ui.button>
                     @endcan
                 </div>
             </div>

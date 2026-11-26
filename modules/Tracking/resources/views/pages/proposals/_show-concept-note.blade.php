@@ -35,19 +35,12 @@
     >
         @unless ($isIdeation)
             {{-- Folded: one line that expands, so a later phase keeps the note within reach. --}}
-            <button
-                type="button"
-                class="flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium"
-                x-on:click="open = ! open"
-                x-bind:aria-expanded="open.toString()"
-                aria-controls="concept-note-body"
-                data-concept-note-toggle
-            >
+            <x-ui.button tone="ghost" size="sm" type="button" class="flex w-full cursor-pointer items-center gap-2 px-4 py-3 text-start focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" aria-controls="concept-note-body" data-concept-note-toggle>
                 <flux:icon.chevron-right variant="micro" class="size-3.5 shrink-0 rtl:-scale-x-100 {{ $mutedText }}" x-bind:class="open && 'rotate-90 rtl:rotate-90'" style="transition: transform 150ms" aria-hidden="true" />
                 <span class="text-base font-bold {{ $inkText }}">{{ __('proposals.concept_note.title') }}</span>
                 <span aria-hidden="true" class="{{ $mutedText }}">·</span>
                 <span class="text-sm underline underline-offset-4 {{ $mutedText }}">{{ __('proposals.concept_note.view') }}</span>
-            </button>
+            </x-ui.button>
         @endunless
 
         <div id="concept-note-body" class="px-4 py-4" @unless ($isIdeation) x-show="open" @endunless>

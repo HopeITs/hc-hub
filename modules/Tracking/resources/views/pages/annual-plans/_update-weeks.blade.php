@@ -9,7 +9,7 @@
 <div class="ap-grp" data-update-weeks>
     <h3 class="ap-h2">1. {{ __('annual_plans.up.weeks_title') }}</h3>
     @unless ($readOnly)
-        <p class="ap-sm ap-muted">{!! __('annual_plans.up.weeks_help') !!} <button type="button" class="dk-btn" wire:click="fillFromPlan" data-test="fill-from-plan">{{ __('annual_plans.up.fill_from_plan') }}</button></p>
+        <p class="ap-sm ap-muted">{!! __('annual_plans.up.weeks_help') !!} <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="fillFromPlan" data-test="fill-from-plan">{{ __('annual_plans.up.fill_from_plan') }}</x-ui.button></p>
     @endunless
     @forelse ($rows as $row)
         @php $item = $row['item']; $batch = $row['batch']; @endphp

@@ -43,18 +43,18 @@
 </section>
 
 <div class="ap-foot">
-    @if ($step > 0)<button type="button" class="dk-btn" wire:click="goToStep({{ $step - 1 }})">‹ {{ __('annual_plans.wf.back') }}</button>@endif
-    <button type="button" class="dk-btn" wire:click="saveDraft" data-test="save-draft">{{ __('annual_plans.up.save_draft') }}</button>
+    @if ($step > 0)<x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="goToStep({{ $step - 1 }})">‹ {{ __('annual_plans.wf.back') }}</x-ui.button>@endif
+    <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="saveDraft" data-test="save-draft">{{ __('annual_plans.up.save_draft') }}</x-ui.button>
     <span class="ap-sp"></span>
     @if ($missing !== [])<span class="ap-err" data-missing>{{ trans_choice('annual_plans.up.fields_need_attention', count($missing), ['count' => count($missing)]) }}</span>@endif
     @if ($readOnly)
         @if ($blockers !== [])
             <span class="ap-xs" style="color: var(--warn); font-weight: 700; max-width: 440px" data-send-blocked>{{ implode(' ', $blockers) }} {{ __('annual_plans.up.save_until') }}</span>
-            <button type="button" class="dk-btn dk-primary" disabled>{{ __('annual_plans.up.send') }} ✓</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" disabled>{{ __('annual_plans.up.send') }} ✓</x-ui.button>
         @else
-            <button type="button" class="dk-btn dk-primary" wire:click="sendUpdate" data-test="send-update">{{ $record?->status === \Modules\Tracking\Enums\PlanUpdateStatus::Returned ? __('annual_plans.up.send_again') : __('annual_plans.up.send') }} ✓</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="sendUpdate" data-test="send-update">{{ $record?->status === \Modules\Tracking\Enums\PlanUpdateStatus::Returned ? __('annual_plans.up.send_again') : __('annual_plans.up.send') }} ✓</x-ui.button>
         @endif
     @else
-        <button type="button" class="dk-btn dk-primary" wire:click="goToStep({{ $step + 1 }})" data-test="update-next">{{ __('annual_plans.up.next', ['step' => $steps[$step + 1]]) }} ›</button>
+        <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="goToStep({{ $step + 1 }})" data-test="update-next">{{ __('annual_plans.up.next', ['step' => $steps[$step + 1]]) }} ›</x-ui.button>
     @endif
 </div>

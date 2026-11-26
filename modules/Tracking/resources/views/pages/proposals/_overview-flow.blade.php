@@ -128,11 +128,11 @@
                         <ul class="mt-4 flex flex-col gap-5 @3xl/directory:hidden" role="list">
                             @foreach ($graph['donors'] as $node)
                                 <li wire:key="flow-stack-{{ $graph['currency'] }}-{{ $node['id'] }}">
-                                    <button type="button" wire:click="toggleDonor({{ $node['id'] }})" aria-pressed="{{ $donor === (string) $node['id'] ? 'true' : 'false' }}" class="flex min-h-11 w-full items-center gap-2.5 text-start">
+                                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="toggleDonor({{ $node['id'] }})" aria-pressed="{{ $donor === (string) $node['id'] ? 'true' : 'false' }}" class="flex min-h-11 w-full items-center gap-2.5 text-start">
                                         <span class="size-3 shrink-0 rounded-full bg-funding" aria-hidden="true"></span>
                                         <span class="min-w-0 flex-1 truncate text-sm font-bold {{ $inkText }}">{{ $node['name'] }}</span>
                                         <span class="shrink-0 text-xs font-semibold tabular-nums {{ $mutedText }}">{{ $amount($node['total']) }} {{ $graph['currency'] }}</span>
-                                    </button>
+                                    </x-ui.button>
                                     <ul class="ms-1.5 flex flex-col border-s-2 border-funding/30 ps-4" role="list">
                                         @foreach ($graph['graph']['money'] as $ribbon)
                                             @if ($ribbon['from'] === $node['key'])

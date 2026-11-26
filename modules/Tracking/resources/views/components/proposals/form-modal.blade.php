@@ -140,11 +140,7 @@
                         <p class="text-xs text-status-critical" data-form-error-sections>{{ __('proposals.form_error_summary_sections', ['sections' => implode(' · ', $failingSections)]) }}</p>
                     @endif
                 </div>
-                <button
-                    type="button"
-                    class="text-sm font-semibold text-secondary-dark underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:text-ink"
-                    x-on:click="const field = $el.closest('form').querySelector('[aria-invalid=true]'); field?.scrollIntoView({ block: 'center' }); field?.focus({ preventScroll: true })"
-                >{{ __('proposals.go_to_the_first_problem') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="text-sm font-semibold text-secondary-dark underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:text-ink" x-on:click="const field = $el.closest('form').querySelector('[aria-invalid=true]'); field?.scrollIntoView({ block: 'center' }); field?.focus({ preventScroll: true })">{{ __('proposals.go_to_the_first_problem') }}</x-ui.button>
             </div>
         @endif
 

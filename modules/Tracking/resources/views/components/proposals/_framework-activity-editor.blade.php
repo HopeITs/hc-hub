@@ -35,14 +35,14 @@
                 <div class="pp-ai-row" wire:key="count-{{ $countId }}">
                     <input type="text" wire:model="actCounts.{{ $countId }}.name" wire:blur="saveCount({{ $countId }})" aria-label="{{ __('proposals.board.what_it_counts') }}">
                     <input type="number" min="0" step="any" @class(['pp-unset' => $count['target'] === '']) wire:model="actCounts.{{ $countId }}.target" wire:blur="saveCount({{ $countId }})" placeholder="{{ __('proposals.board.target') }}" aria-label="{{ __('proposals.board.target') }}">
-                    <button type="button" class="pp-btn pp-btn-ghost" wire:click="deleteCount({{ $countId }})" wire:confirm="{{ __('proposals.board.delete_count_confirm') }}" aria-label="{{ __('proposals.board.remove_count') }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="deleteCount({{ $countId }})" wire:confirm="{{ __('proposals.board.delete_count_confirm') }}" aria-label="{{ __('proposals.board.remove_count') }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></x-ui.button>
                 </div>
                 @error('actCounts.'.$countId.'.name')<p class="pp-err" role="alert">{{ $message }}</p>@enderror
             @endforeach
             <div class="pp-ai-row pp-ai-add">
                 <input type="text" wire:model="newCountName" x-on:keydown.enter.prevent="$wire.addCount()" placeholder="{{ __('proposals.board.add_count') }}" aria-label="{{ __('proposals.board.add_count') }}" data-test="activity-new-count">
                 <input type="number" min="0" step="any" wire:model="newCountTarget" x-on:keydown.enter.prevent="$wire.addCount()" placeholder="{{ __('proposals.board.target') }}" aria-label="{{ __('proposals.board.target') }}">
-                <button type="button" class="pp-btn pp-btn-ghost" wire:click="addCount" aria-label="{{ __('proposals.board.add') }}" data-test="activity-add-count">+</button>
+                <x-ui.button tone="ghost" size="sm" type="button" wire:click="addCount" aria-label="{{ __('proposals.board.add') }}" data-test="activity-add-count">+</x-ui.button>
             </div>
             @error('newCountName')<p class="pp-err" role="alert">{{ $message }}</p>@enderror
         </div>
@@ -58,7 +58,7 @@
     </label>
 
     <div class="pp-acard-foot">
-        <button type="button" class="pp-link pp-link-mute" wire:click="confirmDelete({{ $activity['id'] }})">{{ __('proposals.board.delete_activity') }}</button>
-        <button type="button" class="pp-btn pp-btn-sm pp-btn-primary" wire:click="closeActivityEditor" data-test="activity-done">{{ __('proposals.board.done') }}</button>
+        <x-ui.button tone="ghost" size="sm" type="button" class="pp-link pp-link-mute" wire:click="confirmDelete({{ $activity['id'] }})">{{ __('proposals.board.delete_activity') }}</x-ui.button>
+        <x-ui.button tone="primary" size="sm" type="button" wire:click="closeActivityEditor" data-test="activity-done">{{ __('proposals.board.done') }}</x-ui.button>
     </div>
 </article>

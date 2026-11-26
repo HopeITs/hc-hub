@@ -299,7 +299,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
 <x-desk.register heading-id="activity-plans-heading" :title="__('common.annual_plans')" :count="$counts['']" data-activity-plans>
     <x-slot:actions>
         @can('create', Modules\Tracking\Models\ActivityPlan::class)
-            <button type="button" class="dk-btn dk-primary" wire:click="openCreateModal" data-test="new-activity-plan" data-quick-create><x-desk.icon name="plus" />{{ __('annual_plans.wf.new_plan') }}</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="openCreateModal" data-test="new-activity-plan" data-quick-create><x-desk.icon name="plus" />{{ __('annual_plans.wf.new_plan') }}</x-ui.button>
         @endcan
     </x-slot:actions>
     <x-slot:search>
@@ -319,7 +319,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
 
         <div class="dk-chips" role="group" aria-label="{{ __('common.state') }}">
             @foreach ($statusTabs as $value => $label)
-                <button type="button" class="dk-chip" wire:click="$set('status', '{{ $value }}')" aria-pressed="{{ $status === $value ? 'true' : 'false' }}" data-status-tab="{{ $value === '' ? 'all' : $value }}">{{ $label }} <span class="dk-num">{{ $counts[$value] ?? 0 }}</span></button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-chip" wire:click="$set('status', '{{ $value }}')" aria-pressed="{{ $status === $value ? 'true' : 'false' }}" data-status-tab="{{ $value === '' ? 'all' : $value }}">{{ $label }} <span class="dk-num">{{ $counts[$value] ?? 0 }}</span></x-ui.button>
             @endforeach
         </div>
 
