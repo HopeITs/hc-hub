@@ -226,7 +226,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.approvals')] cla
                     </x-ui.data-table.cell>
                     <td>
                         <span class="flex items-center justify-end">
-                            <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('hr.recruitment.requests.show', ['requestId' => $request->id])" wire:navigate :aria-label="__('hr_recruitment.workflow_ui.review_request', ['number' => $request->request_number])" />
+                            <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('hr.recruitment.requests.show', ['requestId' => $request->id])" wire:navigate :aria-label="__('hr_recruitment.workflow_ui.review_request', ['number' => $request->request_number])" />
                         </span>
                     </td>
                 </tr>

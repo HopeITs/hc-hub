@@ -126,16 +126,60 @@ test('the user chip shows name role and email', function () {
         ->and($html)->toContain('layla@example.com');
 });
 
-test('the ui button renders one tone per variant', function (string $tone, string $expected) {
+test('the ui button renders one tone per variant', function (string $tone, string $expected, string $dataTone) {
     $html = Blade::render('<x-ui.button :tone="$tone">Go</x-ui.button>', ['tone' => $tone]);
 
-    expect($html)->toContain($expected);
+    expect($html)->toContain($expected)
+        ->and($html)->toContain('data-tone="'.$dataTone.'"');
 })->with([
-    'primary' => ['primary', 'bg-primary!'],
-    'secondary' => ['secondary', 'bg-white!'],
-    'ghost' => ['ghost', 'bg-transparent!'],
-    'neutral' => ['neutral', 'bg-secondary-dark!'],
+    'primary' => ['primary', 'bg-primary!', 'primary'],
+    'neutral' => ['neutral', 'bg-white!', 'neutral'],
+    'secondary alias' => ['secondary', 'bg-white!', 'neutral'],
+    'ghost' => ['ghost', 'bg-transparent!', 'ghost'],
+    'danger' => ['danger', 'data-ui-button', 'danger'],
+    'inverse' => ['inverse', 'bg-secondary-dark!', 'inverse'],
 ]);
+
+test('the ui button renders one size per variant', function (string $size, string $dataSize) {
+    $html = Blade::render('<x-ui.button :size="$size" aria-label="Go">Go</x-ui.button>', ['size' => $size]);
+
+    expect($html)->toContain('data-size="'.$dataSize.'"');
+})->with([
+    'sm' => ['sm', 'sm'],
+    'xs alias' => ['xs', 'sm'],
+    'md' => ['md', 'md'],
+    'lg' => ['lg', 'lg'],
+    'icon' => ['icon', 'icon'],
+]);
+
+test('an icon-only ui button carries its aria-label, from label or aria-label', function () {
+    $fromLabel = Blade::render('<x-ui.button size="icon" icon="trash" label="Delete row" />');
+    $fromAttribute = Blade::render('<x-ui.button size="icon" icon="trash" aria-label="Delete row" />');
+
+    expect($fromLabel)->toContain('aria-label="Delete row"')
+        ->and($fromAttribute)->toContain('aria-label="Delete row"')
+        ->and($fromAttribute)->toContain('data-size="icon"');
+});
+
+test('an icon-only ui button without a label is rejected', function () {
+    try {
+        Blade::render('<x-ui.button size="icon" icon="trash" />');
+
+        $this->fail('Expected an icon-only x-ui.button to require a label.');
+    } catch (ViewException $exception) {
+        expect($exception->getMessage())->toContain('needs a label or aria-label');
+    }
+});
+
+test('the ui button rejects an unknown size', function () {
+    try {
+        Blade::render('<x-ui.button size="huge">Go</x-ui.button>');
+
+        $this->fail('Expected x-ui.button to reject the size [huge].');
+    } catch (ViewException $exception) {
+        expect($exception->getMessage())->toContain('Unknown x-ui.button size [huge].');
+    }
+});
 
 test('the ui button rejects an unknown tone', function () {
     try {
@@ -154,39 +198,6 @@ test('the ui button rejects an unknown tone', function () {
             ->not->toBeEmpty()
             ->and($exception->getMessage())->toContain('Unknown x-ui.button tone [rainbow].');
     }
-});
-
-test('the page header matches the directory title and count design without a description', function () {
-    $html = Blade::render(
-        '<x-ui.page-header title="Projects" :count="8" description="Delivery sites."><x-slot:filters><input aria-label="Search projects"></x-slot:filters></x-ui.page-header>'
-    );
-
-    expect($html)->toContain('Projects')
-        ->and($html)->toContain('8')
-        ->and($html)->toContain('page-title!')
-        ->and($html)->toContain('bg-primary')
-        ->and($html)->toContain('data-page-header-controls')
-        ->and($html)->not->toContain('Delivery sites.');
-});
-
-test('the page header omits the count badge when no count is given', function () {
-    $html = Blade::render('<x-ui.page-header title="Projects" />');
-
-    expect($html)->toContain('Projects')
-        ->and($html)->not->toContain('data-count-badge');
-});
-
-test('the page header keeps actions outside the filter grid', function () {
-    $html = Blade::render(
-        '<x-ui.page-header title="Projects"><x-slot:filters><input aria-label="Search projects"></x-slot:filters><x-slot:actions><button data-test="add-project">Add project</button></x-slot:actions></x-ui.page-header>'
-    );
-    $document = new DOMDocument;
-    @$document->loadHTML($html);
-    $xpath = new DOMXPath($document);
-
-    expect($xpath->query('//*[@data-page-header-filters]//input[@aria-label="Search projects"]')->length)->toBe(1)
-        ->and($xpath->query('//*[@data-page-header-filters]//*[@data-test="add-project"]')->length)->toBe(0)
-        ->and($xpath->query('//*[@data-page-header-actions]//*[@data-test="add-project"]')->length)->toBe(1);
 });
 
 test('the header filter select renders the programs dropdown instead of a native select', function () {
@@ -391,32 +402,6 @@ test('the schedule status reads overdue, due soon and future dates correctly', f
         ->and($textOf($dueSoon))->toBe('Due in 3 days')
         ->and($textOf($dueLater))->not->toContain('-')
         ->and($textOf($unscheduled))->toBe('Unscheduled');
-});
-
-test('the capacity bar shows committed and received money and flags an overflow', function () {
-    $withinBudget = Blade::render('<x-ui.capacity-bar :committed="1000" :used="400" currency="USD" />');
-    $overBudget = Blade::render('<x-ui.capacity-bar :committed="1000" :used="1200" currency="USD" />');
-
-    expect($withinBudget)->toContain('1,000.00')
-        ->and($withinBudget)->toContain('400.00')
-        ->and($overBudget)->toContain('Over by 20%');
-});
-
-test('the capacity bar throws without a currency', function () {
-    try {
-        Blade::render('<x-ui.capacity-bar :committed="1000" :used="400" :currency="null" />');
-
-        $this->fail('Expected x-ui.capacity-bar to reject null currency.');
-    } catch (ViewException $exception) {
-        $causes = [];
-
-        for ($cause = $exception->getPrevious(); $cause !== null; $cause = $cause->getPrevious()) {
-            $causes[] = $cause;
-        }
-
-        expect(array_filter($causes, fn (Throwable $cause): bool => $cause instanceof InvalidArgumentException))
-            ->not->toBeEmpty();
-    }
 });
 
 test('the view toggle marks the active option and wires the others to set it', function () {

@@ -39,7 +39,7 @@
             <p class="text-sm {{ $muted }}">{{ __('hr_recruitment.applicant_ui.status_change.confirm') }}</p>
             <div class="flex justify-end gap-2">
                 <x-ui.button tone="ghost" wire:click="$set('showStatus', false)">{{ __('hr_recruitment.applicant_ui.cancel') }}</x-ui.button>
-                <x-ui.button type="submit" :tone="$statusTarget === Stage::Rejected ? 'neutral' : 'primary'" wire:loading.attr="disabled" wire:target="changeStatus">{{ __('hr_recruitment.applicant_ui.decisions.confirm.'.$statusTarget) }}</x-ui.button>
+                <x-ui.button type="submit" :tone="$statusTarget === Stage::Rejected ? 'inverse' : 'primary'" wire:loading.attr="disabled" wire:target="changeStatus">{{ __('hr_recruitment.applicant_ui.decisions.confirm.'.$statusTarget) }}</x-ui.button>
             </div>
         </form>
     @endif
@@ -96,7 +96,7 @@
             <x-ui.form-textarea wire:model="deletionReason" :label="__('hr_recruitment.applicant_ui.notes.deletion_reason')" rows="2" :required="(bool) $deletingNote->is_sensitive" dir="auto" />
             <div class="flex justify-end gap-2">
                 <x-ui.button tone="ghost" wire:click="$set('showNoteDelete', false)">{{ __('hr_recruitment.applicant_ui.cancel') }}</x-ui.button>
-                <x-ui.button type="submit" tone="neutral" wire:loading.attr="disabled" wire:target="deleteNote">{{ __('hr_recruitment.applicant_ui.notes.delete_confirm') }}</x-ui.button>
+                <x-ui.button type="submit" tone="inverse" wire:loading.attr="disabled" wire:target="deleteNote">{{ __('hr_recruitment.applicant_ui.notes.delete_confirm') }}</x-ui.button>
             </div>
         </form>
     @endif
@@ -153,7 +153,7 @@
             </label>
             <div class="flex justify-end gap-2">
                 <x-ui.button tone="ghost" wire:click="$set('showErasure', false)">{{ __('hr_recruitment.applicant_ui.cancel') }}</x-ui.button>
-                <x-ui.button type="submit" tone="neutral">{{ __('hr_recruitment.hub.applicants.erasure_submit') }}</x-ui.button>
+                <x-ui.button type="submit" tone="inverse">{{ __('hr_recruitment.hub.applicants.erasure_submit') }}</x-ui.button>
             </div>
         </form>
     </flux:modal>

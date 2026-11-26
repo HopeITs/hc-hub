@@ -291,7 +291,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_reports')] class extends Comp
                     <td>{{ $report->submitted_on?->translatedFormat(__('formats.date')) ?? '—' }}</td>
                     <td>
                         <span class="flex items-center justify-end">
-                            <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8! pointer-coarse:size-11!" :href="route('donor-reports.show', $report)" wire:navigate :aria-label="__('common.view_name', ['name' => collect([$report->title, $reportProposal?->name])->filter()->implode(' · ')])" />
+                            <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('donor-reports.show', $report)" wire:navigate :aria-label="__('common.view_name', ['name' => collect([$report->title, $reportProposal?->name])->filter()->implode(' · ')])" />
                         </span>
                     </td>
                 </tr>

@@ -89,9 +89,8 @@
                     <flux:tooltip :content="__('results_framework.add_a_contributing_result')">
                         @can('results.create')<x-ui.button
                             tone="ghost"
-                            size="sm"
+                            size="icon"
                             icon="plus"
-                            class="size-8!"
                             wire:click="openCreateModal({{ $result->id }})"
                             :aria-label="__('results_framework.add_a_contributing_result')"
                             data-test="add-child-result-{{ $result->id }}"
@@ -102,9 +101,8 @@
                 <flux:tooltip :content="__('results_framework.edit_result')">
                     @can('results.update')<x-ui.button
                         tone="ghost"
-                        size="sm"
+                        size="icon"
                         icon="pencil-square"
-                        class="size-8!"
                         wire:click="openEditModal({{ $result->id }})"
                         :aria-label="__('common.edit_name', ['name' => $result->statement])"
                         data-test="edit-result-{{ $result->id }}"
@@ -115,9 +113,8 @@
                     <flux:tooltip :content="__('results_framework.delete_result')">
                         @can('results.delete')<x-ui.button
                             tone="ghost"
-                            size="sm"
+                            size="icon"
                             icon="trash"
-                            class="size-8!"
                             wire:click="confirmDelete({{ $result->id }})"
                             :aria-label="__('common.delete_name', ['name' => $result->statement])"
                             data-test="delete-result-{{ $result->id }}"

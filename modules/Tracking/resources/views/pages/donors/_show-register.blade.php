@@ -68,9 +68,9 @@
                             <x-slot:actions>
                                 <td>
                                     <span class="flex items-center justify-end">
-                                        <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('funding-agreements.show', $agreementRow)" wire:navigate :aria-label="__('donors.view_agreement_for', ['name' => $agreementRow->proposal->name])" />
+                                        <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('funding-agreements.show', $agreementRow)" wire:navigate :aria-label="__('donors.view_agreement_for', ['name' => $agreementRow->proposal->name])" />
                                         @can('funding-agreements.update')
-                                            <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openAgreementEdit({{ $agreementRow->id }})" :aria-label="__('common.edit_name', ['name' => $agreementRow->proposal->name])" data-test="edit-agreement-{{ $agreementRow->id }}" />
+                                            <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openAgreementEdit({{ $agreementRow->id }})" :aria-label="__('common.edit_name', ['name' => $agreementRow->proposal->name])" data-test="edit-agreement-{{ $agreementRow->id }}" />
                                         @endcan
                                     </span>
                                 </td>

@@ -324,7 +324,7 @@
                                         @endif
                                     </p>
                                     @unless ($isLinked)
-                                        <x-ui.button type="button" tone="ghost" size="sm" icon="x-mark" class="size-9! shrink-0" wire:click="removeLocationRow({{ $index }})" :aria-label="__('proposals.remove_location', ['number' => $index + 1])" data-test="remove-location" />
+                                        <x-ui.button type="button" tone="ghost" size="icon" icon="x-mark" class="shrink-0" wire:click="removeLocationRow({{ $index }})" :aria-label="__('proposals.remove_location', ['number' => $index + 1])" data-test="remove-location" />
                                     @endunless
                                 </div>
 

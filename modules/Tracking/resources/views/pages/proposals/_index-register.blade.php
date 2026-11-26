@@ -102,17 +102,17 @@
                     <td>
                         @unless ($isRepeat)
                             <span class="flex items-center justify-end">
-                                <x-ui.button tone="ghost" size="sm" icon="eye" icon:variant="outline" class="size-8!" :href="route('proposals.show', $proposal)" wire:navigate :aria-label="__('common.view_name', ['name' => $proposal->name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="eye" icon:variant="outline" :href="route('proposals.show', $proposal)" wire:navigate :aria-label="__('common.view_name', ['name' => $proposal->name])" />
                                 @can('update', $proposal)
                                     {{-- A status move writes its audit note; only proposals with an allowed move get the button. --}}
                                     @if ($proposal->transitionTargets() !== [])
-                                    <x-ui.button tone="ghost" size="sm" icon="arrows-right-left" icon:variant="outline" class="size-8!" wire:click="openStatusModal({{ $proposal->id }})" :aria-label="__('proposals.change_status')" data-test="advance-proposal-{{ $proposal->id }}" />
+                                    <x-ui.button tone="ghost" size="icon" icon="arrows-right-left" icon:variant="outline" wire:click="openStatusModal({{ $proposal->id }})" :aria-label="__('proposals.change_status')" data-test="advance-proposal-{{ $proposal->id }}" />
                                     @endif
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" icon:variant="outline" class="size-8!" wire:click="openEditModal({{ $proposal->id }})" :aria-label="__('common.edit_name', ['name' => $proposal->name])" />
+                                    <x-ui.button tone="ghost" size="icon" icon="pencil-square" icon:variant="outline" wire:click="openEditModal({{ $proposal->id }})" :aria-label="__('common.edit_name', ['name' => $proposal->name])" />
                                 @endcan
                                 @can('delete', $proposal)
                                     @if ($proposal->donor_proposals_count === 0)
-                                        <x-ui.button tone="ghost" size="sm" icon="trash" icon:variant="outline" class="size-8!" wire:click="confirmDelete({{ $proposal->id }})" :aria-label="__('common.delete_name', ['name' => $proposal->name])" />
+                                        <x-ui.button tone="ghost" size="icon" icon="trash" icon:variant="outline" wire:click="confirmDelete({{ $proposal->id }})" :aria-label="__('common.delete_name', ['name' => $proposal->name])" />
                                     @else
                                         <flux:tooltip :content="__('proposals.funded_proposals_cannot_be_deleted_remove_the_funding_agreem')">
                                             <span class="inline-flex size-8 cursor-not-allowed items-center justify-center text-secondary-light" aria-disabled="true" tabindex="0" aria-label="{{ __('proposals.funded_proposals_cannot_be_deleted_remove_the_funding_agreem') }}">

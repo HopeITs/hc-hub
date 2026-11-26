@@ -63,17 +63,15 @@
         @if ($editable)
             <x-ui.button
                 tone="ghost"
-                size="sm"
+                size="icon"
                 icon="pencil-square"
-                class="size-8!"
                 wire:click="openEditFileModal({{ $media->id }})"
                 :aria-label="__('common.edit_name', ['name' => $media->original_name])"
             />
             <x-ui.button
-                tone="ghost"
-                size="sm"
+                tone="danger"
+                size="icon"
                 icon="trash"
-                class="size-8! text-primary! dark:text-brand-text! hover:bg-status-critical-soft!"
                 wire:click="confirmDeleteFile({{ $media->id }})"
                 :aria-label="__('common.delete_name', ['name' => $media->original_name])"
             />

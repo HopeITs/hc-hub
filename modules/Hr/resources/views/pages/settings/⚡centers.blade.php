@@ -207,7 +207,7 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.centers')] class extend
                     </x-ui.data-table.cell>
                     <td class="px-3.5 py-2.5">
                         <span class="flex items-center justify-end">
-                            <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('hr.settings.centers.show', $center->id)" wire:navigate :aria-label="__('common.view_name', ['name' => $center->name])" />
+                            <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('hr.settings.centers.show', $center->id)" wire:navigate :aria-label="__('common.view_name', ['name' => $center->name])" />
                         </span>
                     </td>
                 </tr>

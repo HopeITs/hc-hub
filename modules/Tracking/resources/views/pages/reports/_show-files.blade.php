@@ -66,7 +66,7 @@
 
                         <div class="flex shrink-0 items-center gap-1">
                             @if ($isStored)
-                                <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" wire:click="openPreview({{ $file->id }})" :aria-label="__('reports.preview_name', ['name' => $fileName])" data-test="preview-file-button" />
+                                <x-ui.button tone="ghost" size="icon" icon="eye" wire:click="openPreview({{ $file->id }})" :aria-label="__('reports.preview_name', ['name' => $fileName])" data-test="preview-file-button" />
                                 <a
                                     href="{{ route('reports.files.download', [$report, $file]) }}"
                                     class="inline-flex size-8 items-center justify-center rounded-lg text-secondary-medium transition-colors hover:bg-secondary-soft hover:text-secondary-dark dark:text-ink-muted dark:hover:bg-surface-2 dark:hover:text-ink"
@@ -78,8 +78,8 @@
                             @endif
 
                             @can('update', $report)
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openEditFileModal({{ $file->id }})" :aria-label="__('common.edit_name', ['name' => $fileName])" data-test="edit-file-button" />
-                                <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8! text-primary! dark:text-brand-text! hover:bg-status-critical-soft!" wire:click="confirmDeleteFile({{ $file->id }})" :aria-label="__('common.delete_name', ['name' => $fileName])" data-test="delete-file-button" />
+                                <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditFileModal({{ $file->id }})" :aria-label="__('common.edit_name', ['name' => $fileName])" data-test="edit-file-button" />
+                                <x-ui.button tone="ghost" size="icon" icon="trash" class="text-primary! dark:text-brand-text! hover:bg-status-critical-soft!" wire:click="confirmDeleteFile({{ $file->id }})" :aria-label="__('common.delete_name', ['name' => $fileName])" data-test="delete-file-button" />
                             @endcan
                         </div>
                     </li>

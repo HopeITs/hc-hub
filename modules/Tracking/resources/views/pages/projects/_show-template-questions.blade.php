@@ -99,7 +99,7 @@
                                 @if ($canManageTemplate)
                                     <div class="ms-auto flex shrink-0 flex-wrap items-center gap-1">
                                         <x-ui.button
-                                            tone="ghost" size="sm" icon="arrow-up" class="min-h-11 min-w-11 md:size-9! md:min-h-0 md:min-w-0"
+                                            tone="ghost" size="icon" icon="arrow-up"
                                             wire:click="moveTemplateQuestion({{ $question['id'] }}, 'up')"
                                             wire:target="moveTemplateQuestion"
                                             wire:loading.attr="disabled"
@@ -108,7 +108,7 @@
                                             data-test="move-template-question-up"
                                         />
                                         <x-ui.button
-                                            tone="ghost" size="sm" icon="arrow-down" class="min-h-11 min-w-11 md:size-9! md:min-h-0 md:min-w-0"
+                                            tone="ghost" size="icon" icon="arrow-down"
                                             wire:click="moveTemplateQuestion({{ $question['id'] }}, 'down')"
                                             wire:target="moveTemplateQuestion"
                                             wire:loading.attr="disabled"

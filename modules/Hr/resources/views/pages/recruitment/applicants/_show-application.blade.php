@@ -95,7 +95,7 @@
                 @if ($targets !== [])
                     <div class="flex flex-wrap items-center gap-2">
                         @foreach ($forward as $target)
-                            <x-ui.button :tone="$loop->first ? 'neutral' : 'secondary'" size="sm" wire:key="decide-{{ $application->id }}-{{ $target }}" wire:click="beginStatusChange({{ $application->id }}, '{{ $target }}')">
+                            <x-ui.button :tone="$loop->first ? 'inverse' : 'secondary'" size="sm" wire:key="decide-{{ $application->id }}-{{ $target }}" wire:click="beginStatusChange({{ $application->id }}, '{{ $target }}')">
                                 {{ $application->status === Stage::Rejected ? __('hr_recruitment.applicant_ui.decisions.actions.reopen') : __('hr_recruitment.applicant_ui.decisions.actions.'.$target) }}
                             </x-ui.button>
                         @endforeach
@@ -119,7 +119,7 @@
                         @if ($state['myEndorsement'])
                             <x-ui.button tone="secondary" size="sm" wire:click="retractEndorsement({{ $application->id }})">{{ __('hr_recruitment.applicant_ui.endorsement.retract') }}</x-ui.button>
                         @else
-                            <x-ui.button tone="neutral" size="sm" icon="hand-thumb-up" wire:click="endorse({{ $application->id }})">{{ __('hr_recruitment.applicant_ui.endorsement.endorse') }}</x-ui.button>
+                            <x-ui.button tone="inverse" size="sm" icon="hand-thumb-up" wire:click="endorse({{ $application->id }})">{{ __('hr_recruitment.applicant_ui.endorsement.endorse') }}</x-ui.button>
                         @endif
                     </div>
                 @endif
@@ -297,7 +297,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <p class="text-sm font-semibold">{{ __('hr_recruitment.applicant_ui.interviews.title') }} <span class="tabular-nums {{ $muted }}">({{ $state['interviews']->count() }})</span></p>
                         @if ($state['canSchedule'] && Route::has('hr.recruitment.interviews.create'))
-                            <x-ui.button tone="neutral" size="sm" icon="calendar" :href="route('hr.recruitment.interviews.create', ['applicationId' => $application->id])" wire:navigate>{{ __('hr_recruitment.applicant_ui.interviews.schedule') }}</x-ui.button>
+                            <x-ui.button tone="inverse" size="sm" icon="calendar" :href="route('hr.recruitment.interviews.create', ['applicationId' => $application->id])" wire:navigate>{{ __('hr_recruitment.applicant_ui.interviews.schedule') }}</x-ui.button>
                         @endif
                     </div>
                     @if ($state['mayScheduleAtAll'] && ! $state['canSchedule'])
@@ -348,7 +348,7 @@
                                 @endif
                             </a>
                         @elseif (Route::has('hr.recruitment.offers.create'))
-                            <x-ui.button tone="neutral" size="sm" :href="route('hr.recruitment.offers.create', ['applicationId' => $application->id])" wire:navigate>{{ __('hr_recruitment.applicant_ui.offers.create') }}</x-ui.button>
+                            <x-ui.button tone="inverse" size="sm" :href="route('hr.recruitment.offers.create', ['applicationId' => $application->id])" wire:navigate>{{ __('hr_recruitment.applicant_ui.offers.create') }}</x-ui.button>
                         @endif
                     </div>
                 @endif

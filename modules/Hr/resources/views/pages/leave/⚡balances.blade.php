@@ -213,7 +213,7 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.balances')] class extends 
                     <x-ui.data-table.cell :label="__('hr_leave.balance.remaining')"><span @class(['font-semibold', 'text-status-critical' => $remaining < 0])>{{ \Modules\Hr\Support\Leave\LeaveFormat::hours($remaining, $perDay) }}</span></x-ui.data-table.cell>
                     <td class="px-3.5 py-2.5">
                         <span class="flex items-center justify-end">
-                            <x-ui.button tone="ghost" size="sm" icon="adjustments-horizontal" class="size-8!" wire:click="openAdjust({{ $balance->id }})" :aria-label="__('hr_leave.balance.adjust_name', ['name' => (string) $balance->contract?->employee?->name])" data-test="adjust-balance" />
+                            <x-ui.button tone="ghost" size="icon" icon="adjustments-horizontal" wire:click="openAdjust({{ $balance->id }})" :aria-label="__('hr_leave.balance.adjust_name', ['name' => (string) $balance->contract?->employee?->name])" data-test="adjust-balance" />
                         </span>
                     </td>
                 </tr>

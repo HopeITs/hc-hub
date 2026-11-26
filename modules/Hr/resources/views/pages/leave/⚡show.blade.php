@@ -263,7 +263,7 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
                 <x-ui.button tone="secondary" icon="pencil-square" wire:click="openEditForm({{ $leaveRequest->id }})" data-test="edit-leave">{{ __('hr_leave.ui.edit') }}</x-ui.button>
             @endif
             @if ($canDelete)
-                <x-ui.button tone="ghost" icon="trash" class="text-status-critical!" wire:click="confirmDelete" data-test="delete-leave">{{ $isMine && $isPending ? __('hr_leave.ui.withdraw') : __('common.delete') }}</x-ui.button>
+                <x-ui.button tone="danger" icon="trash" wire:click="confirmDelete" data-test="delete-leave">{{ $isMine && $isPending ? __('hr_leave.ui.withdraw') : __('common.delete') }}</x-ui.button>
             @endif
         </x-slot:actions>
     </x-ui.detail-header>

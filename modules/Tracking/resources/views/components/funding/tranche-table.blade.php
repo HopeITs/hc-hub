@@ -50,7 +50,7 @@
                 <x-slot:actions>
                     <td>
                         @can('transfers.update')
-                            <x-ui.button tone="ghost" size="sm" icon="pencil-square" icon:variant="outline" class="size-8!" wire:click="openTransferEdit({{ $transfer->id }})" :aria-label="__('transfers.edit_transfer')" data-test="edit-transfer-{{ $transfer->id }}" />
+                            <x-ui.button tone="ghost" size="icon" icon="pencil-square" icon:variant="outline" wire:click="openTransferEdit({{ $transfer->id }})" :aria-label="__('transfers.edit_transfer')" data-test="edit-transfer-{{ $transfer->id }}" />
                         @endcan
                     </td>
                 </x-slot:actions>

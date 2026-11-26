@@ -324,8 +324,8 @@ new class extends Component {
                             @endif
                         </div>
                         <div class="ms-auto flex shrink-0 items-center gap-1">
-                            <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openItemModal({{ $item->id }})" :aria-label="__('common.edit_name', ['name' => $item->item])" />
-                            <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8! text-status-critical!" wire:click="confirmDeleteItem({{ $item->id }})" :aria-label="__('common.delete_name', ['name' => $item->item])" />
+                            <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openItemModal({{ $item->id }})" :aria-label="__('common.edit_name', ['name' => $item->item])" />
+                            <x-ui.button tone="danger" size="icon" icon="trash" wire:click="confirmDeleteItem({{ $item->id }})" :aria-label="__('common.delete_name', ['name' => $item->item])" />
                         </div>
                     </li>
                 @endforeach

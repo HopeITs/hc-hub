@@ -293,10 +293,10 @@ new class extends Component {
                         <td class="px-3.5 py-2.5">
                             <span class="flex items-center justify-end gap-1">
                                 @if ($canUpdate)
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openEditModal({{ $row->getKey() }})" :aria-label="__('common.edit_name', ['name' => $rowName])" data-test="hr-settings-edit" />
+                                    <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditModal({{ $row->getKey() }})" :aria-label="__('common.edit_name', ['name' => $rowName])" data-test="hr-settings-edit" />
                                 @endif
                                 @if ($canDelete)
-                                    <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8! text-status-critical!" wire:click="confirmDelete({{ $row->getKey() }})" :aria-label="__('common.delete_name', ['name' => $rowName])" data-test="hr-settings-delete" />
+                                    <x-ui.button tone="danger" size="icon" icon="trash" wire:click="confirmDelete({{ $row->getKey() }})" :aria-label="__('common.delete_name', ['name' => $rowName])" data-test="hr-settings-delete" />
                                 @endif
                             </span>
                         </td>

@@ -199,9 +199,9 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     </x-slot:filters>
 
     <div class="mb-3 flex flex-wrap items-center gap-2" data-calendar-toolbar>
-        <x-ui.button tone="ghost" size="sm" icon="chevron-left" class="size-9! rtl:rotate-180" wire:click="{{ $viewMode === 'month' ? 'previousMonth' : 'previousPeriod' }}" :aria-label="__('common.previous')" />
+        <x-ui.button tone="ghost" size="icon" icon="chevron-left" class="rtl:rotate-180" wire:click="{{ $viewMode === 'month' ? 'previousMonth' : 'previousPeriod' }}" :aria-label="__('common.previous')" />
         <x-ui.button tone="secondary" size="sm" wire:click="goToToday" data-test="calendar-today-button">{{ __('common.today') }}</x-ui.button>
-        <x-ui.button tone="ghost" size="sm" icon="chevron-right" class="size-9! rtl:rotate-180" wire:click="{{ $viewMode === 'month' ? 'nextMonth' : 'nextPeriod' }}" :aria-label="__('common.next')" />
+        <x-ui.button tone="ghost" size="icon" icon="chevron-right" class="rtl:rotate-180" wire:click="{{ $viewMode === 'month' ? 'nextMonth' : 'nextPeriod' }}" :aria-label="__('common.next')" />
         <h2 class="ms-1 text-base font-bold text-secondary-dark dark:text-ink" aria-live="polite">{{ $periodHeading }}</h2>
     </div>
 

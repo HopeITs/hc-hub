@@ -430,7 +430,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.campaign')] clas
                 @endif
                 <div class="flex justify-end gap-2">
                     <x-ui.button tone="ghost" wire:click="$set('showConfirm', false)">{{ __('hr_recruitment.campaign_ui.cancel') }}</x-ui.button>
-                    <x-ui.button :tone="in_array($confirming, ['close', 'disable'], true) ? 'neutral' : 'primary'" wire:click="confirmAction" wire:loading.attr="disabled" wire:target="confirmAction">{{ $confirming === 'launch' ? __('hr_recruitment.campaign_ui.page.launch') : __('hr_recruitment.campaign_ui.act.'.$confirming) }}</x-ui.button>
+                    <x-ui.button :tone="in_array($confirming, ['close', 'disable'], true) ? 'inverse' : 'primary'" wire:click="confirmAction" wire:loading.attr="disabled" wire:target="confirmAction">{{ $confirming === 'launch' ? __('hr_recruitment.campaign_ui.page.launch') : __('hr_recruitment.campaign_ui.act.'.$confirming) }}</x-ui.button>
                 </div>
             </div>
         @endif

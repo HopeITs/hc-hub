@@ -190,8 +190,8 @@ new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.holidays')] class
                     <td class="px-3.5 py-2.5">
                         @if ($editable)
                             <span class="flex items-center justify-end gap-1">
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openEditHoliday({{ $holiday->id }})" :aria-label="__('common.edit_name', ['name' => $holiday->name])" />
-                                <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8! text-status-critical!" wire:click="confirmDeleteHoliday({{ $holiday->id }})" :aria-label="__('common.delete_name', ['name' => $holiday->name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditHoliday({{ $holiday->id }})" :aria-label="__('common.edit_name', ['name' => $holiday->name])" />
+                                <x-ui.button tone="danger" size="icon" icon="trash" wire:click="confirmDeleteHoliday({{ $holiday->id }})" :aria-label="__('common.delete_name', ['name' => $holiday->name])" />
                             </span>
                         @endif
                     </td>

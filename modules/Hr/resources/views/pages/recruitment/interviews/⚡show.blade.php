@@ -595,9 +595,9 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.interview')] cla
                                 <p class="text-xs tabular-nums {{ $muted }}">{{ __('common.file_size_kb', ['size' => number_format($media->size / 1024, 1)]) }} · {{ $media->created_at?->format('Y-m-d H:i') }}</p>
                             </div>
                             <div class="flex items-center gap-1">
-                                <x-ui.button tone="ghost" size="sm" icon="arrow-down-tray" class="size-8!" :href="route('hr.recruitment.interview-attachments.download', ['media' => $media->id])" :aria-label="__('hr_recruitment.hub.download')" />
+                                <x-ui.button tone="ghost" size="icon" icon="arrow-down-tray" :href="route('hr.recruitment.interview-attachments.download', ['media' => $media->id])" :aria-label="__('hr_recruitment.hub.download')" />
                                 @if ($canManage)
-                                    <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8!" wire:click="discardAttachment({{ $media->id }})" wire:confirm="{{ __($t.'attachments.remove_confirm') }}" :aria-label="__($t.'attachments.remove')" />
+                                    <x-ui.button tone="ghost" size="icon" icon="trash" wire:click="discardAttachment({{ $media->id }})" wire:confirm="{{ __($t.'attachments.remove_confirm') }}" :aria-label="__($t.'attachments.remove')" />
                                 @endif
                             </div>
                         </li>

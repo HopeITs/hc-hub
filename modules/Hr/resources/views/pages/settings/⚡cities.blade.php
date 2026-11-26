@@ -257,8 +257,8 @@ new class extends Component {
                     @if ($canUpdate)
                         <td class="px-3.5 py-2.5">
                             <span class="flex items-center justify-end gap-1">
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openEditModal({{ $city->id }})" :aria-label="__('common.edit_name', ['name' => $city->name])" data-test="hr-settings-edit-city" />
-                                <x-ui.button tone="ghost" size="sm" :icon="$city->is_active ? 'pause-circle' : 'play-circle'" class="size-8!" wire:click="confirmToggle({{ $city->id }})" :aria-label="__($city->is_active ? 'hr_settings.cities.deactivate_name' : 'hr_settings.cities.activate_name', ['name' => $city->name])" data-test="hr-settings-toggle-city" />
+                                <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditModal({{ $city->id }})" :aria-label="__('common.edit_name', ['name' => $city->name])" data-test="hr-settings-edit-city" />
+                                <x-ui.button tone="ghost" size="icon" :icon="$city->is_active ? 'pause-circle' : 'play-circle'" wire:click="confirmToggle({{ $city->id }})" :aria-label="__($city->is_active ? 'hr_settings.cities.deactivate_name' : 'hr_settings.cities.activate_name', ['name' => $city->name])" data-test="hr-settings-toggle-city" />
                             </span>
                         </td>
                     @endif

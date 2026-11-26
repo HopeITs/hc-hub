@@ -92,7 +92,7 @@
     @if ($editing)
         <x-slot:footerMeta>
             @can('transfers.delete')
-                <x-ui.button type="button" tone="ghost" icon="trash" class="text-status-critical!" wire:click="confirmTransferDelete" data-test="delete-transfer-button">{{ __('transfers.delete_tranche') }}</x-ui.button>
+                <x-ui.button type="button" tone="danger" icon="trash" wire:click="confirmTransferDelete" data-test="delete-transfer-button">{{ __('transfers.delete_tranche') }}</x-ui.button>
             @endcan
         </x-slot:footerMeta>
     @endif
