@@ -130,9 +130,9 @@
                         <div class="signature-role">{!! $LB('First Party') !!} / {!! $LB('الفريق الأول') !!}</div>
                         <div class="signature-caption">Name and Signature / الاسم والتوقيع</div>
                         <div class="signature-name">
-                            <strong>Fredy Georges Youssef</strong>
+                            <strong>{{ config('contracts.signatory.name_en') }}</strong>
                             <br>
-                            <strong>فريدي جرجس يوسف</strong>
+                            <strong>{{ config('contracts.signatory.name_ar') }}</strong>
                         </div>
                         <div class="signature-date">Date / التاريخ</div>
                     </div>

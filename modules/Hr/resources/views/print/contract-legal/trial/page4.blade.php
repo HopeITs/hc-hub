@@ -69,9 +69,9 @@
             Name and Signature / {{ $Glyphs('الاسم والتوقيع') }}
         </div>
         <div class="signature-name">
-            <strong>Fredy Georges Youssef</strong>
+            <strong>{{ config('contracts.signatory.name_en') }}</strong>
             <br>
-            <strong>{{ $Glyphs('فريدي جرجس يوسف') }}</strong>
+            <strong>{{ $Glyphs((string) config('contracts.signatory.name_ar')) }}</strong>
         </div>
         <div class="signature-date">
             Date / {{ $Glyphs('التاريخ') }}

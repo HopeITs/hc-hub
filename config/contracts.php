@@ -19,4 +19,17 @@ return [
     | on 31 December renews on 1 January either way.
     */
     'renew_at_new_year_months' => [10, 11, 12],
+
+    /*
+    | The first party's signatory on the printed contracts and amendments.
+    | name_*: the signature block. representative_*: the "Represented by ..."
+    | line on page 1, honorific included. Kept in .env, never in the views;
+    | empty prints a blank line to sign over.
+    */
+    'signatory' => [
+        'name_en' => env('CONTRACT_SIGNATORY_NAME_EN', ''),
+        'name_ar' => env('CONTRACT_SIGNATORY_NAME_AR', ''),
+        'representative_en' => env('CONTRACT_SIGNATORY_REPRESENTATIVE_EN', ''),
+        'representative_ar' => env('CONTRACT_SIGNATORY_REPRESENTATIVE_AR', ''),
+    ],
 ];

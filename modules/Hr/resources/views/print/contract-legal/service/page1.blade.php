@@ -85,9 +85,9 @@
 <div class="avoid-break mt-4">
     <x-hr::contract-legal.dual rowClass="fw-bold" :en="'Between'" :ar="$Glyphs('بين')" />
     <x-hr::contract-legal.dual rowClass="mt-1" :en="$L('First Party:')" :ar="$L($Glyphs('الفريق الأول:'))" />
-    <x-hr::contract-legal.dual :en="'<strong>Christian Hope Center - Syria</strong><br>Represented by the Vice chairman of the board of trustees<br><strong>Mr. Fredy Youssef</strong>'"
+    <x-hr::contract-legal.dual :en="'<strong>Christian Hope Center - Syria</strong><br>Represented by the Vice chairman of the board of trustees<br><strong>' . e(config('contracts.signatory.representative_en')) . '</strong>'"
         :ar="$Glyphs(
-            '<strong>مؤسسة مركز الرجاء المسيحي - سوريا</strong><br>ينوب عنها بالتوقيع نائب رئيس مجلس الأمناء<br><strong>السيد فريدي يوسف</strong>')" />
+            '<strong>مؤسسة مركز الرجاء المسيحي - سوريا</strong><br>ينوب عنها بالتوقيع نائب رئيس مجلس الأمناء<br><strong>' . e(config('contracts.signatory.representative_ar')) . '</strong>')" />
 </div>
 
 <div class="avoid-break mt-1">
