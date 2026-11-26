@@ -1,8 +1,9 @@
 @props(['case' => null, 'label' => null, 'tone' => null])
 
-{{-- One badge per StatusTone (W-28). A status enum declares its tone
-     through HasStatusTone; enums that are not statuses (ResultType, DonorType,
-     Period, IndicatorMeasure, ...) fall back to the neutral tone.
+{{-- An enum case as a chip or a tag (W-28, plan task 2.4). A status enum
+     declares its tone through HasStatusTone and renders as x-ui.chip; enums
+     that are not statuses (ResultType, DonorType, Period, IndicatorMeasure, ...)
+     render as a neutral x-ui.tag.
 
      A status always shows an icon and its label (brand palette, D1): the tones
      are red plus greys, so the icon shape is what tells two greys apart. The
@@ -25,11 +26,8 @@
 
 @if ($case === null)
     <span {{ $attributes->class('text-secondary-medium dark:text-ink-faint') }} aria-label="{{ __('ui.not_set') }}">—</span>
+@elseif ($badgeIcon !== null)
+    <x-ui.chip :tone="$badgeTone" :icon="$badgeIcon" :attributes="$attributes">{{ $label ?? $case->label() }}</x-ui.chip>
 @else
-    <span {{ $attributes->class('inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap '.$badgeTone->badgeClasses()) }} data-tone="{{ $badgeTone->value }}">
-        @if ($badgeIcon !== null)
-            <flux:icon :name="$badgeIcon" variant="micro" class="size-3 shrink-0" />
-        @endif
-        {{ $label ?? $case->label() }}
-    </span>
+    <x-ui.tag :tone="$badgeTone" :attributes="$attributes">{{ $label ?? $case->label() }}</x-ui.tag>
 @endif

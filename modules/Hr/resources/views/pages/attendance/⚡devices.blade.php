@@ -408,8 +408,12 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
                                                 {{ __('hr_attendance.devices.agent-never') }}
                                             @endif
                                         </span>
-                                        <button type="button" wire:click="createKey({{ $device->id }})" wire:confirm="{{ __('hr_attendance.devices.key-regenerate-confirm') }}" class="text-sm underline hover:text-primary" data-test="device-key-regenerate">{{ __('hr_attendance.devices.key-regenerate') }}</button>
-                                        <button type="button" wire:click="revokeKey({{ $device->id }})" wire:confirm="{{ __('hr_attendance.devices.key-revoke-confirm') }}" class="ms-2 text-sm underline {{ $muted }} hover:text-primary" data-test="device-key-revoke">{{ __('hr_attendance.devices.key-revoke') }}</button>
+                                        <x-ui.confirm-action :title="__('hr_attendance.devices.key-regenerate-confirm')" confirm="createKey({{ $device->id }})" :confirm-label="__('hr_attendance.devices.key-regenerate')" tone="neutral">
+                                            <button type="button" class="text-sm underline hover:text-primary" data-test="device-key-regenerate">{{ __('hr_attendance.devices.key-regenerate') }}</button>
+                                        </x-ui.confirm-action>
+                                        <x-ui.confirm-action :title="__('hr_attendance.devices.key-revoke-confirm')" confirm="revokeKey({{ $device->id }})" :confirm-label="__('hr_attendance.devices.key-revoke')" tone="danger">
+                                            <button type="button" class="ms-2 text-sm underline {{ $muted }} hover:text-primary" data-test="device-key-revoke">{{ __('hr_attendance.devices.key-revoke') }}</button>
+                                        </x-ui.confirm-action>
                                     @else
                                         <span class="block {{ $muted }}">{{ __('hr_attendance.devices.key-none') }}</span>
                                         <button type="button" wire:click="createKey({{ $device->id }})" class="text-sm underline hover:text-primary" data-test="device-key-create">{{ __('hr_attendance.devices.key-create') }}</button>
@@ -421,7 +425,9 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
                                     <div class="flex flex-wrap justify-end gap-1">
                                         <x-ui.button tone="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $device->id }})" :aria-label="__('hr_attendance.devices.edit')" data-test="device-edit" />
                                         <x-ui.button tone="ghost" size="sm" :icon="$device->isBlocked() ? 'lock-open' : 'no-symbol'" wire:click="toggleBlock({{ $device->id }})" :aria-label="$device->isBlocked() ? __('hr_attendance.devices.unblock') : __('hr_attendance.devices.block')" data-test="device-block" />
-                                        <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="removeDevice({{ $device->id }})" wire:confirm="{{ __('hr_attendance.devices.remove-confirm') }}" :aria-label="__('hr_attendance.devices.remove')" data-test="device-remove" />
+                                        <x-ui.confirm-action :title="__('hr_attendance.devices.remove-confirm')" confirm="removeDevice({{ $device->id }})" :confirm-label="__('hr_attendance.devices.remove')" tone="danger">
+                                            <x-ui.button tone="ghost" size="sm" icon="trash" :aria-label="__('hr_attendance.devices.remove')" data-test="device-remove" />
+                                        </x-ui.confirm-action>
                                     </div>
                                 </x-ui.data-table.cell>
                             @endif

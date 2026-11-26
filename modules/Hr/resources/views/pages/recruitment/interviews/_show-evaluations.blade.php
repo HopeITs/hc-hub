@@ -27,7 +27,9 @@
             @error('evaluation')
                 <div role="alert" class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-status-critical/40 p-3 text-sm text-status-critical">
                     <span>{{ $message }}</span>
-                    <button type="button" wire:click="reloadEvaluation" wire:confirm="{{ __($e.'reload_confirm') }}" class="font-semibold underline underline-offset-4">{{ __($e.'reload') }}</button>
+                    <x-ui.confirm-action :title="__($e.'reload_confirm')" confirm="reloadEvaluation" :confirm-label="__($e.'reload')" tone="neutral">
+                        <button type="button" class="font-semibold underline underline-offset-4">{{ __($e.'reload') }}</button>
+                    </x-ui.confirm-action>
                 </div>
             @enderror
 

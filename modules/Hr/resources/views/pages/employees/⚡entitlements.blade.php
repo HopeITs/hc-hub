@@ -199,7 +199,9 @@ new class extends Component {
                                     <x-ui.button tone="ghost" size="sm" wire:click="keep({{ $row->id }})">{{ __('hr_entitlements.keep') }}</x-ui.button>
                                 @endif
                                 @if ($row->state !== EmployeeEntitlement::STATE_REVOKED)
-                                    <x-ui.button tone="ghost" size="sm" wire:click="revoke({{ $row->id }})" wire:confirm="{{ __('hr_entitlements.revoke_confirm') }}">{{ __('hr_entitlements.revoke') }}</x-ui.button>
+                                    <x-ui.confirm-action :title="__('hr_entitlements.revoke_confirm')" confirm="revoke({{ $row->id }})" :confirm-label="__('hr_entitlements.revoke')" tone="danger">
+                                        <x-ui.button tone="ghost" size="sm">{{ __('hr_entitlements.revoke') }}</x-ui.button>
+                                    </x-ui.confirm-action>
                                 @endif
                             </div>
                         </li>

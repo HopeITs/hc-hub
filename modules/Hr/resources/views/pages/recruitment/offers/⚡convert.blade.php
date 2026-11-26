@@ -410,15 +410,13 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer_convert')]
             </div>
         </form>
 
-        <flux:modal wire:model="showConfirm" class="max-w-lg">
-            <div class="space-y-4">
-                <flux:heading size="lg">{{ __('hr_recruitment.applicant_ui.conversions.confirm_title', ['name' => (string) $applicant?->full_name]) }}</flux:heading>
-                <p class="text-sm">{{ $confirmText }}</p>
-                <div class="flex justify-end gap-2">
-                    <x-ui.button tone="ghost" wire:click="$set('showConfirm', false)">{{ __('hr_recruitment.applicant_ui.cancel') }}</x-ui.button>
-                    <x-ui.button tone="primary" wire:click="save" wire:loading.attr="disabled" wire:target="save">{{ __('hr_recruitment.applicant_ui.conversions.confirm') }}</x-ui.button>
-                </div>
-            </div>
-        </flux:modal>
+        <x-ui.confirm-modal
+            wire:model="showConfirm"
+            :title="__('hr_recruitment.applicant_ui.conversions.confirm_title', ['name' => (string) $applicant?->full_name])"
+            :message="$confirmText"
+            confirm="save"
+            :confirm-label="__('hr_recruitment.applicant_ui.conversions.confirm')"
+            tone="neutral"
+        />
     @endif
 </div>

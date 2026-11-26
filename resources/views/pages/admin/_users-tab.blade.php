@@ -93,14 +93,13 @@
                                 @error('userRoleIds') <p class="mt-1.5 text-xs text-status-critical">{{ $message }}</p> @enderror
                             </section>
 
-                            <section class="border-t border-secondary-soft pt-5 dark:border-line" aria-labelledby="active-role-title">
-                                <label id="active-role-title" for="user-active-role" class="mb-2 block text-sm font-bold text-secondary-dark dark:text-ink">{{ __('access.active-role') }}</label>
-                                <x-ui.select id="user-active-role" wire:model.live="userActiveRoleId" :disabled="! Gate::check('update', $selectedUser)" class="sm:max-w-sm">
+                            <section class="border-t border-secondary-soft pt-5 dark:border-line" aria-labelledby="user-active-role-label">
+                                <x-ui.form-select id="user-active-role" :label="__('access.active-role')" wire:model.live="userActiveRoleId" :disabled="! Gate::check('update', $selectedUser)" class="sm:max-w-sm">
                                     <flux:select.option value="">—</flux:select.option>
                                     @foreach ($this->roleOptions->whereIn('id', $userRoleIds) as $roleOption)
                                         <flux:select.option :value="$roleOption->id">{{ $roleOption->name }}</flux:select.option>
                                     @endforeach
-                                </x-ui.select>
+                                </x-ui.form-select>
                                 @error('userActiveRoleId') <p class="mt-1.5 text-xs text-status-critical">{{ $message }}</p> @enderror
                             </section>
 

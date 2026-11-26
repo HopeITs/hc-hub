@@ -30,7 +30,9 @@
             @forelse ($profile['participants'] as $participant)
                 <li wire:key="participant-{{ $participant->id }}" class="flex items-center justify-between gap-2 px-4 py-2">
                     <span class="min-w-0"><span class="font-medium" dir="auto">{{ $participant->user?->name ?? '—' }}</span> <span class="{{ $muted }}">· {{ __('hr_recruitment.applicant_ui.profile_reviews.roles.'.$participant->role) }}</span></span>
-                    <x-ui.button tone="ghost" size="sm" wire:click="removeParticipant({{ $participant->id }})" wire:confirm="{{ __('hr_recruitment.applicant_ui.profile_reviews.remove_confirm') }}">{{ __('hr_recruitment.applicant_ui.profile_reviews.remove') }}</x-ui.button>
+                    <x-ui.confirm-action :title="__('hr_recruitment.applicant_ui.profile_reviews.remove_confirm')" confirm="removeParticipant({{ $participant->id }})" :confirm-label="__('hr_recruitment.applicant_ui.profile_reviews.remove')" tone="danger">
+                        <x-ui.button tone="ghost" size="sm">{{ __('hr_recruitment.applicant_ui.profile_reviews.remove') }}</x-ui.button>
+                    </x-ui.confirm-action>
                 </li>
             @empty
                 <li class="px-4 py-3 {{ $muted }}">{{ __('hr_recruitment.applicant_ui.profile_reviews.no_participants') }}</li>

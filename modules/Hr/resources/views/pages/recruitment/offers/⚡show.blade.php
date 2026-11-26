@@ -466,7 +466,9 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
                                 <a href="{{ route('hr.recruitment.offer-response-evidence.download', ['media' => $evidence->id]) }}" class="min-w-0 truncate font-medium underline-offset-4 hover:underline" dir="auto">
                                     {{ $evidence->getCustomProperty('original_name', $evidence->file_name) }}
                                 </a>
-                                <x-ui.button size="icon" tone="ghost" icon="trash" wire:click="discardResponseEvidence({{ $evidence->id }})" wire:confirm="{{ __('hr_recruitment.applicant_ui.offers.response_evidence.remove_confirm') }}" :aria-label="__('hr_recruitment.applicant_ui.offers.response_evidence.remove')" />
+                                <x-ui.confirm-action :title="__('hr_recruitment.applicant_ui.offers.response_evidence.remove_confirm')" confirm="discardResponseEvidence({{ $evidence->id }})" :confirm-label="__('hr_recruitment.applicant_ui.offers.response_evidence.remove')" tone="danger">
+                                    <x-ui.button size="icon" tone="ghost" icon="trash" :aria-label="__('hr_recruitment.applicant_ui.offers.response_evidence.remove')" />
+                                </x-ui.confirm-action>
                             </div>
                         @empty
                             <p class="{{ $muted }}">{{ __('hr_recruitment.applicant_ui.offers.response_evidence.empty') }}</p>

@@ -432,7 +432,9 @@
                                     <p class="flex flex-wrap items-center justify-between gap-2">
                                         <span><span @class(['font-semibold', 'text-primary dark:text-brand-text' => $flag->type === RecruitmentApplicationFlag::TYPE_RED])>{{ $flag->typeLabel() }}</span> · {{ $flag->categoryLabel() }}: {{ $flag->reasonLabel() }}</span>
                                         @if ($state['mayTag'])
-                                            <x-ui.button tone="ghost" size="sm" wire:click="discardFlag({{ $application->id }}, {{ $flag->id }})" wire:confirm="{{ __('hr_recruitment.applicant_ui.flags.discard_confirm') }}">{{ __('hr_recruitment.applicant_ui.flags.discard') }}</x-ui.button>
+                                            <x-ui.confirm-action :title="__('hr_recruitment.applicant_ui.flags.discard_confirm')" confirm="discardFlag({{ $application->id }}, {{ $flag->id }})" :confirm-label="__('hr_recruitment.applicant_ui.flags.discard')" tone="danger">
+                                                <x-ui.button tone="ghost" size="sm">{{ __('hr_recruitment.applicant_ui.flags.discard') }}</x-ui.button>
+                                            </x-ui.confirm-action>
                                         @endif
                                     </p>
                                     @if ($flag->note)

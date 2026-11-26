@@ -163,10 +163,12 @@ new class extends Component {
     }
 }; ?>
 
-<flux:modal
+<x-ui.modal
     name="two-factor-setup-modal"
-    class="max-w-md md:min-w-md"
-    @close="closeModal"
+    size="sm"
+    close="closeModal"
+    :title="$this->modalConfig['title']"
+    :description="$this->modalConfig['description']"
 >
         <div class="space-y-6">
             <div class="flex flex-col items-center space-y-4">
@@ -187,11 +189,6 @@ new class extends Component {
                         <flux:icon.qr-code class="relative z-20 dark:text-accent-foreground"/>
                     </div>
                 </div>
-
-                <div class="space-y-2 text-center">
-                    <flux:heading size="lg">{{ $this->modalConfig['title'] }}</flux:heading>
-                    <flux:text>{{ $this->modalConfig['description'] }}</flux:text>
-                </div>
             </div>
 
             @if ($showVerificationStep)
@@ -209,25 +206,6 @@ new class extends Component {
                             label:sr-only
                             class="mx-auto"
                         />
-                    </div>
-
-                    <div class="flex items-center space-x-3">
-                        <flux:button
-                            variant="outline"
-                            class="flex-1"
-                            wire:click="resetVerification"
-                        >
-                            {{ __('settings.back') }}
-                        </flux:button>
-
-                        <flux:button
-                            variant="primary"
-                            class="flex-1"
-                            wire:click="confirmTwoFactor"
-                            x-bind:disabled="$wire.code.length < 6"
-                        >
-                            {{ __('common.confirm') }}
-                        </flux:button>
                     </div>
                 </div>
             @else
@@ -252,17 +230,6 @@ new class extends Component {
                             </div>
                         @endempty
                     </div>
-                </div>
-
-                <div>
-                    <flux:button
-                        :disabled="$errors->has('setupData')"
-                        variant="primary"
-                        class="w-full"
-                        wire:click="showVerificationIfNecessary"
-                    >
-                        {{ $this->modalConfig['buttonText'] }}
-                    </flux:button>
                 </div>
 
                 <div class="space-y-4">
@@ -318,4 +285,30 @@ new class extends Component {
                 </div>
             @endif
         </div>
-</flux:modal>
+
+    <x-slot:actions>
+        @if ($showVerificationStep)
+            <x-ui.button type="button" wire:click="resetVerification">
+                {{ __('settings.back') }}
+            </x-ui.button>
+
+            <x-ui.button
+                type="button"
+                tone="primary"
+                wire:click="confirmTwoFactor"
+                x-bind:disabled="$wire.code.length < 6"
+            >
+                {{ __('common.confirm') }}
+            </x-ui.button>
+        @else
+            <x-ui.button
+                type="button"
+                tone="primary"
+                :disabled="$errors->has('setupData')"
+                wire:click="showVerificationIfNecessary"
+            >
+                {{ $this->modalConfig['buttonText'] }}
+            </x-ui.button>
+        @endif
+    </x-slot:actions>
+</x-ui.modal>

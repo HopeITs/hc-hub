@@ -57,6 +57,13 @@ trait FiltersPlanMatrix
         $this->resetPage();
     }
 
+    /** The multi-select hands the picked years over as strings; keep them sorted whole numbers. */
+    public function updatedYears(): void
+    {
+        $this->years = collect($this->years)->map(fn (mixed $year): int => (int) $year)->unique()->sort()->values()->all();
+        $this->resetPage();
+    }
+
     public function clearYears(): void
     {
         $this->years = [];

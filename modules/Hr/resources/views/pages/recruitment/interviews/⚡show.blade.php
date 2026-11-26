@@ -597,7 +597,9 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.interview')] cla
                             <div class="flex items-center gap-1">
                                 <x-ui.button tone="ghost" size="icon" icon="arrow-down-tray" :href="route('hr.recruitment.interview-attachments.download', ['media' => $media->id])" :aria-label="__('hr_recruitment.hub.download')" />
                                 @if ($canManage)
-                                    <x-ui.button tone="ghost" size="icon" icon="trash" wire:click="discardAttachment({{ $media->id }})" wire:confirm="{{ __($t.'attachments.remove_confirm') }}" :aria-label="__($t.'attachments.remove')" />
+                                    <x-ui.confirm-action :title="__($t.'attachments.remove_confirm')" confirm="discardAttachment({{ $media->id }})" :confirm-label="__($t.'attachments.remove')" tone="danger">
+                                        <x-ui.button tone="ghost" size="icon" icon="trash" :aria-label="__($t.'attachments.remove')" />
+                                    </x-ui.confirm-action>
                                 @endif
                             </div>
                         </li>

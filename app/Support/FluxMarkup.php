@@ -74,22 +74,20 @@ final class FluxMarkup
     }
 
     /**
-     * The task status chip (what x-ui.status-pill renders): the shared
-     * StatusTone badge colours (W-28) with a status icon in front.
+     * The task status chip (what x-ui.status-pill renders), the same markup as
+     * x-ui.chip (plan task 2.4): the `ui-chip` shape, the StatusTone colours
+     * (W-28) and the status icon in front. The quiet variant (task list rows
+     * and cards) is the 13px `ui-tag` shape of x-ui.tag, icon kept, so a
+     * column of statuses reads calmly when scanned.
      */
     public static function statusPill(TaskStatus $case, string $extraClass = '', bool $quiet = false): HtmlString
     {
-        $icon = $case->icon();
-
-        // The quiet variant (task list rows and cards): sentence case and a
-        // smaller chip, so a column of statuses reads calmly when scanned.
-        $shape = $quiet
-            ? 'gap-1 px-2 py-0.5 text-xs font-medium'
-            : 'gap-1.5 px-2.5 py-1 text-xs font-bold tracking-wide uppercase';
+        $tone = $case->tone();
+        [$shape, $iconSize] = $quiet ? ['ui-tag', 'size-3'] : ['ui-chip', 'size-3.5'];
 
         return new HtmlString(
-            '<span class="inline-flex max-w-full items-center rounded-full border whitespace-nowrap '.$shape.' '.$case->tone()->badgeClasses().($extraClass === '' ? '' : ' '.e($extraClass)).'" data-tone="'.$case->tone()->value.'">'
-            .self::icon($icon, 'micro', 'size-3 shrink-0')
+            '<span class="'.$shape.' '.$tone->badgeClasses().($extraClass === '' ? '' : ' '.e($extraClass)).'" data-tone="'.$tone->value.'">'
+            .self::icon($case->icon(), 'micro', $iconSize.' shrink-0')
             .'<span class="truncate">'.e($case->label()).'</span></span>'
         );
     }

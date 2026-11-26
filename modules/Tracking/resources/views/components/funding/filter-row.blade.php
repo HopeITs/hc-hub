@@ -13,7 +13,7 @@
      */
     $dotExpression = collect([
         $pairs === [] ? null : 'onAny('.Illuminate\Support\Js::encode($pairs).')',
-        $watch === [] ? null : 'filled('.Illuminate\Support\Js::encode($watch).')',
+        $watch === [] ? null : 'anyFilled('.Illuminate\Support\Js::encode($watch).')',
     ])->filter()->implode(' || ');
 @endphp
 

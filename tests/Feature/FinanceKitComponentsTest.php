@@ -28,5 +28,6 @@ test('the register, its heading, the totals, the pills and the pager print the h
         ->toContain('aria-pressed="true"')->toContain('data-test="year-2026"')->toContain('data-test="reset-filters"')
         ->toContain('data-test="open-filters"')->toContain('data-filter-count>1</span>')
         ->toContain('x-data="financeFilters(')->toContain('data-test="apply-filters"')->toContain('data-filter-models="[&quot;year&quot;]"')
-        ->toContain("pick('year', '2026', true")->not->toContain('wire:click=');
+        ->toContain("pick('year', '2026', true")->not->toContain('wire:click=')
+        ->toContain('modal-shell-frame')->toContain('data-test="cancel-filters"');
 });

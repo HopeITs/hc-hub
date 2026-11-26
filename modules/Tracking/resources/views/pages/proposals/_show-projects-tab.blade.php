@@ -10,12 +10,12 @@
             @can('update', $this->proposal)
             <form wire:submit="linkProject" class="mb-6 flex flex-col gap-2 @xl/detail:flex-row @xl/detail:items-end" data-link-project>
                 <div class="min-w-0 flex-1">
-                    <x-ui.select wire:model="projectToLink" :label="__('proposals.fund_another_project')">
+                    <x-ui.form-select wire:model="projectToLink" :label="__('proposals.fund_another_project')">
                         <flux:select.option value="">{{ __('proposals.select_a_project') }}</flux:select.option>
                         @foreach ($this->linkableProjects as $linkable)
                             <flux:select.option :value="$linkable->id" :wire:key="'link-project-'.$linkable->id">{{ $linkable->name }}</flux:select.option>
                         @endforeach
-                    </x-ui.select>
+                    </x-ui.form-select>
                 </div>
                 <x-ui.button type="submit" tone="primary" icon="link" class="min-h-10 touch-manipulation" :disabled="$this->linkableProjects->isEmpty()" data-test="link-project">{{ __('proposals.link_project') }}</x-ui.button>
             </form>

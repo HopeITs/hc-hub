@@ -179,6 +179,8 @@
 
     .filter-picker [data-flux-button] {
         min-height: var(--field-h);
+        border-width: var(--border-control);
+        border-radius: var(--radius-control);
         /* Clip a long selected label to the trigger instead of letting it spill
            past the box (and widen crowded form grids): the inner label already
            carries `truncate`, this guarantees the box edge holds even if a flex

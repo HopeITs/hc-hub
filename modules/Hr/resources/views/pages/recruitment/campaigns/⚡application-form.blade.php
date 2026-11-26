@@ -407,7 +407,9 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.application_form
                                             <x-ui.button size="sm" tone="ghost" icon="arrow-up" wire:click="moveField({{ $index }}, -1)" :aria-label="__('hr_recruitment.application_form.move_up')" />
                                             <x-ui.button size="sm" tone="ghost" icon="arrow-down" wire:click="moveField({{ $index }}, 1)" :aria-label="__('hr_recruitment.application_form.move_down')" />
                                             @unless ($locked)
-                                                <x-ui.button size="sm" tone="ghost" icon="trash" wire:click="removeField({{ $index }})" wire:confirm="{{ __('hr_recruitment.application_form.remove_confirm') }}" :aria-label="__('hr_recruitment.application_form.remove')" />
+                                                <x-ui.confirm-action :title="__('hr_recruitment.application_form.remove_confirm')" confirm="removeField({{ $index }})" :confirm-label="__('hr_recruitment.application_form.remove')" tone="danger">
+                                                    <x-ui.button size="sm" tone="ghost" icon="trash" :aria-label="__('hr_recruitment.application_form.remove')" />
+                                                </x-ui.confirm-action>
                                             @endunless
                                         </div>
                                     </div>
@@ -501,9 +503,13 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.application_form
                                 <option value="{{ $template['id'] }}">{{ $template['title'][$locale] }}@if ($template['city'][$locale] !== '') · {{ $template['city'][$locale] }}@endif · {{ __('common.version_short', ['number' => $template['version']]) }}@if ($template['published_at']) · {{ $template['published_at'] }}@endif</option>
                             @endforeach
                         </x-ui.form-select>
-                        <x-ui.button size="sm" tone="secondary" wire:click="applyPublishedTemplate" wire:confirm="{{ __('hr_recruitment.application_form.reuse_confirm') }}">{{ __('hr_recruitment.application_form.use_template') }}</x-ui.button>
+                        <x-ui.confirm-action :title="__('hr_recruitment.application_form.reuse_confirm')" confirm="applyPublishedTemplate" :confirm-label="__('hr_recruitment.application_form.use_template')" tone="neutral">
+                            <x-ui.button size="sm" tone="secondary">{{ __('hr_recruitment.application_form.use_template') }}</x-ui.button>
+                        </x-ui.confirm-action>
                     @endif
-                    <x-ui.button size="sm" tone="ghost" wire:click="applyReferenceTemplate" wire:confirm="{{ __('hr_recruitment.application_form.template_confirm') }}">{{ __('hr_recruitment.application_form.use_pdf_template') }}</x-ui.button>
+                    <x-ui.confirm-action :title="__('hr_recruitment.application_form.template_confirm')" confirm="applyReferenceTemplate" :confirm-label="__('hr_recruitment.application_form.use_pdf_template')" tone="neutral">
+                        <x-ui.button size="sm" tone="ghost">{{ __('hr_recruitment.application_form.use_pdf_template') }}</x-ui.button>
+                    </x-ui.confirm-action>
                 </div>
             </x-ui.panel>
         </aside>

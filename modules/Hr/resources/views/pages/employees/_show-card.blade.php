@@ -38,7 +38,9 @@
         <div class="flex flex-wrap items-center gap-2">
             @if ($canManageCard)
                 @if ($employee->is_active && $cardMissing === null)
-                    <x-ui.button icon="arrow-path" wire:click="reissueCard({{ $cardIndex }})" wire:confirm="{{ __('hr_employees.card.reissue_confirm') }}" data-test="reissue-card">{{ __('hr_employees.card.reissue') }}</x-ui.button>
+                    <x-ui.confirm-action :title="__('hr_employees.card.reissue_confirm')" confirm="reissueCard({{ $cardIndex }})" :confirm-label="__('hr_employees.card.reissue')" tone="neutral">
+                        <x-ui.button icon="arrow-path" data-test="reissue-card">{{ __('hr_employees.card.reissue') }}</x-ui.button>
+                    </x-ui.confirm-action>
                 @endif
                 @if ($cardEnabled)
                     <x-ui.button icon="no-symbol" wire:click="setCardEnabled(false)" data-test="disable-card">{{ __('hr_employees.card.disable') }}</x-ui.button>

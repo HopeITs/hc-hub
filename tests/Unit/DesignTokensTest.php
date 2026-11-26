@@ -412,8 +412,8 @@ test('readable text never uses the faint grey: it is for icons, borders and disa
     // Class-level: no input or select placeholder in the shared form controls is the faint grey.
     $views = bladeViews();
 
-    expect($views['components/ui/input.blade.php'])->toContain('placeholder:text-ink-muted!')->not->toContain('placeholder:text-secondary-light')
-        ->and($views['components/ui/select.blade.php'])->toContain('placeholder:text-ink-muted!')->not->toContain('placeholder:text-secondary-light');
+    // x-ui.input forwards to x-ui.form-input, whose placeholder colour is the forms.css rule checked above.
+    expect($views['components/ui/input.blade.php'])->toContain('<x-ui.form-input')->not->toContain('placeholder:text-secondary-light');
 });
 
 test('one catch-all rule removes animations, transitions and smooth scrolling for reduced motion', function () {

@@ -98,18 +98,16 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
     </x-slot:search>
     <x-slot:filters>
 
-            <x-ui.header-filter-multiselect
+            <x-ui.form-multiselect
                 id="annual-plan-years"
+                wire:model.live="years"
                 :label="__('annual_plans.fiscal_year')"
-                :empty-label="__('annual_plans.all_fiscal_years')"
-                :selected="$years"
-                toggle="toggleYear"
-                clear="clearYears"
+                :placeholder="__('annual_plans.all_fiscal_years')"
             >
                 @foreach ($this->yearOptions as $yearOption)
                     <option value="{{ $yearOption }}">{{ $yearOption }}</option>
                 @endforeach
-            </x-ui.header-filter-multiselect>
+            </x-ui.form-multiselect>
 
             <x-ui.header-filter-select id="annual-plan-manager" :label="__('annual_plans.assigned_manager')" wire:model.live="manager" :value="$manager">
                 <option value="">{{ __('common.all_managers') }}</option>
@@ -123,7 +121,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
 
 
     <div class="flex justify-end">
-        <span wire:loading.delay.flex wire:target="toggleYear,clearYears,manager,programSearch,clearFilters,focusOnYear" class="hidden items-center gap-1.5 text-xs text-secondary-medium dark:text-ink-muted">
+        <span wire:loading.delay.flex wire:target="years,toggleYear,clearYears,manager,programSearch,clearFilters,focusOnYear" class="hidden items-center gap-1.5 text-xs text-secondary-medium dark:text-ink-muted">
             <flux:icon.arrow-path class="size-3.5 animate-spin" /> {{ __('common.updating') }}
         </span>
         @if ($filtersAreActive)

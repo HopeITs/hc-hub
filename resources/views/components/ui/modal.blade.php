@@ -6,6 +6,7 @@
     'close' => null,
     'requiredNote' => false,
     'cancelLabel' => null,
+    'cancelTest' => null,
     'flush' => false,
     'sheet' => false,
     /* Opt-in: ['fields' => [Livewire properties], 'original' => [property => value at open]]. Closing with a different value asks before discarding. */
@@ -190,7 +191,7 @@
             @endif
 
             <div class="modal-shell-actions">
-                <x-ui.button type="button" x-on:click="close()">{{ $cancelLabel ?? __('common.cancel') }}</x-ui.button>
+                <x-ui.button type="button" x-on:click="close()" :data-test="$cancelTest">{{ $cancelLabel ?? __('common.cancel') }}</x-ui.button>
 
                 <fieldset class="modal-shell-submit" x-bind:disabled="busy">
                     {{ $actions ?? '' }}

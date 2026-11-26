@@ -1,25 +1,23 @@
-# Handoff — HC Hub unification (2026-11-23)
+# Handoff — HC Hub phase 7 + UI/UX (2026-11-26)
 
-## Done
-- Phase 5 (roadmap `docs/hub-unification/03-roadmap.md`, rows 5.1–5.4) is finished, reviewed, merged into `main` and pushed (`000b6226`).
-- Phase 6 item 6.1, first step: the full suite was run on the pre-phase-5 commit `797f1907` and compared with `main`.
-  - Baseline: 7097 tests, 30 failed + 9 errors. `main`: 7111 tests, 30 failed + 9 errors.
-  - The 39 broken tests are the same names on both sides. Phase 5 broke nothing; the +14 tests are the Sample module tests.
-  - PHPStan level 7 (same app code as `main`): 956 errors — `modules/Hr` 716, `modules/Tracking` 138, `app` 86, `database` 16.
+## Done (all on `main` at `04d6e129`, nothing pushed)
+- 7.10b–e merged (`e0ddf06e`); A1 HR merge kept main's contract weekdays and leave alternatives plus the branch's extras.
+- port-daily: was already merged on `main` (`0aeb232a`) by another session. The A2 merge added only test updates (6 stale tests moved to the embedded proposal page or to place-scoped MEAL coverage), the `_framework-matrix` indicator fix (`@if`/`@else` around `x-ui.button`), and `forms.css` `.form-section-review` → `--color-brand-text`. Merged as `15eb7f97`.
+- 7.11 Entitlements: hc-hr's contract→entitlements sync was already ported (`modules/Hr/Support/Entitlements`). Added `tests/Feature/Hr/ContractEntitlementSyncTest.php` (8 cases via SaveContract, amendment approval and TerminateContract). Merged as `04d6e129`.
+- Proposals: "Set grant dates" is back in the proposal head's More actions menu (`bbd49a59`). Checked in the browser; the dialog opens.
+- UI ratchet: the proposal and annual-plan pages are back under the UiDebt and DesignTokens guardrails (`c8e465eb`, `25963cc1`).
 
 ## Remaining
-- 6.1: fix the 39 broken tests and the 956 PHPStan errors (nothing fixed yet; task table was proposed to the owner).
-- 6.2–6.7 not started. 6.7 (dropping old tables/columns) needs explicit approval per table and a backup.
-- Branch `hub/phase-5` still exists locally (merged, safe to delete).
+- Full suite not run for this batch: `php -d memory_limit=3G vendor/bin/pest --compact` (~90–100 min, run it in the background).
+- ClickUp is not updated for the batch (the MCP daily limit of 100 calls was hit on 2026-11-26). Update: UI 0.9, 2.1, 2.14, 2.6, 2.7; 7.10 merged; port-daily merged; 7.11 done (task `123jdbau5j3`).
+- Remind the owner to set the `CONTRACT_SIGNATORY_*` values in the production `.env`.
 
 ## Open issues
-- `php artisan test --compact` on the full suite runs out of memory; use `php -d memory_limit=3G vendor/bin/pest --compact` (~90–100 min).
-- `tests/TestCase.php` refuses any DB whose name does not end in `_test`; an isolated run needs `DB_DATABASE=<name>_test` in the environment.
-- Left in place by the 6.1 run: worktree `.claude/worktrees/p6-baseline` (detached at `797f1907`) and MySQL database `hc_hub_p6base_test`. Both are safe to remove.
-- Logs: `$TEMP/phase5-suite.log` (main), `$TEMP/phase6-baseline-suite.log` (baseline), `$TEMP/phase6-phpstan-full.log`.
-- Owner decisions waiting: accept or reject the proposed D9 change (`decisions.md` is unchanged); 8 open questions in the assets plan.
-- Inventory docs disagree on `ApproveDisposal` vs `DecideDisposal` (belongs to the Inventory session).
-- Untracked files of other sessions were left alone: `.claude/commands/inventory.md`, `docs/inventory/`, `docs/superpowers/plans/2026-11-20-*.md`.
+- `DesignTokensTest` "readable text never uses the faint grey" fails on `main`: `placeholder:text-ink-muted!` in `x-ui.input`. It comes from UI 2.2 (`1dc87477` / `4d48c1e3`, the `/ui` session), not this batch.
+- Known failures that were already there: CriticalPositionsTest and PickerScopesTest (`$criticalMark` not found); EmployeeFormParityTest draft contract fails only in the full run.
+- 7.11 small differences from hc-hr: EntitlementHooks skips updates on rows loaded without `type`, `is_active` or `position_id`; `PositionSeats::holdsSeat` treats a null `is_active` as no seat. Bulk query-builder writes skip the hooks (`entitlements:backfill` covers them).
+- Annual-plans page not checked visually (no plans in the local DB).
+- Isolated test DBs: `hc_hub_a1_test`, `hc_hub_a2_test`, `hc_hub_e7_test`. Worktrees `agent-a171731e357d703c9` and `agent-ae66b132ddc2a4275` are merged and safe to remove (each has an untracked copy of vendor).
 
 ## Next command
-After the owner approves the 6.1 task table: start with the Hr-merge fallout group (policies, authorization coverage, module boundaries), one agent per group, each in its own worktree with its own `*_test` database.
+Run the full suite in the background, compare its failures with the known list above, then update ClickUp once for the batch.

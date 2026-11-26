@@ -300,7 +300,7 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
                         <x-tracking::funding.pills :label="__('finance_tables.flags')" :pills="$flagPills" />
 
                         @if ($this->donorFilterName !== null)
-                            <x-tracking::funding.filter-row :label="__('funding_agreements.donor')" on :watch="['donor']" :models="['donor']" x-show="filled(['donor'])">
+                            <x-tracking::funding.filter-row :label="__('funding_agreements.donor')" on :watch="['donor']" :models="['donor']" x-show="anyFilled(['donor'])">
                                 <x-ui.button tone="ghost" size="sm" type="button" x-on:click="pick('donor', '')" class="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-funding-soft ps-3 pe-2 text-xs font-semibold text-funding transition-colors hover:bg-funding hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:text-ink dark:hover:text-surface-0" aria-label="{{ __('proposals.remove_donor_filter', ['name' => $this->donorFilterName]) }}" data-donor-chip>
                                     {{ __('proposals.funded_by', ['name' => $this->donorFilterName]) }}
                                     <flux:icon.x-mark variant="micro" class="size-3.5" />
