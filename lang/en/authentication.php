@@ -5,7 +5,7 @@ return [
     'confirm_password' => 'Confirm password',
     'confirm_with_passkey' => 'Confirm with passkey',
     'confirming' => 'Confirming...',
-    'copyright_notice' => '© :year - Christian Hope Center - PT',
+    'copyright_notice' => '© :year - Christian Hope Center - Hub',
     'email_address' => 'Email address',
     'enter_the_authentication_code_provided_by_your_authenticator' => 'Enter the authentication code provided by your authenticator application.',
     'login_using_a_recovery_code' => 'login using a recovery code',

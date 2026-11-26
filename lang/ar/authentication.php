@@ -5,7 +5,7 @@ return [
     'confirm_password' => 'تأكيد كلمة المرور',
     'confirm_with_passkey' => 'التأكيد بمفتاح مرور',
     'confirming' => 'جارٍ التأكيد...',
-    'copyright_notice' => '© :year - مركز الأمل المسيحي - HC Hub',
+    'copyright_notice' => '© :year - مركز الأمل المسيحي - Hub',
     'email_address' => 'البريد الإلكتروني',
     'enter_the_authentication_code_provided_by_your_authenticator' => 'أدخل رمز المصادقة الظاهر في تطبيق المصادقة لديك.',
     'login_using_a_recovery_code' => 'تسجيل الدخول برمز استرداد',
