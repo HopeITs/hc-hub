@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Actions\Contracts;
 
-use App\Models\Role;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Modules\Core\Models\User;
+use Modules\Hr\Actions\Employees\CreateEmployeeAccount;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
@@ -71,30 +69,19 @@ class ActivateEmployeeForContract
             return [self::NONE, null];
         }
 
-        $username = strtolower(trim((string) $employee->username));
+        $email = CreateEmployeeAccount::workEmail($employee);
 
-        if ($username === '') {
+        if ($email === null) {
             return [self::NONE, null];
         }
 
-        $email = $username.'@hcsyria.org';
-
-        if (User::query()->where('email', $email)->exists()) {
+        if (! CreateEmployeeAccount::emailIsFree($email)) {
             Log::warning('Employee activation: work email already in use, no account created.', ['employee_id' => $employee->id]);
 
             return [self::EMAIL_TAKEN, null];
         }
 
-        $user = new User;
-        $user->forceFill([
-            'email' => $email,
-            'password' => Hash::make(Str::password(64)),
-            'employee_id' => $employee->id,
-        ])->save();
-
-        if (Role::query()->where('name', 'employee')->exists()) {
-            $user->assignRole('employee');
-        }
+        app(CreateEmployeeAccount::class)->createLogin($employee, $email);
 
         return [self::ACCOUNT_CREATED, $email];
     }

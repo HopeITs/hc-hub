@@ -1,8 +1,11 @@
 <?php
 
 use Flux\Flux;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -21,15 +24,26 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.form')] class extends 
     {
         $user = Auth::user();
         $this->payHidden = ! HrAccess::canViewSalary($user);
+        $this->submissionToken = (string) Str::uuid();
         $isRenewal = request()->routeIs('hr.contracts.renew');
 
         if ($contract?->exists && $isRenewal) {
             Gate::authorize('renew', $contract);
             $this->renewalSourceId = $contract->id;
             $this->fillFromRenewal($contract);
+
+            // "Renew with edit" from the contract page carries the period picked there.
+            foreach (['start' => 'start_date', 'end' => 'end_date'] as $query => $field) {
+                $picked = request()->string($query)->toString();
+
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $picked) === 1 && strtotime($picked) !== false) {
+                    $this->form[$field] = $picked;
+                }
+            }
         } elseif ($contract?->exists) {
             Gate::authorize('update', $contract);
             $this->contractId = $contract->id;
+            $this->termsLocked = $contract->hasAppliedAmendments();
             $this->fillFromContract($contract);
         } else {
             Gate::authorize('create', Contract::class);
@@ -53,16 +67,43 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.form')] class extends 
         unset($this->positionOptions);
     }
 
+    /**
+     * A second submit of the same form (a double click, a retried request)
+     * waits for the first and lands on what it saved instead of saving again.
+     */
     public function save(): void
     {
-        $contract = $this->contractId === null ? null : Contract::query()->findOrFail($this->contractId);
-        $source = $this->renewalSourceId === null ? null : Contract::query()->findOrFail($this->renewalSourceId);
+        try {
+            $savedId = Cache::lock($this->submissionKey().':lock', 30)->block(10, function (): int {
+                $alreadySaved = Cache::get($this->submissionKey());
 
-        $saved = app(SaveContract::class)->handle($contract, $this->formData(), $this->tiers, Auth::user(), $source);
+                if ($alreadySaved !== null) {
+                    return (int) $alreadySaved;
+                }
+
+                $contract = $this->contractId === null ? null : Contract::query()->findOrFail($this->contractId);
+                $source = $this->renewalSourceId === null ? null : Contract::query()->findOrFail($this->renewalSourceId);
+
+                $saved = app(SaveContract::class)->handle($contract, $this->formData(), $this->tiers, Auth::user(), $source);
+
+                Cache::put($this->submissionKey(), $saved->id, now()->addDay());
+
+                return $saved->id;
+            });
+        } catch (LockTimeoutException) {
+            Flux::toast(text: __('hr_contracts.toasts.save_in_progress'));
+
+            return;
+        }
 
         Flux::toast(variant: 'success', text: __('hr_contracts.toasts.saved'));
 
-        $this->redirectRoute('hr.contracts.show', ['contract' => $saved->id], navigate: true);
+        $this->redirectRoute('hr.contracts.show', ['contract' => $savedId], navigate: true);
+    }
+
+    protected function submissionKey(): string
+    {
+        return 'hr-contract-form:'.Auth::id().':'.sha1($this->submissionToken);
     }
 };
 ?>
@@ -96,6 +137,16 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.form')] class extends 
         ]"
         :title="$title"
     />
+
+    @if ($renewalSourceId !== null)
+        <div class="flex items-start gap-2 rounded-lg border border-panel-border bg-surface-2 px-4 py-3 text-sm" data-test="renewal-banner">
+            <flux:icon.arrow-path variant="micro" class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            <div class="flex flex-col gap-1">
+                <p class="font-semibold">{{ __('hr_contracts.form.renewing_for', ['name' => \Modules\Hr\Models\Contract::query()->with('employee')->find($renewalSourceId)?->employee?->name ?? '—']) }}</p>
+                <p class="tabular-nums">{{ __('hr_contracts.form.renewing_period', ['start' => $form['start_date'] ?? '', 'end' => $form['end_date'] ?? '']) }}</p>
+            </div>
+        </div>
+    @endif
 
     <form wire:submit="save" novalidate class="flex flex-col gap-5">
         <x-ui.unsaved-guard :watch="['form', 'tiers']" />
@@ -142,9 +193,28 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.form')] class extends 
             </div>
         </x-ui.panel>
 
-        @include('hr::pages.contracts._form-schedule', ['grid' => $grid])
+        @if ($termsLocked)
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-panel-border bg-surface-2 px-4 py-3 text-sm" data-test="terms-locked">
+                <p class="flex items-center gap-2">
+                    <flux:icon.lock-closed variant="micro" class="size-4 shrink-0" aria-hidden="true" />
+                    {{ __('hr_contracts.form.terms_locked') }}
+                </p>
+                @php
+                    $lockedContract = \Modules\Hr\Models\Contract::query()->find($contractId);
+                @endphp
+                @if ($lockedContract?->canBeAmended())
+                    @can('amend', $lockedContract)
+                        <x-ui.button size="sm" icon="document-plus" :href="route('hr.contracts.amend', $contractId)" wire:navigate data-test="amend-contract">{{ __('hr_contracts.actions.amend') }}</x-ui.button>
+                    @endcan
+                @endif
+            </div>
+        @endif
 
-        @include('hr::pages.contracts._form-pay', ['grid' => $grid])
+        <fieldset @disabled($termsLocked) class="flex min-w-0 flex-col gap-5">
+            @include('hr::pages.contracts._form-schedule', ['grid' => $grid])
+
+            @include('hr::pages.contracts._form-pay', ['grid' => $grid])
+        </fieldset>
 
         <div class="sticky bottom-0 z-10 flex flex-wrap items-center justify-end gap-2 border-t border-panel-border bg-white/90 px-4 py-3 backdrop-blur dark:bg-surface-1/90">
             <x-ui.button :href="BackUrl::for(route('hr.contracts.index'))" wire:navigate>{{ __('common.cancel') }}</x-ui.button>

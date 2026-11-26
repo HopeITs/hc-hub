@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Modules\Hr\Actions\Leave\DecideLeaveRequest;
@@ -14,11 +15,13 @@ use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Livewire\Concerns\Leave\ManagesLeaveRequestForm;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Support\Leave\LeaveAlternativeEmployees;
 use Modules\Hr\Support\Leave\LeaveContext;
 use Modules\Hr\Support\Leave\LeaveDecisionAlreadyMade;
 use Modules\Hr\Support\Leave\LeaveRequestNextStep;
 use Modules\Hr\Support\Leave\LeaveRequestPricing;
 use Modules\Hr\Support\Leave\LeaveRequestReview;
+use Modules\Hr\Support\Leave\LeaveWindow;
 
 /*
  * One leave request: who, what, when, how much, where it stands and HR's

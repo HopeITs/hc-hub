@@ -33,6 +33,7 @@ use Modules\Hr\Models\RecruitmentHiringConversion as Conversion;
 use Modules\Hr\Models\RecruitmentJobOffer as Offer;
 use Modules\Hr\Models\RecruitmentJobOfferVersion as Version;
 use Modules\Hr\Models\Vacancy;
+use Modules\Hr\Support\Contracts\PositionSeats;
 use Modules\Hr\Support\Recruitment\Access;
 use Modules\Hr\Support\Recruitment\ActivityLogger;
 use Modules\Hr\Support\Recruitment\HiringHandoff;
@@ -389,6 +390,12 @@ class RecruitmentHiringConversionService
 
         $contract = new Contract($this->contractAttributes($employee, $offer, $version, $sessionDuration));
         $contract->save();
+
+        // The seat the blockers checked is now taken (HR's ContractObserver::created did this).
+        if (PositionSeats::holdsSeat($contract->type, $contract->is_active)) {
+            PositionSeats::move(null, (int) $contract->position_id);
+        }
+
         $this->handoff->contractCreated($employee, $contract);
 
         [$vacancyStatus, $campaignsClosed, $campaignsLeftOpen] = $this->fillSeat($actor, $vacancy);
@@ -648,6 +655,8 @@ class RecruitmentHiringConversionService
             'type' => $this->employmentType($version, $type),
             'place' => (int) ($version->terms_json['place'] ?? ContractPlace::Onsite->value),
             'is_active' => true,
+            // A trial ends to be evaluated, never rolls over (HR's ContractObserver::saving).
+            'auto_renew' => $type->category !== 'trial',
             'start_date' => $start->toDateString(),
             'end_date' => $end->toDateString(),
             'weekly_hours' => $weeklyHours,

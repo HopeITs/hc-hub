@@ -48,6 +48,14 @@ trait ManagesContractForm
     #[Locked]
     public bool $payHidden = false;
 
+    /** An amendment has been applied: the schedule and pay change only through amendments. */
+    #[Locked]
+    public bool $termsLocked = false;
+
+    /** One per form load, so a double submit saves once. */
+    #[Locked]
+    public string $submissionToken = '';
+
     /** @var array<string, mixed> */
     public array $form = [];
 
@@ -175,6 +183,48 @@ trait ManagesContractForm
         if ($category === 'trial') {
             $this->form['auto_renew'] = false;
         }
+    }
+
+    /**
+     * A fixed schedule works out its weekly hours from the days and the
+     * hours of each day (picked days, else the from-to day range).
+     */
+    public function updatedForm(mixed $value, ?string $key = null): void
+    {
+        $drivers = ['work_weekdays', 'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_day_from', 'work_day_to'];
+
+        if ($key === null || (int) ($this->form['schedule_mode'] ?? 0) !== ScheduleMode::Fixed->value || ! in_array(explode('.', $key)[0], $drivers, true)) {
+            return;
+        }
+
+        $picked = Contract::parseWeekdays(is_array($this->form['work_weekdays'] ?? null) ? $this->form['work_weekdays'] : null);
+        $from = $this->form['work_day_from'] ?? '';
+        $to = $this->form['work_day_to'] ?? '';
+        $days = match (true) {
+            $picked !== [] => count($picked),
+            filled($from) && filled($to) && (int) $to >= (int) $from => (int) $to - (int) $from + 1,
+            default => 0,
+        };
+
+        $minutes = $this->shiftMinutes('work_hours_from', 'work_hours_to') + $this->shiftMinutes('work_hours_2_from', 'work_hours_2_to');
+
+        if ($days > 0 && $minutes > 0) {
+            $this->form['weekly_hours'] = (string) round($days * $minutes / 60);
+        }
+    }
+
+    private function shiftMinutes(string $fromKey, string $toKey): int
+    {
+        $from = (string) ($this->form[$fromKey] ?? '');
+        $to = (string) ($this->form[$toKey] ?? '');
+
+        if (preg_match('/^\d{2}:\d{2}$/', $from) !== 1 || preg_match('/^\d{2}:\d{2}$/', $to) !== 1) {
+            return 0;
+        }
+
+        $toMinutes = fn (string $time): int => (int) substr($time, 0, 2) * 60 + (int) substr($time, 3, 2);
+
+        return max(0, $toMinutes($to) - $toMinutes($from));
     }
 
     public function addTier(): void

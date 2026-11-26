@@ -190,6 +190,49 @@ final class SaveLeaveRequest
         }
     }
 
+    /**
+     * The dry run behind the confirmation step (the old confirmSave()): the
+     * same shape, overlap, eligibility and pricing checks as a write, each
+     * error on its own field, and nothing written. Returns the priced quote
+     * the confirmation shows. The write repeats every check under its locks.
+     *
+     * @param  array<string, mixed>  $input
+     *
+     * @throws ValidationException
+     */
+    public function check(User $actor, ?int $employeeId, array $input, ?int $editingId = null): LeaveQuote
+    {
+        $editing = null;
+
+        if ($editingId !== null) {
+            $editing = LeaveContext::request($editingId);
+            Gate::forUser($actor)->authorize('update', $editing);
+            $employee = $editing->leaveBalance->contract->employee;
+        } else {
+            $employee = $this->targetEmployee($actor, $employeeId);
+        }
+
+        $draft = LeaveRequestDraft::fromArray($input);
+        $contract = $this->validate($draft, $employee, $editing);
+        $balance = $this->balanceOf($contract, $draft);
+        $window = $this->requireWindow($draft);
+
+        $this->assertNoOwnOverlap((int) $employee->id, $draft, $editing?->id);
+
+        if ($editing === null || (int) $editing->leave_balance_id !== (int) $balance->id) {
+            $this->assertEligible($employee, $balance);
+        }
+
+        $quote = $this->pricing->quote($balance->contract, $balance, $window, $editing);
+
+        // An accepted request being edited is checked against the committed balance on write.
+        if ($editing === null || (int) $editing->status !== LeaveRequestStatus::Accepted->value) {
+            $this->assertQuoteAllows($quote, $balance, $window);
+        }
+
+        return $quote;
+    }
+
     public static function submissionKey(int $userId, string $token): string
     {
         return 'hr-leave-request-submission:'.$userId.':'.sha1($token);
@@ -275,9 +318,27 @@ final class SaveLeaveRequest
             }
         };
 
+        $rules = $draft->rules($contract?->id, $alternatives, $eligibility);
+
+        // Hourly leave is for annual leave only (the old dialog offered it nowhere else).
+        // An hourly request already saved on another type is left as it is on a content edit.
+        $rules['type'][] = function (string $attribute, mixed $value, \Closure $fail) use ($draft, $editing, $contract): void {
+            $balance = $contract?->leaveBalances->firstWhere('id', (int) $draft->leaveBalanceId);
+
+            if ($value !== LeaveWindow::HOUR || $balance === null || $balance->isAnnual()) {
+                return;
+            }
+
+            if ($editing !== null && $editing->type === LeaveWindow::HOUR && (int) $editing->leave_balance_id === (int) $balance->id) {
+                return;
+            }
+
+            $fail(__('hr_leave.validation.hour-annual-only'));
+        };
+
         Validator::make(
             $draft->data() + ['is_exceptional' => $draft->isExceptional],
-            $draft->rules($contract?->id, $alternatives, $eligibility),
+            $rules,
             ['end_at.after_or_equal' => __('hr_leave.validation.end-before-start')],
             __('hr_leave.fields'),
         )->validate();
