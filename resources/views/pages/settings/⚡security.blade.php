@@ -717,62 +717,36 @@ new #[Layout('layouts::desk'), Title('titles.security_settings')] class extends 
         </section>
     </div>
 
-    <flux:modal
+    @php
+        $confirmKey = match ($confirmingAction) {
+            'email-off' => 'email_off',
+            'app-off' => 'app_off',
+            'sign-out-others' => 'sign_out_others',
+            default => 'forget_trusted',
+        };
+    @endphp
+
+    <x-ui.confirm-modal
         name="confirm-security-action-modal"
-        class="max-w-md md:min-w-md"
-        @close="closeConfirmModal"
         wire:model="showConfirmModal"
-    >
-        @if ($showConfirmModal)
-            @php
-                $confirmKey = match ($confirmingAction) {
-                    'email-off' => 'email_off',
-                    'app-off' => 'app_off',
-                    'sign-out-others' => 'sign_out_others',
-                    default => 'forget_trusted',
-                };
-            @endphp
+        close="closeConfirmModal"
+        confirm="runConfirmedAction"
+        confirm-test="confirm-security-action-yes"
+        icon="exclamation-triangle"
+        :title="__('settings.confirm_'.$confirmKey.'_title')"
+        :message="__('settings.confirm_'.$confirmKey.'_body')"
+        :confirm-label="__('common.confirm')"
+        data-test="confirm-security-action"
+    />
 
-            <div class="space-y-6" data-test="confirm-security-action">
-                <div class="space-y-2">
-                    <flux:heading size="lg">{{ __('settings.confirm_'.$confirmKey.'_title') }}</flux:heading>
-                    <flux:text>{{ __('settings.confirm_'.$confirmKey.'_body') }}</flux:text>
-                </div>
-
-                <div class="flex justify-end gap-3">
-                    <x-ui.button wire:click="closeConfirmModal" class="border">
-                        {{ __('common.cancel') }}
-                    </x-ui.button>
-                    <flux:button variant="danger" wire:click="runConfirmedAction" data-test="confirm-security-action-yes">
-                        {{ __('common.confirm') }}
-                    </flux:button>
-                </div>
-            </div>
-        @endif
-    </flux:modal>
-
-    <flux:modal
+    <x-ui.confirm-modal
         name="delete-passkey-modal"
-        class="max-w-md md:min-w-md"
-        @close="closeDeleteModal"
         wire:model="showDeleteModal"
-    >
-        <div class="space-y-6">
-            <div class="space-y-2">
-                <flux:heading size="lg">{{ __('settings.remove_passkey') }}</flux:heading>
-                <flux:text>
-                    {{ __('settings.are_you_sure_you_want_to_remove_the_passkey_name_you_will_no', ['name' => $deletingPasskeyName]) }}
-                </flux:text>
-            </div>
-
-            <div class="flex justify-end gap-3">
-                <x-ui.button wire:click="closeDeleteModal" class="border">
-                    {{ __('common.cancel') }}
-                </x-ui.button>
-                <flux:button variant="danger" wire:click="deletePasskey">
-                    {{ __('settings.remove_passkey') }}
-                </flux:button>
-            </div>
-        </div>
-    </flux:modal>
+        close="closeDeleteModal"
+        confirm="deletePasskey"
+        icon="key"
+        :title="__('settings.remove_passkey')"
+        :message="__('settings.are_you_sure_you_want_to_remove_the_passkey_name_you_will_no', ['name' => $deletingPasskeyName])"
+        :confirm-label="__('settings.remove_passkey')"
+    />
 </x-desk.register>

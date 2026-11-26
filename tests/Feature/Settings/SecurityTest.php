@@ -386,6 +386,8 @@ test('the one-click security actions ask first and only act once confirmed', fun
         ->call('askToConfirm', $action)
         ->assertSet('showConfirmModal', true)
         ->assertSee(__($title))
+        ->assertSeeHtml('data-test="confirm-security-action-yes"')
+        ->assertSeeHtml('data-confirm-mark')
         ->assertSet('twoFactorEnabled', true)
         ->assertSet('emailTwoFactorEnabled', true)
         ->call('closeConfirmModal')

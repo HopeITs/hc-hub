@@ -77,7 +77,8 @@ document.addEventListener('alpine:init', () => {
             return String(this.value(name)) === String(value);
         },
 
-        filled(names) {
+        // Not `filled`: the shared modal's own scope has a `filled` counter that would shadow it.
+        anyFilled(names) {
             return names.some((name) => String(this.value(name)) !== '');
         },
 
