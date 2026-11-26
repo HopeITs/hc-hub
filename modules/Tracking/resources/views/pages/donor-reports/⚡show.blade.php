@@ -358,11 +358,11 @@ new #[Layout('layouts::desk'), Title('titles.donor_report')] class extends Compo
                             <span class="min-w-0 truncate" dir="auto">{{ $file->original_name }}</span>
                             <span class="flex shrink-0 items-center gap-1">
                                 @can('downloadFile', $report)
-                                    <x-ui.button tone="ghost" size="sm" icon="arrow-down-tray" class="size-8!" :href="route('donor-reports.files.download', [$report, $file->id])" :aria-label="__('donor_reports.download_name', ['name' => $file->original_name])" />
+                                    <x-ui.button tone="ghost" size="icon" icon="arrow-down-tray" :href="route('donor-reports.files.download', [$report, $file->id])" :aria-label="__('donor_reports.download_name', ['name' => $file->original_name])" />
                                 @endcan
                                 @if (! $report->isSubmitted())
                                     @can('deleteFile', $report)
-                                        <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8!" wire:click="confirmFileDelete({{ $file->id }})" :aria-label="__('donor_reports.remove_name', ['name' => $file->original_name])" />
+                                        <x-ui.button tone="ghost" size="icon" icon="trash" wire:click="confirmFileDelete({{ $file->id }})" :aria-label="__('donor_reports.remove_name', ['name' => $file->original_name])" />
                                     @endcan
                                 @endif
                             </span>

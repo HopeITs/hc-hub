@@ -485,7 +485,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.applicants')] cl
                         </x-ui.data-table.cell>
                         <td>
                             @if ($canSchedule && Route::has('hr.recruitment.interviews.create'))
-                                <x-ui.button tone="neutral" size="sm" :href="route('hr.recruitment.interviews.create', ['applicationId' => $application->id])" wire:navigate class="whitespace-nowrap">
+                                <x-ui.button tone="inverse" size="sm" :href="route('hr.recruitment.interviews.create', ['applicationId' => $application->id])" wire:navigate class="whitespace-nowrap">
                                     {{ $application->status === Stage::Finalist ? __('hr_recruitment.applicant_ui.interviews.schedule_final') : __('hr_recruitment.applicant_ui.interviews.schedule') }}
                                 </x-ui.button>
                             @else

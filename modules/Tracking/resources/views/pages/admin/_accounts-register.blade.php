@@ -99,15 +99,15 @@
                     <td>
                         <span class="flex items-center justify-end">
                             @can('transfers.view')
-                                <x-ui.button tone="ghost" size="sm" icon="eye" icon:variant="outline" class="size-8!" :href="route('transfers.index', ['account' => $account->id])" wire:navigate :aria-label="__('accounts.view_transfers_for_name', ['name' => $account->account_name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="eye" icon:variant="outline" :href="route('transfers.index', ['account' => $account->id])" wire:navigate :aria-label="__('accounts.view_transfers_for_name', ['name' => $account->account_name])" />
                             @endcan
                             @can('accounts.update')
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" icon:variant="outline" class="size-8!" wire:click="openEditModal({{ $account->id }})" :aria-label="__('common.edit_name', ['name' => $account->account_name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="pencil-square" icon:variant="outline" wire:click="openEditModal({{ $account->id }})" :aria-label="__('common.edit_name', ['name' => $account->account_name])" />
                             @endcan
 
                             {{-- No delete anywhere: transfers_tracking.account_id RESTRICTs. Closing needs accounts.delete. --}}
                             @if ($account->is_active && auth()->user()->can('accounts.delete'))
-                                <x-ui.button tone="ghost" size="sm" icon="lock-closed" icon:variant="outline" class="size-8!" wire:click="confirmClose({{ $account->id }})" :aria-label="__('accounts.close_name', ['name' => $account->account_name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="lock-closed" icon:variant="outline" wire:click="confirmClose({{ $account->id }})" :aria-label="__('accounts.close_name', ['name' => $account->account_name])" />
                             @endif
                         </span>
                     </td>

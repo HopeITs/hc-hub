@@ -67,7 +67,7 @@
 
             <div class="ms-auto flex shrink-0 flex-wrap items-center gap-1">
                 <x-ui.button
-                    tone="ghost" size="sm" icon="arrow-up" class="size-9!"
+                    tone="ghost" size="icon" icon="arrow-up"
                     wire:click="moveEvidenceType({{ $evidenceType->id }}, 'up')"
                     wire:target="moveEvidenceType({{ $evidenceType->id }}, 'up')"
                     :disabled="$loop->first"
@@ -75,20 +75,20 @@
                     data-test="move-evidence-type-up"
                 />
                 <x-ui.button
-                    tone="ghost" size="sm" icon="arrow-down" class="size-9!"
+                    tone="ghost" size="icon" icon="arrow-down"
                     wire:click="moveEvidenceType({{ $evidenceType->id }}, 'down')"
                     wire:target="moveEvidenceType({{ $evidenceType->id }}, 'down')"
                     :disabled="$loop->iteration === $total"
                     :aria-label="__('evidence_types.move_down_name', ['name' => $displayName])"
                     data-test="move-evidence-type-down"
                 />
-                <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9!" wire:click="openEditModal({{ $evidenceType->id }})" :aria-label="__('common.edit_name', ['name' => $displayName])" />
+                <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditModal({{ $evidenceType->id }})" :aria-label="__('common.edit_name', ['name' => $displayName])" />
                 @if ($evidenceType->is_active)
-                    <x-ui.button tone="ghost" size="sm" icon="pause-circle" class="size-9!" wire:click="confirmDeactivate({{ $evidenceType->id }})" :aria-label="__('evidence_types.deactivate_name', ['name' => $displayName])" />
+                    <x-ui.button tone="ghost" size="icon" icon="pause-circle" wire:click="confirmDeactivate({{ $evidenceType->id }})" :aria-label="__('evidence_types.deactivate_name', ['name' => $displayName])" />
                 @else
-                    <x-ui.button tone="ghost" size="sm" icon="play-circle" class="size-9!" wire:click="reactivateEvidenceType({{ $evidenceType->id }})" wire:target="reactivateEvidenceType({{ $evidenceType->id }})" :aria-label="__('evidence_types.reactivate_name', ['name' => $displayName])" />
+                    <x-ui.button tone="ghost" size="icon" icon="play-circle" wire:click="reactivateEvidenceType({{ $evidenceType->id }})" wire:target="reactivateEvidenceType({{ $evidenceType->id }})" :aria-label="__('evidence_types.reactivate_name', ['name' => $displayName])" />
                 @endif
-                <x-ui.button tone="ghost" size="sm" icon="trash" class="size-9! text-status-critical!" wire:click="confirmDelete({{ $evidenceType->id }})" :aria-label="__('common.delete_name', ['name' => $displayName])" />
+                <x-ui.button tone="danger" size="icon" icon="trash" wire:click="confirmDelete({{ $evidenceType->id }})" :aria-label="__('common.delete_name', ['name' => $displayName])" />
             </div>
         </li>
     @endforeach

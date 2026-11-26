@@ -52,7 +52,7 @@
 
     <div class="flex shrink-0 items-center gap-0.5">
         @if ($isStored)
-            <x-ui.button tone="ghost" size="sm" icon="eye" class="size-9! touch-manipulation" wire:click="openPreview({{ $media->id }})" :aria-label="__('reports.preview_name', ['name' => $media->original_name])" data-test="preview-file-{{ $media->id }}" />
+            <x-ui.button tone="ghost" size="icon" icon="eye" wire:click="openPreview({{ $media->id }})" :aria-label="__('reports.preview_name', ['name' => $media->original_name])" data-test="preview-file-{{ $media->id }}" />
             <a
                 href="{{ $downloadUrl }}"
                 class="inline-flex size-9 touch-manipulation items-center justify-center rounded-lg transition-colors hover:bg-secondary-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:hover:bg-surface-2 {{ $mutedText }}"
@@ -63,8 +63,8 @@
             </a>
         @endif
         @if ($editable)
-            <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9! touch-manipulation" wire:click="openEditFileModal({{ $media->id }})" :aria-label="__('common.edit_name', ['name' => $media->original_name])" data-test="edit-file-{{ $media->id }}" />
-            <x-ui.button tone="ghost" size="sm" icon="trash" class="size-9! touch-manipulation text-status-critical! hover:bg-status-critical-soft!" wire:click="confirmDeleteFile({{ $media->id }})" :aria-label="__('common.delete_name', ['name' => $media->original_name])" data-test="delete-file-{{ $media->id }}" />
+            <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditFileModal({{ $media->id }})" :aria-label="__('common.edit_name', ['name' => $media->original_name])" data-test="edit-file-{{ $media->id }}" />
+            <x-ui.button tone="danger" size="icon" icon="trash" wire:click="confirmDeleteFile({{ $media->id }})" :aria-label="__('common.delete_name', ['name' => $media->original_name])" data-test="delete-file-{{ $media->id }}" />
         @endif
     </div>
 </li>

@@ -93,7 +93,7 @@
 
                                             <div class="flex shrink-0 items-center gap-1.5">
                                                 <x-ui.enum-badge :case="$latest->status" />
-                                                <x-ui.button tone="ghost" size="sm" icon="eye" class="size-9!" :href="route('reports.show', $latest)" wire:navigate :aria-label="__('common.view_name', ['name' => $planIndicator->indicator->name])" />
+                                                <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('reports.show', $latest)" wire:navigate :aria-label="__('common.view_name', ['name' => $planIndicator->indicator->name])" />
                                                 @if ($latest->is_seen_by_meal)
                                                     <flux:tooltip :content="__('reports.seen_by_meal')">
                                                         <flux:icon.eye variant="micro" class="size-4 text-status-good" />

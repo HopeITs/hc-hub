@@ -365,13 +365,13 @@
 
                             {{-- Actions --}}
                             <div class="flex items-center gap-0.5 @4xl/directory:justify-end">
-                                <x-ui.button tone="ghost" size="sm" icon="eye" icon:variant="outline" class="size-9! touch-manipulation" :href="route('donors.show', $donor)" wire:navigate :aria-label="__('common.view_name', ['name' => $donor->name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="eye" icon:variant="outline" :href="route('donors.show', $donor)" wire:navigate :aria-label="__('common.view_name', ['name' => $donor->name])" />
                                 @can('donors.update')
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" icon:variant="outline" class="size-9! touch-manipulation" wire:click="openEditModal({{ $donor->id }})" :aria-label="__('common.edit_name', ['name' => $donor->name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="pencil-square" icon:variant="outline" wire:click="openEditModal({{ $donor->id }})" :aria-label="__('common.edit_name', ['name' => $donor->name])" />
                                 @endcan
                                 @can('donors.delete')
                                 @if ($isProspect)
-                                    <x-ui.button tone="ghost" size="sm" icon="trash" icon:variant="outline" class="size-9! touch-manipulation" wire:click="confirmDelete({{ $donor->id }})" :aria-label="__('common.delete_name', ['name' => $donor->name])" />
+                                    <x-ui.button tone="ghost" size="icon" icon="trash" icon:variant="outline" wire:click="confirmDelete({{ $donor->id }})" :aria-label="__('common.delete_name', ['name' => $donor->name])" />
                                 @else
                                     <flux:tooltip :content="__('donors.donors_holding_an_agreement_cannot_be_deleted')">
                                         <span class="inline-flex size-9 cursor-not-allowed items-center justify-center text-secondary-light" aria-disabled="true">

@@ -195,7 +195,7 @@
         <x-slot:footerMeta>
             @can('funding-agreements.delete')
                 @if ($deleteBlocker === null)
-                    <x-ui.button type="button" tone="ghost" icon="trash" class="text-status-critical!" wire:click="confirmAgreementDelete" data-test="delete-agreement-button">{{ __('funding_agreements.delete_agreement') }}</x-ui.button>
+                    <x-ui.button type="button" tone="danger" icon="trash" wire:click="confirmAgreementDelete" data-test="delete-agreement-button">{{ __('funding_agreements.delete_agreement') }}</x-ui.button>
                 @else
                     <p class="flex items-center gap-1.5 text-xs text-secondary-medium dark:text-ink-muted" data-agreement-delete-blocked>
                         <flux:icon.lock-closed variant="micro" class="size-3.5 shrink-0" />

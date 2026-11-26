@@ -83,16 +83,16 @@
                             </td>
                             <td>
                                 <span class="flex items-center justify-end gap-1">
-                                    <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('donor-reports.show', $report)" wire:navigate :aria-label="__('common.view_name', ['name' => $report->title])" data-test="view-report-{{ $report->id }}" />
+                                    <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('donor-reports.show', $report)" wire:navigate :aria-label="__('common.view_name', ['name' => $report->title])" data-test="view-report-{{ $report->id }}" />
                                     @unless ($report->isSubmitted())
                                         @can('submit', $report)
                                             <x-ui.button size="sm" icon="check" class="min-h-8 touch-manipulation" wire:click="openSubmit({{ $report->id }})" data-test="submit-report-{{ $report->id }}">{{ __('funding_agreements.mark_submitted') }}</x-ui.button>
                                         @endcan
                                         @can('funding-agreements.update')
-                                            <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openReportEdit({{ $report->id }})" :aria-label="__('common.edit_name', ['name' => $report->title])" />
+                                            <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openReportEdit({{ $report->id }})" :aria-label="__('common.edit_name', ['name' => $report->title])" />
                                         @endcan
                                         @can('delete', $report)
-                                            <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8!" wire:click="confirmReportDelete({{ $report->id }})" :aria-label="__('funding_agreements.delete_report_name', ['name' => $report->title])" data-test="delete-report-{{ $report->id }}" />
+                                            <x-ui.button tone="ghost" size="icon" icon="trash" wire:click="confirmReportDelete({{ $report->id }})" :aria-label="__('funding_agreements.delete_report_name', ['name' => $report->title])" data-test="delete-report-{{ $report->id }}" />
                                         @endcan
                                     @endunless
                                 </span>

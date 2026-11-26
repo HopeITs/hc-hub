@@ -46,10 +46,10 @@
             </x-ui.data-table.cell>
             <td class="px-3.5 py-2.5">
                 <span class="flex items-center justify-end gap-1">
-                    <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('hr.leave.show', $leaveRequest->id)" wire:navigate :aria-label="__('hr_leave.ui.open_request')" />
+                    <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('hr.leave.show', $leaveRequest->id)" wire:navigate :aria-label="__('hr_leave.ui.open_request')" />
                     @if ($mine && $leaveRequest->status === $pending)
-                        <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openEditForm({{ $leaveRequest->id }})" :aria-label="__('hr_leave.ui.edit_request')" />
-                        <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8! text-status-critical!" wire:click="confirmWithdraw({{ $leaveRequest->id }})" :aria-label="__('hr_leave.ui.withdraw')" />
+                        <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditForm({{ $leaveRequest->id }})" :aria-label="__('hr_leave.ui.edit_request')" />
+                        <x-ui.button tone="danger" size="icon" icon="trash" wire:click="confirmWithdraw({{ $leaveRequest->id }})" :aria-label="__('hr_leave.ui.withdraw')" />
                     @endif
                 </span>
             </td>

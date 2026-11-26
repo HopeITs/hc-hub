@@ -97,9 +97,9 @@
                         {{-- No delete here: an agreement is deleted from its edit form, and only while nothing is filed under it. --}}
                         <td>
                             <span class="flex items-center justify-end">
-                                <x-ui.button tone="ghost" size="sm" icon="eye" icon:variant="outline" class="size-8! max-sm:size-11! touch-manipulation" :href="route('funding-agreements.show', $agreement)" wire:navigate :aria-label="__('common.view_name', ['name' => $agreementName])" />
+                                <x-ui.button tone="ghost" size="icon" icon="eye" icon:variant="outline" :href="route('funding-agreements.show', $agreement)" wire:navigate :aria-label="__('common.view_name', ['name' => $agreementName])" />
                                 @can('funding-agreements.update')
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" icon:variant="outline" class="size-8! max-sm:size-11! touch-manipulation" wire:click="openEditModal({{ $agreement->id }})" :aria-label="__('common.edit_name', ['name' => $agreementName])" data-test="edit-agreement-{{ $agreement->id }}" />
+                                    <x-ui.button tone="ghost" size="icon" icon="pencil-square" icon:variant="outline" wire:click="openEditModal({{ $agreement->id }})" :aria-label="__('common.edit_name', ['name' => $agreementName])" data-test="edit-agreement-{{ $agreement->id }}" />
                                 @endcan
                             </span>
                         </td>

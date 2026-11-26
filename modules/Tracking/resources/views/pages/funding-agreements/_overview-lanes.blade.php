@@ -40,9 +40,9 @@
                                                     {{-- No delete: transfers_tracking cascades from this row, so
                                                          deleting an agreement would erase the money received. --}}
                                                     <div class="-me-1.5 -mt-1.5 flex shrink-0 items-center">
-                                                        <x-ui.button tone="ghost" size="sm" icon="eye" class="size-9! shrink-0 touch-manipulation" :href="route('funding-agreements.show', $agreement)" wire:navigate :aria-label="__('common.view_name', ['name' => $agreementName])" />
+                                                        <x-ui.button tone="ghost" size="icon" icon="eye" class="shrink-0" :href="route('funding-agreements.show', $agreement)" wire:navigate :aria-label="__('common.view_name', ['name' => $agreementName])" />
                                                         @can('funding-agreements.update')
-                                                        <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9! shrink-0 touch-manipulation" wire:click="openEditModal({{ $agreement->id }})" :aria-label="__('common.edit_name', ['name' => $agreementName])" />
+                                                        <x-ui.button tone="ghost" size="icon" icon="pencil-square" class="shrink-0" wire:click="openEditModal({{ $agreement->id }})" :aria-label="__('common.edit_name', ['name' => $agreementName])" />
                                                         @endcan
                                                     </div>
                                                 </div>

@@ -69,26 +69,26 @@
             @if ($canManage)
                 <div class="ms-auto flex shrink-0 flex-wrap items-center gap-1">
                     <x-ui.button
-                        tone="ghost" size="sm" icon="arrow-up" class="size-9!"
+                        tone="ghost" size="icon" icon="arrow-up"
                         wire:click="moveSector({{ $sector->id }}, 'up')"
                         :disabled="$loop->first"
                         :aria-label="__('sectors.move_up_name', ['name' => $displayName])"
                         data-test="move-sector-up"
                     />
                     <x-ui.button
-                        tone="ghost" size="sm" icon="arrow-down" class="size-9!"
+                        tone="ghost" size="icon" icon="arrow-down"
                         wire:click="moveSector({{ $sector->id }}, 'down')"
                         :disabled="$loop->iteration === $total"
                         :aria-label="__('sectors.move_down_name', ['name' => $displayName])"
                         data-test="move-sector-down"
                     />
-                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9!" wire:click="openEditModal({{ $sector->id }})" :aria-label="__('common.edit_name', ['name' => $displayName])" />
+                    <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditModal({{ $sector->id }})" :aria-label="__('common.edit_name', ['name' => $displayName])" />
                     @if ($sector->is_active)
-                        <x-ui.button tone="ghost" size="sm" icon="pause-circle" class="size-9!" wire:click="confirmDeactivate({{ $sector->id }})" :aria-label="__('sectors.deactivate_name', ['name' => $displayName])" />
+                        <x-ui.button tone="ghost" size="icon" icon="pause-circle" wire:click="confirmDeactivate({{ $sector->id }})" :aria-label="__('sectors.deactivate_name', ['name' => $displayName])" />
                     @else
-                        <x-ui.button tone="ghost" size="sm" icon="play-circle" class="size-9!" wire:click="reactivateSector({{ $sector->id }})" :aria-label="__('sectors.reactivate_name', ['name' => $displayName])" />
+                        <x-ui.button tone="ghost" size="icon" icon="play-circle" wire:click="reactivateSector({{ $sector->id }})" :aria-label="__('sectors.reactivate_name', ['name' => $displayName])" />
                     @endif
-                    <x-ui.button tone="ghost" size="sm" icon="trash" class="size-9! text-status-critical!" wire:click="confirmDelete({{ $sector->id }})" :aria-label="__('common.delete_name', ['name' => $displayName])" />
+                    <x-ui.button tone="danger" size="icon" icon="trash" wire:click="confirmDelete({{ $sector->id }})" :aria-label="__('common.delete_name', ['name' => $displayName])" />
                 </div>
             @endif
         </li>

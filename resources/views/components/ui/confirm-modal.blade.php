@@ -33,7 +33,7 @@
      */
     [$markTone, $buttonTone, $fallbackIcon] = match ($tone) {
         'danger' => ['danger', 'primary', 'trash'],
-        'neutral' => ['neutral', 'neutral', 'exclamation-circle'],
+        'neutral' => ['neutral', 'inverse', 'exclamation-circle'],
         default => throw new InvalidArgumentException("Unknown x-ui.confirm-modal tone [{$tone}]."),
     };
 

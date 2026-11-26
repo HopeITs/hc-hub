@@ -466,7 +466,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
                                 <a href="{{ route('hr.recruitment.offer-response-evidence.download', ['media' => $evidence->id]) }}" class="min-w-0 truncate font-medium underline-offset-4 hover:underline" dir="auto">
                                     {{ $evidence->getCustomProperty('original_name', $evidence->file_name) }}
                                 </a>
-                                <x-ui.button size="sm" tone="ghost" icon="trash" class="size-8!" wire:click="discardResponseEvidence({{ $evidence->id }})" wire:confirm="{{ __('hr_recruitment.applicant_ui.offers.response_evidence.remove_confirm') }}" :aria-label="__('hr_recruitment.applicant_ui.offers.response_evidence.remove')" />
+                                <x-ui.button size="icon" tone="ghost" icon="trash" wire:click="discardResponseEvidence({{ $evidence->id }})" wire:confirm="{{ __('hr_recruitment.applicant_ui.offers.response_evidence.remove_confirm') }}" :aria-label="__('hr_recruitment.applicant_ui.offers.response_evidence.remove')" />
                             </div>
                         @empty
                             <p class="{{ $muted }}">{{ __('hr_recruitment.applicant_ui.offers.response_evidence.empty') }}</p>
@@ -546,7 +546,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
             @endif
 
             <x-slot:actions>
-                <x-ui.button type="submit" :tone="$panel === 'cancel' ? 'neutral' : 'primary'" wire:loading.attr="disabled" wire:target="{{ $action }},responseEvidence">{{ $actionLabel }}</x-ui.button>
+                <x-ui.button type="submit" :tone="$panel === 'cancel' ? 'inverse' : 'primary'" wire:loading.attr="disabled" wire:target="{{ $action }},responseEvidence">{{ $actionLabel }}</x-ui.button>
             </x-slot:actions>
         </x-ui.modal>
     @endif

@@ -35,7 +35,7 @@
                             <x-ui.risk-rating kind="severity" :value="$risk->severity" />
                             @if ($canManage)
                                 <x-ui.button
-                                    tone="ghost" size="sm" icon="trash" class="size-8! text-status-critical!"
+                                    tone="danger" size="icon" icon="trash"
                                     wire:click="confirmRemoveRisk({{ $risk->id }})"
                                     wire:loading.attr="disabled" wire:target="detachRisk"
                                     :aria-label="__('risks.remove_risk_name', ['name' => $risk->localizedName()])"

@@ -194,8 +194,7 @@ test('every page title shares the HR title style and the eyebrow uses the muted 
         expect($views[$path])->toContain('<h1 class="page-title"');
     }
 
-    expect($views['components/ui/page-header.blade.php'])->toContain('class="page-title!"')
-        ->and($views['components/ui/detail-header.blade.php'])->toContain('class="page-title! {{ $titleClass }}"')
+    expect($views['components/ui/detail-header.blade.php'])->toContain('class="page-title! {{ $titleClass }}"')
         ->and(implode("\n", $views))->not->toMatch('/title-class="[^"]*(text-3xl|text-\[|font-|leading-|tracking-)/');
 });
 

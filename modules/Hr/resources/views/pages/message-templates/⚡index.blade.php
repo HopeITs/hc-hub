@@ -208,7 +208,7 @@ new #[Layout('layouts::desk'), Title('hr_messages.title')] class extends Compone
                     <td>
                         <span class="flex items-center justify-end gap-1">
                             <x-ui.button tone="ghost" size="sm" icon="pencil-square" wire:click="openEditModal({{ $template->id }})" :aria-label="__('common.edit_name', ['name' => $template->name])" />
-                            <x-ui.button tone="ghost" size="sm" icon="trash" class="text-status-critical!" wire:click="confirmDelete({{ $template->id }})" :aria-label="__('common.delete_name', ['name' => $template->name])" />
+                            <x-ui.button tone="danger" size="sm" icon="trash" wire:click="confirmDelete({{ $template->id }})" :aria-label="__('common.delete_name', ['name' => $template->name])" />
                         </span>
                     </td>
                 </tr>

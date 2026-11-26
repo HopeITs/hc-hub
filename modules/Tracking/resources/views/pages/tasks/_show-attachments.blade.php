@@ -67,7 +67,7 @@
 
                         <div class="flex shrink-0 items-center gap-1">
                             @if ($isStored)
-                                <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" wire:click="openPreview({{ $attachment->id }})" :aria-label="__('tasks.preview_name', ['name' => $attachmentName])" data-test="preview-file-button" />
+                                <x-ui.button tone="ghost" size="icon" icon="eye" wire:click="openPreview({{ $attachment->id }})" :aria-label="__('tasks.preview_name', ['name' => $attachmentName])" data-test="preview-file-button" />
                                 <a
                                     href="{{ route('tasks.files.download', [$this->task, $attachment]) }}"
                                     class="inline-flex size-8 items-center justify-center rounded-lg text-secondary-medium transition-colors hover:bg-secondary-soft hover:text-secondary-dark dark:text-ink-muted dark:hover:bg-surface-2 dark:hover:text-ink"
@@ -79,8 +79,8 @@
                             @endif
 
                             @if ($canEditAttachments)
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openEditFileModal({{ $attachment->id }})" :aria-label="__('common.edit_name', ['name' => $attachmentName])" data-test="edit-file-button" />
-                                <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8! text-primary! dark:text-brand-text! hover:bg-status-critical-soft!" wire:click="confirmDeleteFile({{ $attachment->id }})" :aria-label="__('common.delete_name', ['name' => $attachmentName])" data-test="delete-file-button" />
+                                <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditFileModal({{ $attachment->id }})" :aria-label="__('common.edit_name', ['name' => $attachmentName])" data-test="edit-file-button" />
+                                <x-ui.button tone="ghost" size="icon" icon="trash" class="text-primary! dark:text-brand-text! hover:bg-status-critical-soft!" wire:click="confirmDeleteFile({{ $attachment->id }})" :aria-label="__('common.delete_name', ['name' => $attachmentName])" data-test="delete-file-button" />
                             @endif
                         </div>
                     </li>

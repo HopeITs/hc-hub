@@ -687,8 +687,8 @@ new #[Layout('layouts::desk'), Title('titles.risks')] class extends Component {
                                 </button>
                             </div>
                             <div class="flex shrink-0 items-center gap-1.5">
-                                @can('update', $risk)<x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-11! touch-manipulation @sm/directory:size-9!" wire:click="openEditModal({{ $risk->id }})" :aria-label="__('common.edit_name', ['name' => $risk->name])" />@endcan
-                                @can('delete', $risk)<x-ui.button tone="ghost" size="sm" icon="trash" class="size-11! touch-manipulation @sm/directory:size-9!" wire:click="confirmDelete({{ $risk->id }})" :aria-label="__('common.delete_name', ['name' => $risk->name])" />@endcan
+                                @can('update', $risk)<x-ui.button tone="ghost" size="icon" icon="pencil-square" class="size-11! @sm/directory:" wire:click="openEditModal({{ $risk->id }})" :aria-label="__('common.edit_name', ['name' => $risk->name])" />@endcan
+                                @can('delete', $risk)<x-ui.button tone="ghost" size="icon" icon="trash" class="size-11! @sm/directory:" wire:click="confirmDelete({{ $risk->id }})" :aria-label="__('common.delete_name', ['name' => $risk->name])" />@endcan
                             </div>
                         </div>
 

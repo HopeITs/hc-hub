@@ -55,10 +55,10 @@
                                 <div class="flex items-center gap-1">
                                     <p class="me-2 text-2xl font-extrabold tracking-tight tabular-nums {{ $inkText }}">{{ $amount($budget) }} <span class="text-xs font-semibold tracking-normal {{ $mutedText }}">{{ $currency }}</span></p>
                                     @can('transfers.create')
-                                    <x-ui.button tone="ghost" size="sm" icon="plus" class="size-9! touch-manipulation" wire:click="openTransferCreate({{ $agreement->id }})" :aria-label="__('proposals.schedule_tranche_for', ['donor' => $agreement->donor->name])" data-test="schedule-tranche-{{ $agreement->id }}" />
+                                    <x-ui.button tone="ghost" size="icon" icon="plus" wire:click="openTransferCreate({{ $agreement->id }})" :aria-label="__('proposals.schedule_tranche_for', ['donor' => $agreement->donor->name])" data-test="schedule-tranche-{{ $agreement->id }}" />
                                     @endcan
                                     @can('funding-agreements.update')
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9! touch-manipulation" wire:click="openAgreementEdit({{ $agreement->id }})" :aria-label="__('common.edit_name', ['name' => $agreement->donor->name])" data-test="edit-agreement-{{ $agreement->id }}" />
+                                    <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openAgreementEdit({{ $agreement->id }})" :aria-label="__('common.edit_name', ['name' => $agreement->donor->name])" data-test="edit-agreement-{{ $agreement->id }}" />
                                     @endcan
                                 </div>
                             </div>
@@ -136,7 +136,7 @@
                                                     @endif
                                                     <x-ui.enum-badge :case="$transfer->ar_status" />
                                                     @can('transfers.update')
-                                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9! touch-manipulation" wire:click="openTransferEdit({{ $transfer->id }})" :aria-label="__('proposals.edit_tranche')" data-test="edit-transfer-{{ $transfer->id }}" />
+                                                    <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openTransferEdit({{ $transfer->id }})" :aria-label="__('proposals.edit_tranche')" data-test="edit-transfer-{{ $transfer->id }}" />
                                                     @endcan
                                                 </div>
                                             </div>
@@ -222,12 +222,12 @@
                             <x-slot:actions>
                                 <td>
                                     <span class="flex items-center justify-end">
-                                        <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('funding-agreements.show', $agreementRow)" wire:navigate :aria-label="__('proposals.view_agreement')" />
+                                        <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('funding-agreements.show', $agreementRow)" wire:navigate :aria-label="__('proposals.view_agreement')" />
                                         @can('transfers.create')
-                                            <x-ui.button tone="ghost" size="sm" icon="plus" class="size-8!" wire:click="openTransferCreate({{ $agreementRow->id }})" :aria-label="__('proposals.schedule_tranche_for', ['donor' => $agreementRow->donor->name])" data-test="schedule-tranche-{{ $agreementRow->id }}" />
+                                            <x-ui.button tone="ghost" size="icon" icon="plus" wire:click="openTransferCreate({{ $agreementRow->id }})" :aria-label="__('proposals.schedule_tranche_for', ['donor' => $agreementRow->donor->name])" data-test="schedule-tranche-{{ $agreementRow->id }}" />
                                         @endcan
                                         @can('funding-agreements.update')
-                                            <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openAgreementEdit({{ $agreementRow->id }})" :aria-label="__('common.edit_name', ['name' => $agreementRow->donor->name])" data-test="edit-agreement-{{ $agreementRow->id }}" />
+                                            <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openAgreementEdit({{ $agreementRow->id }})" :aria-label="__('common.edit_name', ['name' => $agreementRow->donor->name])" data-test="edit-agreement-{{ $agreementRow->id }}" />
                                         @endcan
                                     </span>
                                 </td>

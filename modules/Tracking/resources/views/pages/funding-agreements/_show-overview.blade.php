@@ -190,7 +190,7 @@
                                 <div class="flex shrink-0 items-center gap-1">
                                     <x-ui.enum-badge :case="$transfer->ar_status" />
                                     @can('transfers.update')
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9! touch-manipulation" wire:click="openTransferEdit({{ $transfer->id }})" :aria-label="__('funding_agreements.edit_tranche_number', ['number' => $journey['number']])" data-test="edit-transfer-{{ $transfer->id }}" />
+                                    <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openTransferEdit({{ $transfer->id }})" :aria-label="__('funding_agreements.edit_tranche_number', ['number' => $journey['number']])" data-test="edit-transfer-{{ $transfer->id }}" />
                                     @endcan
                                 </div>
                             </div>
@@ -341,8 +341,8 @@
                                     @unless ($report->isSubmitted())
                                         <x-ui.button size="sm" icon="check" class="min-h-9 touch-manipulation" wire:click="markReportSubmitted({{ $report->id }})" data-test="submit-report-{{ $report->id }}">{{ __('funding_agreements.mark_submitted') }}</x-ui.button>
                                     @endunless
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9! touch-manipulation" wire:click="openReportEdit({{ $report->id }})" :aria-label="__('common.edit_name', ['name' => $report->title])" />
-                                    <x-ui.button tone="ghost" size="sm" icon="trash" class="size-9! touch-manipulation" wire:click="confirmReportDelete({{ $report->id }})" :aria-label="__('funding_agreements.delete_report_name', ['name' => $report->title])" data-test="delete-report-{{ $report->id }}" />
+                                    <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openReportEdit({{ $report->id }})" :aria-label="__('common.edit_name', ['name' => $report->title])" />
+                                    <x-ui.button tone="ghost" size="icon" icon="trash" wire:click="confirmReportDelete({{ $report->id }})" :aria-label="__('funding_agreements.delete_report_name', ['name' => $report->title])" data-test="delete-report-{{ $report->id }}" />
                                 </div>
                                 @endcan
                             </li>

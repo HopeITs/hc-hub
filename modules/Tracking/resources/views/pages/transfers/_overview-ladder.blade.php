@@ -214,7 +214,7 @@
 
                                         @can('transfers.update')
                                         {{-- No delete: a money record never disappears. --}}
-                                        <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openEditModal({{ $transfer->id }})" :aria-label="__('transfers.edit_transfer')" />
+                                        <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditModal({{ $transfer->id }})" :aria-label="__('transfers.edit_transfer')" />
                                         @endcan
                                     </div>
                                 </div>

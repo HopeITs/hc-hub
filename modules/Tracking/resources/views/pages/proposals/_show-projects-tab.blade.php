@@ -74,7 +74,7 @@
                                 <div class="flex shrink-0 items-center gap-1">
                                     <x-ui.enum-badge :case="$project->status" />
                                     @can('update', $this->proposal)
-                                    <x-ui.button tone="ghost" size="sm" icon="link-slash" class="size-9! touch-manipulation" wire:click="confirmUnlinkProject({{ $project->id }})" :aria-label="__('proposals.unlink_project_name', ['name' => $project->name])" data-test="unlink-project-{{ $project->id }}" />
+                                    <x-ui.button tone="ghost" size="icon" icon="link-slash" wire:click="confirmUnlinkProject({{ $project->id }})" :aria-label="__('proposals.unlink_project_name', ['name' => $project->name])" data-test="unlink-project-{{ $project->id }}" />
                                     @endcan
                                 </div>
                             </div>

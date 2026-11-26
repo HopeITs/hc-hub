@@ -153,14 +153,14 @@
                         </div>
 
                         <div class="flex shrink-0 items-center gap-1">
-                            <x-ui.button tone="ghost" size="sm" icon="eye" class="size-9!" :href="route('transfers.index', ['account' => $account->id])" wire:navigate :aria-label="__('accounts.view_transfers_for_name', ['name' => $account->account_name])" />
+                            <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('transfers.index', ['account' => $account->id])" wire:navigate :aria-label="__('accounts.view_transfers_for_name', ['name' => $account->account_name])" />
                             @can('accounts.update')
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9!" wire:click="openEditModal({{ $account->id }})" :aria-label="__('common.edit_name', ['name' => $account->account_name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditModal({{ $account->id }})" :aria-label="__('common.edit_name', ['name' => $account->account_name])" />
                             @endcan
 
                             {{-- No delete anywhere: transfers_tracking.account_id RESTRICTs. Closing needs accounts.delete. --}}
                             @if ($account->is_active && auth()->user()->can('accounts.delete'))
-                                <x-ui.button tone="ghost" size="sm" icon="lock-closed" class="size-9!" wire:click="confirmClose({{ $account->id }})" :aria-label="__('accounts.close_name', ['name' => $account->account_name])" />
+                                <x-ui.button tone="ghost" size="icon" icon="lock-closed" wire:click="confirmClose({{ $account->id }})" :aria-label="__('accounts.close_name', ['name' => $account->account_name])" />
                             @endif
                         </div>
                     </div>

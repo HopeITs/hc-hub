@@ -97,7 +97,7 @@
                             {{-- A disabled button takes no pointer events, so the reason sits on this wrapper. --}}
                             <span class="flex items-center gap-1" @if ($filtersAreActive) title="{{ __('narrative_questions.clear_to_reorder') }}" @endif data-test="move-narrative-question-arrows">
                                 <x-ui.button
-                                    tone="ghost" size="sm" icon="arrow-up" class="min-h-11 min-w-11 md:size-9! md:min-h-0 md:min-w-0"
+                                    tone="ghost" size="icon" icon="arrow-up"
                                     wire:click="moveQuestion({{ $question->id }}, 'up')"
                                     wire:target="moveQuestion"
                                     wire:loading.attr="disabled"
@@ -106,7 +106,7 @@
                                     data-test="move-narrative-question-up"
                                 />
                                 <x-ui.button
-                                    tone="ghost" size="sm" icon="arrow-down" class="min-h-11 min-w-11 md:size-9! md:min-h-0 md:min-w-0"
+                                    tone="ghost" size="icon" icon="arrow-down"
                                     wire:click="moveQuestion({{ $question->id }}, 'down')"
                                     wire:target="moveQuestion"
                                     wire:loading.attr="disabled"

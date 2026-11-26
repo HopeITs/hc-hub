@@ -55,7 +55,7 @@
             <div class="flex justify-end gap-2">
                 <x-ui.button tone="ghost" wire:click="$set('showBulk', false)">{{ __('hr_recruitment.applicant_ui.cancel') }}</x-ui.button>
                 @if ($bulk === 'reject')
-                    <x-ui.button type="submit" tone="neutral" wire:loading.attr="disabled" wire:target="applyBulk" wire:confirm="{{ __('hr_recruitment.applicant_ui.decisions.bulk_confirm') }}">{{ __('hr_recruitment.applicant_ui.decisions.bulk_apply') }}</x-ui.button>
+                    <x-ui.button type="submit" tone="inverse" wire:loading.attr="disabled" wire:target="applyBulk" wire:confirm="{{ __('hr_recruitment.applicant_ui.decisions.bulk_confirm') }}">{{ __('hr_recruitment.applicant_ui.decisions.bulk_apply') }}</x-ui.button>
                 @else
                     <x-ui.button type="submit" tone="primary" wire:loading.attr="disabled" wire:target="applyBulk">{{ $bulk === 'tags' ? __('hr_recruitment.applicant_ui.tags.bulk_apply') : __('hr_recruitment.applicant_ui.profile_reviews.bulk_apply') }}</x-ui.button>
                 @endif

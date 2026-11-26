@@ -449,7 +449,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.interviews')] cl
                         <x-ui.data-table.cell :label="__($t.'participants')"><span class="tabular-nums">{{ $interview->currentParticipants->count() }}</span></x-ui.data-table.cell>
                         <td>
                             <span class="flex items-center justify-end">
-                                <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('hr.recruitment.interviews.show', ['interviewId' => $interview->id])" wire:navigate :aria-label="__('hr_recruitment.hub.view')" />
+                                <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('hr.recruitment.interviews.show', ['interviewId' => $interview->id])" wire:navigate :aria-label="__('hr_recruitment.hub.view')" />
                             </span>
                         </td>
                     </tr>

@@ -248,9 +248,9 @@ new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.team_calendar')] 
     </x-slot:filters>
 
     <div class="mb-3 flex flex-wrap items-center gap-2" data-calendar-toolbar>
-        <x-ui.button tone="ghost" size="sm" icon="chevron-left" class="size-9! rtl:rotate-180" wire:click="move(-1)" :aria-label="__('hr_leave.calendar.nav_buttons.previous')" />
+        <x-ui.button tone="ghost" size="icon" icon="chevron-left" class="rtl:rotate-180" wire:click="move(-1)" :aria-label="__('hr_leave.calendar.nav_buttons.previous')" />
         <x-ui.button tone="secondary" size="sm" wire:click="goToday">{{ __('hr_leave.calendar.nav_buttons.today') }}</x-ui.button>
-        <x-ui.button tone="ghost" size="sm" icon="chevron-right" class="size-9! rtl:rotate-180" wire:click="move(1)" :aria-label="__('hr_leave.calendar.nav_buttons.next')" />
+        <x-ui.button tone="ghost" size="icon" icon="chevron-right" class="rtl:rotate-180" wire:click="move(1)" :aria-label="__('hr_leave.calendar.nav_buttons.next')" />
         <h2 class="ms-1 text-base font-bold text-secondary-dark dark:text-ink" aria-live="polite">{{ $periodLabel }}</h2>
         <span wire:loading.delay.flex class="hidden items-center gap-1.5 text-xs {{ $muted }}">
             <flux:icon.arrow-path class="size-3.5 animate-spin" />{{ __('common.updating') }}

@@ -179,7 +179,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.campaigns')] cla
                     <x-ui.data-table.cell :label="__('hr_recruitment.campaign_ui.created_by')"><span dir="auto">{{ $campaign->creator?->name ?? '—' }}</span></x-ui.data-table.cell>
                     <td>
                         <span class="flex items-center justify-end">
-                            <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('hr.recruitment.campaigns.show', ['campaignId' => $campaign->id])" wire:navigate :aria-label="__('hr_recruitment.hub.view')" />
+                            <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('hr.recruitment.campaigns.show', ['campaignId' => $campaign->id])" wire:navigate :aria-label="__('hr_recruitment.hub.view')" />
                         </span>
                     </td>
                 </tr>

@@ -84,14 +84,14 @@
                 {{-- A disabled button takes no pointer events, so the reason sits on this wrapper. --}}
                 <span class="flex items-center gap-1" @if ($filtersAreActive) title="{{ __('risk_library.clear_to_reorder') }}" @endif data-test="move-entry-arrows">
                     <x-ui.button
-                        tone="ghost" size="sm" icon="arrow-up" class="min-h-11 min-w-11 md:size-9! md:min-h-0 md:min-w-0"
+                        tone="ghost" size="icon" icon="arrow-up"
                         wire:click="moveEntry({{ $entry->id }}, 'up')"
                         :disabled="$filtersAreActive || $position === 1"
                         :aria-label="__('risk_library.move_up_name', ['name' => $displayTitle])"
                         data-test="move-entry-up"
                     />
                     <x-ui.button
-                        tone="ghost" size="sm" icon="arrow-down" class="min-h-11 min-w-11 md:size-9! md:min-h-0 md:min-w-0"
+                        tone="ghost" size="icon" icon="arrow-down"
                         wire:click="moveEntry({{ $entry->id }}, 'down')"
                         :disabled="$filtersAreActive || $position === $total"
                         :aria-label="__('risk_library.move_down_name', ['name' => $displayTitle])"

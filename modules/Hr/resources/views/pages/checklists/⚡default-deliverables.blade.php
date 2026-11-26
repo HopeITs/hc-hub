@@ -339,8 +339,8 @@ new #[Layout('layouts::desk'), Title('hr_checklists.titles.default_deliverables'
                     <td class="px-3.5 py-2.5">
                         @if ($canEdit)
                             <span class="flex items-center justify-end gap-1">
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-8!" wire:click="openEditModal({{ $row->id }})" :aria-label="__('common.edit_name', ['name' => $rowLabel])" />
-                                <x-ui.button tone="ghost" size="sm" icon="trash" class="size-8! text-status-critical!" wire:click="confirmDelete({{ $row->id }})" :aria-label="__('common.delete_name', ['name' => $rowLabel])" />
+                                <x-ui.button tone="ghost" size="icon" icon="pencil-square" wire:click="openEditModal({{ $row->id }})" :aria-label="__('common.edit_name', ['name' => $rowLabel])" />
+                                <x-ui.button tone="danger" size="icon" icon="trash" wire:click="confirmDelete({{ $row->id }})" :aria-label="__('common.delete_name', ['name' => $rowLabel])" />
                             </span>
                         @endif
                     </td>

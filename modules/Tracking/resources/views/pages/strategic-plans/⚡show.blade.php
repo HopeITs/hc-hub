@@ -406,7 +406,7 @@ new #[Layout('layouts::desk'), Title('titles.strategic_plan')] class extends Com
                                     @endforeach
                                     @if ($canWrite)
                                         <td class="px-2 py-2 align-top">
-                                            <x-ui.button tone="ghost" size="sm" icon="x-mark" class="size-8!" wire:click="confirmRemoveIndicator({{ $indicatorId }})" :aria-label="__('strategic_plans.remove_named', ['name' => $indicator->name])" data-test="remove-plan-indicator-{{ $indicatorId }}" />
+                                            <x-ui.button tone="ghost" size="icon" icon="x-mark" wire:click="confirmRemoveIndicator({{ $indicatorId }})" :aria-label="__('strategic_plans.remove_named', ['name' => $indicator->name])" data-test="remove-plan-indicator-{{ $indicatorId }}" />
                                         </td>
                                     @endif
                                 </tr>

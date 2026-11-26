@@ -1,0 +1,40 @@
+/*
+ * x-ui.button sizes and the danger tone (docs/redesign-plan/02-shared-components.md 2.1).
+ * Sits in @layer utilities beside the .page-action block in flux-overrides.css: same layer as
+ * Flux's own size classes, so the extra data-attribute specificity wins without `!`.
+ * The Desk's .dk-btn / .dk-iconbtn read the same control tokens, so the families agree on height.
+ */
+@layer utilities {
+    [data-flux-button][data-ui-button][data-size='lg'] {
+        height: 3rem;
+        padding-inline: 1.25rem;
+        font-size: 1rem;
+    }
+
+    /* Icon-only: a square, 2rem on a fine pointer and the full control height on touch. */
+    [data-flux-button][data-ui-button][data-size='icon'] {
+        width: 2rem;
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0;
+        touch-action: manipulation;
+    }
+
+    @media (pointer: coarse) {
+        [data-flux-button][data-ui-button][data-size='icon'] {
+            width: var(--control-h);
+            min-width: var(--control-h);
+            height: var(--control-h);
+        }
+    }
+
+    [data-flux-button][data-ui-button][data-tone='danger'] {
+        border-width: 0;
+        background-color: transparent;
+        color: var(--color-status-critical-text);
+    }
+
+    [data-flux-button][data-ui-button][data-tone='danger']:hover {
+        background-color: var(--color-status-critical-soft);
+    }
+}

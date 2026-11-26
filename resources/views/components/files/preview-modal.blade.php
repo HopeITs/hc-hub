@@ -27,8 +27,8 @@
         @if ($file !== null)
             <x-slot:headerActions>
                 @if ($count > 1)
-                    <x-ui.button tone="ghost" size="sm" icon="chevron-left" class="{{ $compact ? 'size-8!' : 'size-9! touch-manipulation' }} rtl:[&_svg]:-scale-x-100" wire:click="previewAdjacent(-1)" :aria-label="__('reports.previous_file')" />
-                    <x-ui.button tone="ghost" size="sm" icon="chevron-right" class="{{ $compact ? 'size-8!' : 'size-9! touch-manipulation' }} rtl:[&_svg]:-scale-x-100" wire:click="previewAdjacent(1)" :aria-label="__('reports.next_file')" />
+                    <x-ui.button tone="ghost" size="icon" icon="chevron-left" class="rtl:[&_svg]:-scale-x-100" wire:click="previewAdjacent(-1)" :aria-label="__('reports.previous_file')" />
+                    <x-ui.button tone="ghost" size="icon" icon="chevron-right" class="rtl:[&_svg]:-scale-x-100" wire:click="previewAdjacent(1)" :aria-label="__('reports.next_file')" />
                 @endif
                 @if ($file->isPreviewable())
                     <a href="{{ $previewUrl }}" target="_blank" rel="noopener" class="inline-flex {{ $compact ? 'size-8' : 'size-9' }} items-center justify-center rounded-lg text-secondary-medium transition-colors hover:bg-secondary-soft hover:text-secondary-dark dark:text-ink-muted dark:hover:bg-surface-2 dark:hover:text-ink" aria-label="{{ __('reports.open_in_new_tab') }}">

@@ -138,7 +138,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offers')] class 
                     <x-ui.data-table.cell :label="__('hr_recruitment.applicant_ui.offers.expires_at')"><span class="whitespace-nowrap tabular-nums">{{ $fmt($offer->expires_at) }}</span></x-ui.data-table.cell>
                     <td>
                         <span class="flex items-center justify-end">
-                            <x-ui.button tone="ghost" size="sm" icon="eye" class="size-8!" :href="route('hr.recruitment.offers.show', ['offerId' => $offer->id])" wire:navigate :aria-label="__('hr_recruitment.hub.view')" />
+                            <x-ui.button tone="ghost" size="icon" icon="eye" :href="route('hr.recruitment.offers.show', ['offerId' => $offer->id])" wire:navigate :aria-label="__('hr_recruitment.hub.view')" />
                         </span>
                     </td>
                 </tr>
