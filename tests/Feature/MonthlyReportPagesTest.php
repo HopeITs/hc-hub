@@ -147,14 +147,14 @@ test('MEAL lands on its queue and sees only the submitted reports of the project
         ->assertDontSeeHtml('data-validate-row="'.$foreign->id.'"');
 });
 
-test('a project officer from another governorate sees the project while the governorate officer does not', function () {
+test('a place officer from another governorate sees the place while the governorate officer does not', function () {
     $governorateEmployee = insertHrEmployee(firstNameEn: 'Nour', lastNameEn: 'Officer');
     Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forCity($this->aleppo)->create(['employee_id' => $governorateEmployee]));
     $idlibEmployee = insertHrEmployee(firstNameEn: 'Ziad', lastNameEn: 'Idlib');
-    $project = mrpProject($this->aleppo);
+    $place = mrpPlace($this->aleppo);
     Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forCity(insertHrCity('Idlib'))->create(['employee_id' => $idlibEmployee]));
-    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forProject($project->id)->create(['employee_id' => $idlibEmployee]));
-    $report = mrpMonth($project, '2026-09-01', MonthlyReportStatus::Submitted);
+    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forPlace($place)->create(['employee_id' => $idlibEmployee]));
+    $report = mrpExtractTemplate($place, 'Education for All', ['2026-09-01' => MonthlyReportStatus::Submitted])['reports']['2026-09-01'];
 
     Livewire::actingAs(userWithRole('MEAL', $idlibEmployee))->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-validate-row="'.$report->id.'"');

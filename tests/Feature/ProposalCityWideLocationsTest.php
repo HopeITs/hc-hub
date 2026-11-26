@@ -96,7 +96,7 @@ test('the Locations chapter shows each row with its status and field work in pla
     ProposalLocation::factory()->cityWide()->create(['proposal_id' => $proposal->id, 'city_id' => $this->aleppo, 'program_id' => $this->program->id, 'responsible_employee_id' => $this->employee]);
     $missing = ProposalLocation::factory()->create(['proposal_id' => $proposal->id, 'city_id' => insertHrCity('Homs', 'حمص'), 'program_id' => $this->program->id, 'responsible_employee_id' => $this->employee, 'sort' => 1]);
 
-    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $proposal])
+    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->set('tab', 'projects')
         ->assertSeeHtml('data-test="locations-chapter"')
         ->assertSeeHtml('data-location-status="complete"')
@@ -111,7 +111,7 @@ test('the Locations chapter shows each row with its status and field work in pla
 test('the chapter says so when the proposal has no rows yet', function () {
     $proposal = Proposal::factory()->create();
 
-    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $proposal])
+    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->set('tab', 'projects')
         ->assertSeeHtml('data-test="locations-chapter-empty"')
         ->assertDontSeeHtml('data-test="add-centers"');

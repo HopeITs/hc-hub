@@ -21,10 +21,10 @@ test('a project running past the grant term is flagged', function () {
     );
 
     Livewire::actingAs($user)
-        ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->set('tab', 'projects')
-        // Stage 3b: the Projects & places section flags it with an "Ends after grant" pill.
-        ->assertSee(__('proposals.sections.ends_after_grant'))
+        // The embedded Projects tab flags it with a plain-worded chip.
+        ->assertSee(__('proposals.runs_past_the_grant_term'))
         ->assertSeeHtml('data-outruns-grant');
 });
 
@@ -44,7 +44,7 @@ test('a project ending inside the grant term is not flagged', function () {
     );
 
     Livewire::actingAs($user)
-        ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->set('tab', 'projects')
         ->assertSee('Contained Mobile Clinic')
         ->assertDontSeeHtml('data-outruns-grant');

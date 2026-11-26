@@ -461,7 +461,7 @@
 
     .modal-shell-index-optional.is-review,
     .form-section-review {
-        color: var(--color-primary);
+        color: var(--color-brand-text);
         font-weight: 600;
     }
 
