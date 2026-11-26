@@ -76,8 +76,8 @@ test('UI debt never goes up', function () {
         'smallFonts' => 0,
         'arbitraryTextSizes' => 18,
         'rawButtons' => 639,
-        'importantOverrides' => 566,
-        'rawHexColours' => 89,
+        'importantOverrides' => 412,
+        'rawHexColours' => 25,
     ];
 
     $counts = uiDebtCounts();
