@@ -371,19 +371,19 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
                 <flux:heading size="lg">{{ __('annual_plans.wf.new_plan') }}</flux:heading>
                 <flux:text class="mt-1">{{ __('annual_plans.wf.new_plan_help') }}</flux:text>
             </div>
-            <flux:select wire:model.live="newProposal" :label="__('annual_plans.wf.fact_proposal')" data-test="new-plan-proposal">
+            <x-ui.form-select wire:model.live="newProposal" :label="__('annual_plans.wf.fact_proposal')" data-test="new-plan-proposal">
                 <option value="">{{ __('annual_plans.wf.pick_proposal') }}</option>
                 @foreach ($this->proposalOptions as $proposal)
                     <option value="{{ $proposal->id }}">{{ $proposal->name }}{{ $proposal->internal_project_number ? ' · '.$proposal->internal_project_number : '' }}</option>
                 @endforeach
-            </flux:select>
+            </x-ui.form-select>
             @error('newProposal') <p class="ap-err">{{ $message }}</p> @enderror
-            <flux:select wire:model="newProgram" :label="__('annual_plans.wf.program')" :disabled="$newProposal === ''" data-test="new-plan-program">
+            <x-ui.form-select wire:model="newProgram" :label="__('annual_plans.wf.program')" :disabled="$newProposal === ''" data-test="new-plan-program">
                 <option value="">{{ __('annual_plans.wf.pick_program') }}</option>
                 @foreach ($this->programOptions as $programId => $programName)
                     <option value="{{ $programId }}">{{ $programName }}</option>
                 @endforeach
-            </flux:select>
+            </x-ui.form-select>
             @if ($newProposal !== '' && $this->programOptions === [])
                 <p class="ap-sm ap-muted">{{ __('annual_plans.wf.no_program_to_plan') }}</p>
             @endif

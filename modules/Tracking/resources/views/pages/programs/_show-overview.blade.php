@@ -238,16 +238,16 @@
         <div id="program-settings-body" class="dk-prog-fold-b" x-show="open" x-collapse x-cloak>
             <div class="dk-prog-setting">
                 <div class="min-w-0">
-                    <label for="program-donor-attribution" class="dk-prog-setting-l">{{ __('programs.donor_attribution') }}</label>
+                    <span class="dk-prog-setting-l" aria-hidden="true">{{ __('programs.donor_attribution') }}</span>
                     <p class="dk-small dk-muted">{{ __('programs.donor_attribution_help') }}</p>
                 </div>
                 @can('report-templates.manage')
                     <div class="w-full max-w-72">
-                        <flux:select id="program-donor-attribution" size="sm" wire:change="setDonorAttribution($event.target.value)" wire:loading.attr="disabled" wire:target="setDonorAttribution">
+                        <x-ui.form-select id="program-donor-attribution" wire:model.live="donorAttribution" :label="__('programs.donor_attribution')" class="[&_.form-label]:sr-only">
                             @foreach (\Modules\Tracking\Enums\DonorAttribution::cases() as $attribution)
-                                <flux:select.option value="{{ $attribution->value }}" :selected="$this->program->donor_attribution === $attribution">{{ $attribution->label() }}</flux:select.option>
+                                <flux:select.option value="{{ $attribution->value }}">{{ $attribution->label() }}</flux:select.option>
                             @endforeach
-                        </flux:select>
+                        </x-ui.form-select>
                     </div>
                 @endcan
             </div>

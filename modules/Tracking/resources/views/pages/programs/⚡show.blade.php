@@ -45,9 +45,13 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
     #[Url(except: 'overview')]
     public string $tab = 'overview';
 
+    /** The donor attribution picked in the overview settings; saved on change. */
+    public string $donorAttribution = '';
+
     public function mount(Program $program): void
     {
         $this->programId = $program->id;
+        $this->donorAttribution = $program->donor_attribution instanceof DonorAttribution ? $program->donor_attribution->value : DonorAttribution::Shared->value;
         $this->tab = $this->resolveTab($this->tab);
     }
 
@@ -60,6 +64,11 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
     protected function resolveTab(string $tab): string
     {
         return in_array($tab, self::TABS, true) ? $tab : 'overview';
+    }
+
+    public function updatedDonorAttribution(string $attribution): void
+    {
+        $this->setDonorAttribution($attribution);
     }
 
     /**
