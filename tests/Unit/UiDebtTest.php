@@ -76,7 +76,7 @@ test('UI debt never goes up', function () {
         'smallFonts' => 0,
         'arbitraryTextSizes' => 18,
         'rawButtons' => 629,
-        'importantOverrides' => 412,
+        'importantOverrides' => 405,
         'rawHexColours' => 25,
     ];
 
