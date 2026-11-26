@@ -4,6 +4,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\LeaveRequestStatus;
@@ -13,6 +14,7 @@ use Modules\Hr\Models\AttendanceImport;
 use Modules\Hr\Models\AttendancePunch;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Holiday;
 use Modules\Hr\Models\LeaveBalance;
 use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Models\Position;
@@ -68,6 +70,15 @@ beforeEach(function () {
             'employee_id' => $employee->id,
             'punched_at' => $at,
         ]);
+    };
+
+    // Every working day of September answered, so the paper may be printed (nothing waits).
+    $this->settle = function (Employee $employee): void {
+        for ($day = CarbonImmutable::create(2026, 9, 1); $day->month === 9; $day = $day->addDay()) {
+            if (! in_array($day->dayOfWeek, [0, 6], true)) {
+                AttendanceDayDecision::query()->updateOrCreate(['employee_id' => $employee->id, 'work_date' => $day->toDateString()], ['kind' => AttendanceDayDecision::WORKED]);
+            }
+        }
     };
 
     // The program's own old Excel export: a BOF record, then one text record per cell.
@@ -242,7 +253,8 @@ test('hr decides a day on the page, and a weekend is never asked about', functio
     Livewire::actingAs($hr)->test('hr::attendance.timesheets')
         ->set('month', '2026-09')
         ->call('openDay', $employee->id, '2026-09-10')
-        ->assertSet('showDayModal', true)
+        ->assertSet('dayEmployeeId', $employee->id)
+        ->assertSet('dayDate', '2026-09-10')
         ->set('dayKind', AttendanceDayDecision::ABSENT)
         ->set('dayNote', 'no call')
         ->call('saveDecision')
@@ -256,9 +268,13 @@ test('hr decides a day on the page, and a weekend is never asked about', functio
         ->assertForbidden();
 });
 
-test('the pages need their permission, and the print shows only the viewer\'s city as a draft', function () {
+test('the pages need their permission, and the print shows only the viewer\'s city', function () {
     $mine = ($this->volunteer)();
     $other = ($this->volunteer)(City::factory()->create());
+    foreach ([$mine, $other] as $person) {
+        ($this->punch)($person, '2026-09-02 08:00:00');
+        ($this->settle)($person);
+    }
     $nobody = User::factory()->create()->refresh();
     $hr = ($this->hr)($this->city, ['attendance.view-own', 'attendance.view']);
 
@@ -274,12 +290,13 @@ test('the pages need their permission, and the print shows only the viewer\'s ci
         ->assertOk()
         ->assertSee($mine->nameForLocale('ar'))
         ->assertDontSee($other->nameForLocale('ar'))
-        ->assertSee('Monthly TimeSheet')
-        ->assertSee('مسودة');
+        ->assertSee('Monthly TimeSheet');
 });
 
 test('a print link without a month opens the month the page opens on', function () {
     $mine = ($this->volunteer)();
+    ($this->punch)($mine, '2026-09-02 08:00:00');
+    ($this->settle)($mine);
     $hr = ($this->hr)($this->city, ['attendance.view-own', 'attendance.view']);
 
     // The Timesheets page opens on the month of ten days ago: early October means September.
@@ -370,6 +387,8 @@ test('someone who sees every city starts on their own city, and a city link wins
 test('groups start folded, and a search or a hand-opened group shows the rows', function () {
     $first = ($this->volunteer)();
     $second = ($this->volunteer)();
+    ($this->punch)($first, '2026-09-02 08:00:00');
+    ($this->punch)($second, '2026-09-02 08:00:00');
     $hr = ($this->hr)($this->city);
 
     $page = Livewire::actingAs($hr)->test('hr::attendance.timesheets')
@@ -389,7 +408,9 @@ test('groups start folded, and a search or a hand-opened group shows the rows', 
 
 test('a search opens every group, even one folded by hand, and clearing it brings the choice back', function () {
     $first = ($this->volunteer)();
-    ($this->volunteer)();
+    $second = ($this->volunteer)();
+    ($this->punch)($first, '2026-09-02 08:00:00');
+    ($this->punch)($second, '2026-09-02 08:00:00');
     $hr = ($this->hr)($this->city);
     $foldKey = $this->city->id.':'.Grouping::DEPARTMENT.'-'.($first->allContracts()->first()->position->department_id ?: 'none');
 
@@ -402,4 +423,237 @@ test('a search opens every group, even one folded by hand, and clearing it bring
         ->assertSeeHtml('aria-expanded="true"')
         ->set('search', '')
         ->assertDontSeeHtml('aria-expanded="true"');
+});
+
+test('a public holiday or a feast is a day off with its name, never a day to answer', function () {
+    $employee = ($this->volunteer)();
+    $hr = ($this->hr)($this->city);
+    ($this->punch)($employee, '2026-09-02 08:00:00');
+
+    // A three-day feast, for everyone: no punches on those days and nothing to ask.
+    Holiday::query()->create([
+        'name_en' => 'Eid al-Adha', 'name_ar' => 'عيد الأضحى',
+        'start_date' => '2026-09-15', 'end_date' => '2026-09-17',
+        'is_recurring' => false, 'scope' => Holiday::SCOPE_NATIONAL, 'kind' => Holiday::KIND_OFFICIAL,
+    ]);
+
+    $rows = collect(app(Timesheet::class)->forEmployee($employee, $this->september)['rows'])->keyBy(fn (array $row): string => $row['date']->toDateString());
+
+    foreach (['2026-09-15', '2026-09-16', '2026-09-17'] as $date) {
+        expect($rows[$date]['kind'])->toBe(Timesheet::HOLIDAY)
+            ->and($rows[$date]['decidable'])->toBeFalse();
+    }
+
+    // The person's calendar shows the feast by name, and the day cannot be opened as a question.
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->call('openMonth', $employee->id)
+        ->assertSee('عيد الأضحى')
+        ->call('openDay', $employee->id, '2026-09-16')
+        ->assertForbidden();
+});
+
+test("the calendar names the person's own days off and where they come from", function () {
+    $employee = ($this->volunteer)();
+    $contract = $employee->allContracts()->first();
+    $center = Center::factory()->create(['city_id' => $this->city->id, 'weekends' => '0,6']);
+    $contract->position->update(['center_id' => $center->id]);
+    $hr = ($this->hr)($this->city);
+    ($this->punch)($employee, '2026-09-02 08:00:00');
+
+    $placement = app(Timesheet::class)->forEmployee($employee, $this->september)['placement'];
+
+    expect($placement['days_off'])->toBe([0, 6])
+        ->and($placement['days_off_from'])->toBe('center');
+
+    // A center whose only day off is Sunday ("0") is a real setting, not "nothing set".
+    $center->update(['weekends' => '0']);
+    $sheet = app(Timesheet::class)->forEmployee($employee->fresh(), $this->september);
+    $rows = collect($sheet['rows'])->keyBy(fn (array $row): string => $row['date']->toDateString());
+
+    expect($sheet['placement']['days_off'])->toBe([0])
+        ->and($sheet['placement']['days_off_from'])->toBe('center')
+        ->and($rows['2026-09-13']['kind'])->toBe(Timesheet::WEEKEND)
+        ->and($rows['2026-09-12']['kind'])->not->toBe(Timesheet::WEEKEND);
+
+    // Days picked on the contract win over the center: Sunday, Tuesday and Thursday are worked.
+    $contract->update(['work_weekdays' => '0,2,4']);
+    $placement = app(Timesheet::class)->forEmployee($employee->fresh(), $this->september)['placement'];
+
+    expect($placement['days_off'])->toBe([1, 3, 5, 6])
+        ->and($placement['days_off_from'])->toBe('contract');
+
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->call('openMonth', $employee->id)
+        ->assertSeeHtml('data-attendance-days-off')
+        ->assertSee(__('hr_attendance.timesheets.days-off-from.contract'));
+});
+
+test('a day off with punches shows its times on the calendar', function () {
+    $employee = ($this->volunteer)();
+    $hr = ($this->hr)($this->city);
+    ($this->punch)($employee, '2026-09-12 09:00:00'); // Saturday
+    ($this->punch)($employee, '2026-09-12 15:30:00');
+
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->call('openMonth', $employee->id)
+        ->assertSee('09:00–15:30')
+        ->assertSee(__('hr_attendance.timesheets.worked-off'));
+});
+
+test('a day with a leave request is never a day for HR to decide', function () {
+    $employee = ($this->volunteer)();
+    ($this->punch)($employee, '2026-09-02 08:00:00');
+    $balance = LeaveBalance::factory()->for($employee->allContracts()->first())->create();
+
+    foreach ([LeaveRequestStatus::Pending, LeaveRequestStatus::Accepted] as $status) {
+        LeaveRequest::query()->delete();
+        LeaveRequest::factory()->for($balance)->create([
+            'status' => $status->value,
+            'start_at' => '2026-09-14 00:00:00',
+            'end_at' => '2026-09-14 23:59:59',
+        ]);
+
+        $sheet = app(Timesheet::class)->forEmployee($employee->fresh(), $this->september);
+        $rows = collect($sheet['rows'])->keyBy(fn (array $row): string => $row['date']->toDateString());
+
+        expect($rows['2026-09-14']['kind'])->toBe(Timesheet::LEAVE)
+            ->and($rows['2026-09-14']['decidable'])->toBeFalse()
+            ->and($sheet['totals']['leave_pending'])->toBe($status === LeaveRequestStatus::Pending ? 1 : 0);
+    }
+});
+
+test('the paper is not printed while a day waits or a leave request is unanswered', function () {
+    $employee = ($this->volunteer)();
+    ($this->punch)($employee, '2026-09-02 08:00:00'); // the other working days have no punch: they wait for HR
+    $hr = ($this->hr)($this->city, ['attendance.view-own', 'attendance.view']);
+
+    $this->actingAs($hr)->get(route('hr.attendance.print', ['month' => '2026-09']))->assertStatus(422);
+
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->assertSeeHtml('data-test="attendance-print-blocked"')
+        ->assertDontSeeHtml('data-test="attendance-print-link"');
+
+    // Every day answered: it prints, and the link opens in a new tab.
+    ($this->settle)($employee);
+    $this->actingAs($hr)->get(route('hr.attendance.print', ['month' => '2026-09']))->assertOk();
+
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->assertSeeHtmlInOrder(['data-test="attendance-print-link"', 'target="_blank"'])
+        ->call('openMonth', $employee->id)
+        ->assertSeeHtml('data-test="attendance-print-person"');
+});
+
+test('the page lists only people with punches in the month and never goes to a month to come', function () {
+    $with = ($this->volunteer)();
+    $without = ($this->volunteer)();
+    $hr = ($this->hr)($this->city);
+    ($this->punch)($with, '2026-09-02 08:00:00');
+    ($this->settle)($with);
+
+    // Someone whose center's report is not uploaded yet is not on the page, nor on the print.
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->assertSeeHtml('data-attendance-row="'.$with->id.'"')
+        ->assertDontSeeHtml('data-attendance-row="'.$without->id.'"');
+
+    $this->actingAs($hr)->get(route('hr.attendance.print', ['month' => '2026-09']))->assertOk();
+    $this->actingAs($hr)->get(route('hr.attendance.print', ['month' => '2026-09', 'employees' => [$without->id]]))->assertNotFound();
+
+    // A month with no punches says so, and the month after the current one never opens.
+    $this->travelTo('2026-11-24 10:00:00');
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-10')
+        ->assertSee(__('hr_attendance.timesheets.no-punches'))
+        ->set('month', '2027-03')
+        ->assertSet('month', '2026-11')
+        ->call('shiftMonth', 1)
+        ->assertSet('month', '2026-11');
+
+    $this->actingAs($hr)->get(route('hr.attendance.print', ['month' => '2027-01']))->assertSessionHasErrors('month');
+});
+
+test("a person's calendar answers a day with one button and moves on to the next day that waits", function () {
+    $employee = ($this->volunteer)();
+    $hr = ($this->hr)($this->city);
+
+    foreach (['2026-09-07', '2026-09-08', '2026-09-09'] as $date) {
+        ($this->punch)($employee, $date.' 08:00:00');
+        ($this->punch)($employee, $date.' 17:00:00');
+    }
+    ($this->punch)($employee, '2026-09-10 08:00:00'); // Thu: one punch, so it waits; Fri 11 and the rest wait too
+
+    $page = Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->call('openMonth', $employee->id)
+        ->assertSeeHtml('data-attendance-calendar')
+        ->assertSeeHtml('data-attendance-alert')
+        ->call('openDay', $employee->id, '2026-09-10')
+        ->assertSeeHtml('data-attendance-day-dialog')
+        ->call('answerDay', 'absent')
+        ->assertHasNoErrors();
+
+    $this->assertDatabaseHas('attendance_day_decisions', ['employee_id' => $employee->id, 'work_date' => '2026-09-10', 'kind' => 'absent', 'decided_by' => $hr->id]);
+
+    // The next day that still waits opens by itself.
+    $page->assertSet('dayEmployeeId', $employee->id)->assertNotSet('dayDate', '2026-09-10')->assertNotSet('dayDate', null);
+
+    // A bad answer is refused and nothing is saved for it.
+    $page->call('answerDay', 'maybe')->assertHasErrors('dayKind');
+});
+
+test('someone who sees only their own month gets the calendar straight away', function () {
+    $employee = ($this->volunteer)();
+    ($this->punch)($employee, '2026-09-02 08:00:00');
+    $staff = User::factory()->create(['employee_id' => $employee->id]);
+    $staff->givePermissionTo('attendance.view-own');
+
+    Livewire::actingAs($staff->refresh())->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->assertSeeHtml('data-attendance-month-panel="'.$employee->id.'"')
+        ->assertDontSeeHtml('data-test="attendance-back"');
+});
+
+test('a new report replaces what was stored for the days it covers, and ties older punches to their employee', function () {
+    $employee = ($this->volunteer)();
+    $other = ($this->volunteer)();
+    $importer = app(AttendanceImporter::class);
+    $upload = function (string $rows) use ($importer): AttendanceImport {
+        $csv = tempnam(sys_get_temp_dir(), 'att').'.csv';
+        file_put_contents($csv, "AC-No.,Time\n".$rows);
+
+        return $importer->import($csv, 'report.csv', null);
+    };
+
+    $upload("{$employee->id},01/09/2026 08:00\n{$employee->id},01/09/2026 16:00\n{$employee->id},02/09/2026 08:00\n");
+    // Someone the next file does not mention, and a day outside it: both stay.
+    ($this->punch)($other, '2026-09-01 08:30:00');
+    ($this->punch)($employee, '2026-09-20 08:00:00');
+
+    // The same file twice changes nothing.
+    $again = $upload("{$employee->id},01/09/2026 08:00\n{$employee->id},01/09/2026 16:00\n");
+    expect([$again->punches_total, $again->punches_new, (int) $again->getAttribute('punches_replaced')])->toBe([2, 0, 0]);
+
+    // The corrected export for 1 September: 08:00 became 08:05. The 2nd is outside it and stays.
+    $corrected = $upload("{$employee->id},01/09/2026 08:05\n{$employee->id},01/09/2026 16:00\n");
+    $left = AttendancePunch::query()->where('employee_id', $employee->id)->orderBy('punched_at')->pluck('punched_at')->map(fn ($at): string => $at->format('Y-m-d H:i'))->all();
+
+    expect($left)->toBe(['2026-09-01 08:05', '2026-09-01 16:00', '2026-09-02 08:00', '2026-09-20 08:00'])
+        ->and(AttendancePunch::query()->where('employee_id', $other->id)->count())->toBe(1)
+        ->and([$corrected->punches_total, $corrected->punches_new, (int) $corrected->getAttribute('punches_replaced')])->toBe([2, 1, 1]);
+
+    // Stored earlier when the number matched no one: the next file for those days ties them to the employee.
+    $newcomer = ($this->volunteer)();
+    $import = AttendanceImport::query()->create(['file_name' => 'old.xls']);
+    foreach (['2026-09-03 08:00:00', '2026-09-03 16:00:00'] as $at) {
+        AttendancePunch::query()->create(['import_id' => $import->id, 'device_no' => (string) $newcomer->id, 'employee_id' => null, 'punched_at' => $at]);
+    }
+
+    $upload("{$newcomer->id},03/09/2026 08:00\n{$newcomer->id},03/09/2026 16:00\n");
+
+    expect(AttendancePunch::query()->where('employee_id', $newcomer->id)->count())->toBe(2);
 });

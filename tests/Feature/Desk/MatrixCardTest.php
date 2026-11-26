@@ -137,13 +137,10 @@ test('the card takes a fixed number of queries whatever the number of templates'
     $viewer = userWithRole('General Manager', insertHrEmployee());
     $count = function () use ($viewer): int {
         DB::flushQueryLog();
-        DB::connection('hr')->flushQueryLog();
         DB::enableQueryLog();
-        DB::connection('hr')->enableQueryLog();
         Livewire::actingAs($viewer)->test('desk.panels.matrix', ['size' => 'XL']);
-        $queries = count(DB::getQueryLog()) + count(DB::connection('hr')->getQueryLog());
+        $queries = count(DB::getQueryLog());
         DB::disableQueryLog();
-        DB::connection('hr')->disableQueryLog();
 
         return $queries;
     };

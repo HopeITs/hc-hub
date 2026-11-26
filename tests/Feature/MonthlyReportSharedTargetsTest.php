@@ -27,20 +27,24 @@ use Modules\Tracking\Support\Reporting\ReportPlace;
 */
 
 beforeEach(function () {
+    $this->cityId = insertHrCity();
+    $this->centerA = insertHrCenter($this->cityId, 'Center A');
+    $this->centerB = insertHrCenter($this->cityId, 'Center B');
+
     Activity::withoutRecording(function (): void {
         $this->program = Program::factory()->create();
         $this->proposal = Proposal::factory()->create();
-        $row = ProposalLocation::factory()->create(['proposal_id' => $this->proposal->id, 'city_id' => 7, 'program_id' => $this->program->id]);
-        $row->centers()->create(['center_id' => 9]);
-        $row->centers()->create(['center_id' => 10]);
+        $row = ProposalLocation::factory()->create(['proposal_id' => $this->proposal->id, 'city_id' => $this->cityId, 'program_id' => $this->program->id]);
+        $row->centers()->create(['center_id' => $this->centerA]);
+        $row->centers()->create(['center_id' => $this->centerB]);
 
         $this->shared = PlanIndicator::factory()->forProposal($this->proposal)
-            ->create(['project_id' => null, 'city_id' => 7, 'program_id' => $this->program->id, 'all_centers' => true, 'target' => 100]);
+            ->create(['project_id' => null, 'city_id' => $this->cityId, 'program_id' => $this->program->id, 'all_centers' => true, 'target' => 100]);
         $this->own = PlanIndicator::factory()->forProposal($this->proposal)
-            ->create(['project_id' => null, 'city_id' => 7, 'program_id' => $this->program->id, 'center_id' => 9, 'target' => 50]);
+            ->create(['project_id' => null, 'city_id' => $this->cityId, 'program_id' => $this->program->id, 'center_id' => $this->centerA, 'target' => 50]);
 
-        $this->reportA = mrstReport(new ReportPlace(7, $this->program->id, 9, false), [$this->shared, $this->own]);
-        $this->reportB = mrstReport(new ReportPlace(7, $this->program->id, 10, false), [$this->shared]);
+        $this->reportA = mrstReport(new ReportPlace($this->cityId, $this->program->id, $this->centerA, false), [$this->shared, $this->own]);
+        $this->reportB = mrstReport(new ReportPlace($this->cityId, $this->program->id, $this->centerB, false), [$this->shared]);
     });
 });
 
@@ -85,7 +89,7 @@ test('a shared target nobody has validated yet has reached nothing', function ()
 });
 
 test('a report without a shared target reads nothing', function () {
-    $report = Activity::withoutRecording(fn (): MonthlyReport => mrstReport(new ReportPlace(7, $this->program->id, 9, false), [$this->own]));
+    $report = Activity::withoutRecording(fn (): MonthlyReport => mrstReport(new ReportPlace($this->cityId, $this->program->id, $this->centerA, false), [$this->own]));
 
     expect(app(MonthlyReportSharedTargets::class)->for($report))->toBe([]);
 });
@@ -106,7 +110,7 @@ test('the read takes a fixed number of queries whatever the number of lines', fu
     Activity::withoutRecording(function (): void {
         foreach (range(1, 3) as $ignored) {
             $target = PlanIndicator::factory()->forProposal($this->proposal)
-                ->create(['project_id' => null, 'city_id' => 7, 'program_id' => $this->program->id, 'all_centers' => true]);
+                ->create(['project_id' => null, 'city_id' => $this->cityId, 'program_id' => $this->program->id, 'all_centers' => true]);
             $line = MonthlyReportLine::factory()->create(['monthly_report_id' => $this->reportB->id]);
             MonthlyReportLineShare::factory()->create(['monthly_report_line_id' => $line->id, 'plan_indicator_id' => $target->id]);
             Report::factory()->approved()->create(['plan_indicator_id' => $target->id, 'value' => 1]);
@@ -128,7 +132,7 @@ function mrstRatioTarget(array $figures): PlanIndicator
         $entry = LibraryIndicator::factory()->create(['measure' => IndicatorMeasure::Percentage, 'denominator_basis' => DenominatorBasis::Entered]);
         $indicator = Indicator::factory()->create(['library_indicator_id' => $entry->id, 'measure' => IndicatorMeasure::Percentage]);
         $target = PlanIndicator::factory()->forProposal(test()->proposal)
-            ->create(['indicator_id' => $indicator->id, 'project_id' => null, 'city_id' => 7, 'program_id' => test()->program->id, 'all_centers' => true, 'target' => 90]);
+            ->create(['indicator_id' => $indicator->id, 'project_id' => null, 'city_id' => test()->cityId, 'program_id' => test()->program->id, 'all_centers' => true, 'target' => 90]);
 
         foreach ($figures as $figure) {
             $line = MonthlyReportLine::factory()->create(['monthly_report_id' => $figure[0]->id]);

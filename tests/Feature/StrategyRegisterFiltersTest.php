@@ -10,6 +10,7 @@ use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Risk;
@@ -38,9 +39,11 @@ function openedFromStrategy(string $page, array $query = []): Testable
 }
 
 test('the risks register keeps only the strategy\'s high risks and shows a removable chip', function () {
-    Risk::factory()->rated(3, 2)->create(['name' => 'Ours high', 'project_id' => $this->ours->id]);
-    Risk::factory()->rated(1, 1)->create(['name' => 'Ours low', 'project_id' => $this->ours->id]);
-    Risk::factory()->rated(3, 3)->create(['name' => 'Theirs high', 'project_id' => $this->theirs->id]);
+    $ourRow = ProposalLocation::factory()->forProject($this->ours)->create();
+    $theirRow = ProposalLocation::factory()->forProject($this->theirs)->create();
+    Risk::factory()->onRow($ourRow)->rated(3, 2)->create(['name' => 'Ours high']);
+    Risk::factory()->onRow($ourRow)->rated(1, 1)->create(['name' => 'Ours low']);
+    Risk::factory()->onRow($theirRow)->rated(3, 3)->create(['name' => 'Theirs high']);
 
     openedFromStrategy('tracking::risks.index', ['high' => '1'])
         ->assertSeeText('Ours high')

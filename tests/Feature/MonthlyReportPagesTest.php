@@ -147,14 +147,14 @@ test('MEAL lands on its queue and sees only the submitted reports of the project
         ->assertDontSeeHtml('data-validate-row="'.$foreign->id.'"');
 });
 
-test('a project officer from another governorate sees the project while the governorate officer does not', function () {
+test('a place officer from another governorate sees the place while the governorate officer does not', function () {
     $governorateEmployee = insertHrEmployee(firstNameEn: 'Nour', lastNameEn: 'Officer');
     Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forCity($this->aleppo)->create(['employee_id' => $governorateEmployee]));
     $idlibEmployee = insertHrEmployee(firstNameEn: 'Ziad', lastNameEn: 'Idlib');
-    $project = mrpProject($this->aleppo);
+    $place = mrpPlace($this->aleppo);
     Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forCity(insertHrCity('Idlib'))->create(['employee_id' => $idlibEmployee]));
-    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forProject($project->id)->create(['employee_id' => $idlibEmployee]));
-    $report = mrpMonth($project, '2026-09-01', MonthlyReportStatus::Submitted);
+    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forPlace($place)->create(['employee_id' => $idlibEmployee]));
+    $report = mrpExtractTemplate($place, 'Education for All', ['2026-09-01' => MonthlyReportStatus::Submitted])['reports']['2026-09-01'];
 
     Livewire::actingAs(userWithRole('MEAL', $idlibEmployee))->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-validate-row="'.$report->id.'"');
@@ -566,13 +566,10 @@ test('"My reports" takes a fixed number of queries whatever the number of templa
     $this->travelTo('2026-11-20 10:00:00');
     $render = function (): int {
         DB::flushQueryLog();
-        DB::connection('hr')->flushQueryLog();
         DB::enableQueryLog();
-        DB::connection('hr')->enableQueryLog();
         Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index');
-        $count = count(DB::getQueryLog()) + count(DB::connection('hr')->getQueryLog());
+        $count = count(DB::getQueryLog());
         DB::disableQueryLog();
-        DB::connection('hr')->disableQueryLog();
 
         return $count;
     };
@@ -812,13 +809,10 @@ test('Y-05: "To validate" takes a fixed number of queries whatever the number of
     $meal = mealManager();
     $render = function () use ($meal): int {
         DB::flushQueryLog();
-        DB::connection('hr')->flushQueryLog();
         DB::enableQueryLog();
-        DB::connection('hr')->enableQueryLog();
         Livewire::withQueryParams(['city' => (string) $this->aleppo])->actingAs($meal)->test('tracking::monthly-reports.index');
-        $count = count(DB::getQueryLog()) + count(DB::connection('hr')->getQueryLog());
+        $count = count(DB::getQueryLog());
         DB::disableQueryLog();
-        DB::connection('hr')->disableQueryLog();
 
         return $count;
     };

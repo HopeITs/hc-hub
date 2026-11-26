@@ -275,7 +275,8 @@ test('the responsible MEAL officer and the MEAL Manager are told once, only when
     $manager = userWithRole('MEAL', $managerId);
     $officerId = insertHrEmployee(firstNameEn: 'Omar');
     $officer = userWithRole('MEAL', $officerId);
-    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forProject($this->centerA->id)->create(['employee_id' => $officerId]));
+    $place = app(PlaceBridge::class)->placesOfProject($this->proposal, $this->centerA->id)[0];
+    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forPlace($place)->create(['employee_id' => $officerId]));
     prefillTarget($this->proposal, $this->output, $this->centerA);
 
     approveForPrefill($this->proposal);

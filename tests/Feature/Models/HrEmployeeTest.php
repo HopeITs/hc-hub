@@ -1,8 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
 use Modules\Hr\Models\Department as HrDepartment;
 use Modules\Hr\Models\Employee as HrEmployee;
-use Illuminate\Support\Facades\DB;
 
 test('is_board_member is cast to boolean', function () {
     $employeeId = insertHrEmployee(firstNameEn: 'Board', lastNameEn: 'Member');

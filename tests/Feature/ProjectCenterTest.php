@@ -13,6 +13,7 @@ use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Support\MealCoverage;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 beforeEach(function () {
     $this->user = User::factory()->role('General Manager')->create();
@@ -336,7 +337,7 @@ describe('hosted projects (W-01, D-55)', function () {
         MealCoverageAssignment::factory()->forCity($this->idlebId)->create(['employee_id' => $officer]);
         $project = Project::factory()->create(['center_id' => null, 'host_center_id' => $this->hostId, 'city_id' => $this->idlebId]);
 
-        expect(MealCoverage::responsibleFor($project))->toBe($officer);
+        expect(MealCoverage::responsibleForPlace(new ReportPlace($project->city_id, (int) $project->program_id, null, false)))->toBe($officer);
     });
 });
 

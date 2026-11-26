@@ -24,12 +24,13 @@ use Modules\Hr\Support\Attendance\WorkflowRefused;
 use Modules\Hr\Support\Employees\HrMedia;
 
 /*
- * The month at a glance, from the device report: for each city, the people
- * grouped by project or by department, one square per day, the overtime in
- * hours and free days, and the days that wait for an answer. A day with no
- * record (or a single punch) opens the question "did they work, or were they
- * absent?"; a person opens their month: confirm, approve, lock, the signed
- * paper. Who sees whom is Roster; who may do what is MonthWorkflow::abilities().
+ * The month from the device report, in two steps: a list of the people (for each
+ * city, grouped by project or by department), one line each with one status in
+ * plain words, then one person's month as a calendar. A day with no record (or a
+ * single punch) is red and answered with two buttons (worked / absent); the month
+ * is then confirmed, and HR may lock it and keep the signed paper. Only people the
+ * uploaded reports hold punches for in the month are listed, and never a month to
+ * come. Who sees whom is Roster; who may do what is MonthWorkflow::abilities().
  */
 new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class extends Component {
     use WithFileUploads;
@@ -46,12 +47,12 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
     #[Url(except: '')]
     public string $search = '';
 
-    public bool $onlyToDecide = false;
+    /** The list's filter: everyone, only those with days waiting, or only the confirmed. */
+    #[Url(except: 'all', history: false)]
+    public string $tab = 'all';
 
     /** @var array<string, bool> Groups the viewer folded (true) or opened (false) by hand ("<city>:<group>"). */
     public array $collapsed = [];
-
-    public bool $showDayModal = false;
 
     #[Locked]
     public ?int $dayEmployeeId = null;
@@ -63,8 +64,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
 
     public string $dayNote = '';
 
-    public bool $showMonthModal = false;
-
+    /** The person whose month is open. */
     #[Locked]
     public ?int $monthEmployeeId = null;
 
@@ -79,6 +79,8 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
             $this->month = now()->subDays(10)->format('Y-m');
         }
 
+        $this->clampMonth();
+
         $this->groupBy = Grouping::normalize($this->groupBy);
 
         // Someone who sees every city starts on one (their own, else the first) rather than on the
@@ -92,7 +94,22 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
     public function shiftMonth(int $delta): void
     {
         $this->month = $this->monthDate()->addMonthsNoOverflow($delta > 0 ? 1 : -1)->format('Y-m');
-        $this->closeMonth();
+        $this->clampMonth();
+        // An open person stays open: their next or previous month. Without a contract then, the list shows.
+        $this->closeDay();
+        $this->signedFile = null;
+    }
+
+    /** The month picker or the link was changed by hand: still never a month to come. */
+    public function updatedMonth(): void
+    {
+        $this->clampMonth();
+        $this->closeDay();
+    }
+
+    public function updatedTab(): void
+    {
+        $this->tab = in_array($this->tab, ['all', 'need', 'done'], true) ? $this->tab : 'all';
     }
 
     public function updatedGroupBy(): void
@@ -120,12 +137,10 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
         $this->dayDate = $date;
         $this->dayKind = $row['decision'] ?? AttendanceDayDecision::WORKED;
         $this->dayNote = (string) ($row['note'] ?? '');
-        $this->showDayModal = true;
     }
 
     public function closeDay(): void
     {
-        $this->showDayModal = false;
         $this->dayEmployeeId = null;
         $this->dayDate = null;
         $this->dayNote = '';
@@ -156,6 +171,32 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
         Flux::toast(variant: 'success', text: __('hr_attendance.timesheets.saved'));
     }
 
+    /**
+     * The person's calendar answers a day with one of two buttons. The answer is saved through the
+     * same checks as before, then the next day that still waits opens by itself.
+     */
+    public function answerDay(string $kind): void
+    {
+        $employeeId = $this->dayEmployeeId;
+        $this->dayKind = $kind;
+        $this->dayNote = '';
+        $this->saveDecision();
+
+        if ($employeeId === null || $this->getErrorBag()->isNotEmpty()) {
+            return;
+        }
+
+        $employee = Employee::query()->find($employeeId);
+        $next = $employee === null ? null : collect(app(Timesheet::class)->forEmployee($employee, $this->monthDate())['rows'])
+            ->first(fn (array $row): bool => in_array($row['kind'], [Timesheet::ONE_PUNCH, Timesheet::NO_RECORD], true) && $row['decidable']);
+
+        if ($employee !== null && $next !== null && $this->mayDecide($employee, $next['date']->toDateString())) {
+            $this->dayEmployeeId = $employee->id;
+            $this->dayDate = $next['date']->toDateString();
+            $this->dayKind = AttendanceDayDecision::WORKED;
+        }
+    }
+
     public function clearDecision(): void
     {
         $employee = $this->scopedEmployee((int) $this->dayEmployeeId, $this->dayDate);
@@ -180,14 +221,14 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
         $this->resetValidation();
         $this->monthEmployeeId = $employeeId;
         $this->signedFile = null;
-        $this->showMonthModal = true;
+        $this->closeDay();
     }
 
     public function closeMonth(): void
     {
-        $this->showMonthModal = false;
         $this->monthEmployeeId = null;
         $this->signedFile = null;
+        $this->closeDay();
         $this->resetValidation();
     }
 
@@ -261,6 +302,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
         $by = Grouping::normalize($this->groupBy);
         $roster = app(Roster::class);
         $user = $this->user();
+        $mode = $roster->mode($user);
         $items = $this->items($month);
 
         // The figures above the groups describe the whole selection, not just what is unfolded.
@@ -277,9 +319,19 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
             ? null
             : $items->first(fn (array $item): bool => $item['employee']->id === $this->monthEmployeeId);
 
-        if ($this->onlyToDecide) {
-            $items = $items->filter(fn (array $item): bool => $item['sheet']['totals']['to_decide'] > 0)->values();
+        // Someone who sees only their own month has no list before it: it opens straight away.
+        if ($panel === null && $mode === Roster::OWN) {
+            $panel = $items->first();
         }
+
+        $counts = [
+            'all' => $items->count(),
+            'need' => $items->filter(fn (array $item): bool => $this->listStatus($item) === 'need')->count(),
+            'done' => $items->filter(fn (array $item): bool => $this->listStatus($item) === 'done')->count(),
+        ];
+
+        $tab = in_array($this->tab, ['need', 'done'], true) ? $this->tab : 'all';
+        $listed = $tab === 'all' ? $items : $items->filter(fn (array $item): bool => $this->listStatus($item) === $tab)->values();
 
         $openDay = null;
 
@@ -288,14 +340,14 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
             $openDay = $employee === null ? null : ['employee' => $employee, 'row' => $this->rowFor($employee, $this->dayDate)];
         }
 
-        $blocks = app(Grouping::class)->group($items, $by);
+        $blocks = app(Grouping::class)->group($listed, $by);
 
         return [
             'blocks' => $blocks,
             // A long page opens as a short list of groups; one group, a search or the
             // days-to-decide filter opens them all, so a match is never hidden.
-            'searching' => trim($this->search) !== '' || $this->onlyToDecide,
-            'foldedByDefault' => trim($this->search) === '' && ! $this->onlyToDecide
+            'searching' => trim($this->search) !== '' || $tab !== 'all',
+            'foldedByDefault' => trim($this->search) === '' && $tab === 'all'
                 && collect($blocks)->sum(fn (array $block): int => count($block['groups'])) > 1,
             'summary' => $summary,
             'by' => $by,
@@ -304,7 +356,11 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
                 'w' => $month->day($day)->locale(app()->getLocale())->isoFormat('dd'),
             ]),
             'cities' => $roster->cities($user),
-            'mode' => $roster->mode($user),
+            'mode' => $mode,
+            'tab' => $tab,
+            'counts' => $counts,
+            // Printing waits until every day is answered and every leave request of the month is.
+            'printBlocked' => $items->contains(fn (array $item): bool => $item['sheet']['totals']['to_decide'] > 0 || $item['sheet']['totals']['leave_pending'] > 0),
             'monthDate' => $month,
             'openDay' => $openDay,
             'panel' => $panel,
@@ -327,7 +383,9 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
     {
         $user = $this->user();
         $workflow = app(MonthWorkflow::class);
-        $employees = app(Roster::class)->employees($user, $month, $this->cityId)
+        // Only people the uploaded reports hold punches for in this month; the print follows the same rule.
+        $roster = app(Roster::class);
+        $employees = $roster->withPunches($roster->employees($user, $month, $this->cityId), $month)
             ->when(trim($this->search) !== '', fn (Collection $all): Collection => $all->filter(fn (Employee $employee): bool => $this->matchesSearch($employee)));
         // One batch of reads for everyone on the page, not a set per person.
         $sheets = app(Timesheet::class)->forEmployees($employees, $month);
@@ -352,6 +410,31 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
                 'can' => $workflow->abilities($user, $employee, $month, $record, $sheet['totals']['to_decide'], true),
             ];
         })->values();
+    }
+
+    /**
+     * One status per person in plain words: days waiting for an answer, confirmed (approved or
+     * locked), or still on its way.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    private function listStatus(array $item): string
+    {
+        return match (true) {
+            $item['sheet']['totals']['to_decide'] > 0 => 'need',
+            in_array($item['state'], ['approved', 'locked'], true) => 'done',
+            default => 'other',
+        };
+    }
+
+    /** There are no punches in the future, so the page never goes past the current month. */
+    private function clampMonth(): void
+    {
+        $current = now()->format('Y-m');
+
+        if (! preg_match('/^\d{4}-\d{2}$/', $this->month) || $this->month > $current) {
+            $this->month = $current;
+        }
     }
 
     private function step(string $step, int $employeeId): void
@@ -479,13 +562,20 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
 <x-desk.register class="@container" heading-id="hr-attendance-heading" :title="$title" :count="$summary['people']" data-hr-attendance>
     <x-slot:actions>
         @if ($canManage)
-            <x-ui.button tone="action" icon="signal" :href="route('hr.attendance.devices')" wire:navigate data-test="attendance-devices-link">{{ __('hr_attendance.devices.title') }}</x-ui.button>
+            @if (config('attendance.devices_page'))
+                <x-ui.button tone="action" icon="signal" :href="route('hr.attendance.devices')" wire:navigate data-test="attendance-devices-link">{{ __('hr_attendance.devices.title') }}</x-ui.button>
+            @endif
             <x-ui.button tone="action" icon="arrow-up-tray" :href="route('hr.attendance.upload')" wire:navigate data-test="attendance-upload-link">{{ __('hr_attendance.timesheets.upload') }}</x-ui.button>
         @endif
-        <x-ui.button tone="action" icon="printer" :href="route('hr.attendance.print', $printBase)" target="_blank" data-test="attendance-print-link">{{ $own ? __('hr_attendance.timesheets.print-own') : __('hr_attendance.timesheets.print-all') }}</x-ui.button>
+        {{-- The paper is signed: it prints only when every day is answered and no leave request waits. --}}
+        @if ($printBlocked)
+            <x-ui.button tone="action" icon="printer" disabled title="{{ __('hr_attendance.timesheets.print-blocked') }}" data-test="attendance-print-blocked">{{ $own ? __('hr_attendance.timesheets.print-own') : __('hr_attendance.timesheets.print-all') }}</x-ui.button>
+        @else
+            <x-ui.button tone="action" icon="printer" :href="route('hr.attendance.print', $printBase)" target="_blank" data-test="attendance-print-link">{{ $own ? __('hr_attendance.timesheets.print-own') : __('hr_attendance.timesheets.print-all') }}</x-ui.button>
+        @endif
     </x-slot:actions>
 
-    @unless ($own)
+    @unless ($own || $panel)
         <x-slot:search>
             <x-desk.register-search :label="__('hr_attendance.timesheets.search')" :placeholder="__('hr_attendance.timesheets.search')" wire:model.live.debounce.300ms="search" />
         </x-slot:search>
@@ -494,29 +584,30 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
     <x-slot:filters>
         <div class="flex items-center gap-1" role="group" aria-label="{{ __('hr_attendance.timesheets.month') }}">
             <x-ui.button tone="ghost" size="sm" icon="chevron-left" class="rtl:rotate-180" wire:click="shiftMonth(-1)" :aria-label="__('hr_attendance.timesheets.prev-month')" />
-            <flux:input type="month" size="sm" wire:model.live="month" :aria-label="__('hr_attendance.timesheets.month')" class="w-40!" data-test="attendance-month" />
-            <x-ui.button tone="ghost" size="sm" icon="chevron-right" class="rtl:rotate-180" wire:click="shiftMonth(1)" :aria-label="__('hr_attendance.timesheets.next-month')" />
+            <flux:input type="month" size="sm" wire:model.live="month" :max="now()->format('Y-m')" :aria-label="__('hr_attendance.timesheets.month')" class="w-40!" data-test="attendance-month" />
+            <x-ui.button tone="ghost" size="sm" icon="chevron-right" class="rtl:rotate-180" wire:click="shiftMonth(1)" :disabled="$month >= now()->format('Y-m')" :aria-label="__('hr_attendance.timesheets.next-month')" />
         </div>
-        @if ($cities->count() > 1)
-            <x-ui.header-filter-select :label="__('hr_attendance.timesheets.city')" wire:model.live="cityId" :value="$cityId">
-                <option value="">{{ __('hr_attendance.timesheets.all-cities') }}</option>
-                @foreach ($cities as $city)
-                    <option value="{{ $city->id }}">{{ $city->name }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
-        @endif
-        @unless ($own)
-            <x-ui.header-filter-select :label="__('hr_attendance.timesheets.group-by')" wire:model.live="groupBy" :value="$by">
-                <option value="{{ Grouping::PROJECT }}">{{ __('hr_attendance.timesheets.by-project') }}</option>
-                <option value="{{ Grouping::DEPARTMENT }}">{{ __('hr_attendance.timesheets.by-department') }}</option>
-            </x-ui.header-filter-select>
-            <flux:checkbox wire:model.live="onlyToDecide" :label="__('hr_attendance.timesheets.only-to-decide')" />
+        @unless ($panel)
+            @if ($cities->count() > 1)
+                <x-ui.header-filter-select :label="__('hr_attendance.timesheets.city')" wire:model.live="cityId" :value="$cityId">
+                    <option value="">{{ __('hr_attendance.timesheets.all-cities') }}</option>
+                    @foreach ($cities as $city)
+                        <option value="{{ $city->id }}">{{ $city->name }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+            @endif
+            @unless ($own)
+                <x-ui.header-filter-select :label="__('hr_attendance.timesheets.group-by')" wire:model.live="groupBy" :value="$by">
+                    <option value="{{ Grouping::PROJECT }}">{{ __('hr_attendance.timesheets.by-project') }}</option>
+                    <option value="{{ Grouping::DEPARTMENT }}">{{ __('hr_attendance.timesheets.by-department') }}</option>
+                </x-ui.header-filter-select>
+            @endunless
         @endunless
     </x-slot:filters>
 
-    @include('hr::pages.attendance._timesheets-grid')
-
-    @include('hr::pages.attendance._timesheets-month-modal')
-
-    @include('hr::pages.attendance._timesheets-day-modal')
+    @if ($panel)
+        @include('hr::pages.attendance._timesheets-person')
+    @else
+        @include('hr::pages.attendance._timesheets-list')
+    @endif
 </x-desk.register>

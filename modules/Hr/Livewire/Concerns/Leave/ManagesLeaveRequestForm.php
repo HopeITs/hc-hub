@@ -242,6 +242,7 @@ trait ManagesLeaveRequestForm
     {
         /** @var User $actor */
         $actor = Auth::user();
+        abort_unless($actor->can($this->editingLeaveRequestId === null ? 'leaves.create' : 'leaves.update'), 403);
         $input = $this->requestInput();
 
         if ($this->editingLeaveRequestId !== null) {
@@ -388,7 +389,14 @@ trait ManagesLeaveRequestForm
 
         return app(LeaveAlternativeEmployees::class)
             ->choices($employee, LeaveRequestDraft::fromArray($this->requestInput())->window(), $kept === null ? null : (int) $kept)
-            ->mapWithKeys(fn (Employee $candidate) => [(int) $candidate->id => $candidate->name])
+            // Their current position goes with each name: two colleagues may share one.
+            ->load('contracts.position:id,title_en,title_ar')
+            ->mapWithKeys(function (Employee $candidate): array {
+                $position = $candidate->latestActiveContract()?->position;
+                $title = $position === null ? '' : (app()->getLocale() === 'ar' ? ($position->title_ar ?: $position->title_en) : ($position->title_en ?: $position->title_ar));
+
+                return [(int) $candidate->id => $candidate->name.($title !== '' ? ' · '.$title : '')];
+            })
             ->all();
     }
 

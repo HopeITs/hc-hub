@@ -35,7 +35,11 @@ test('.env.example leaves every key, secret, password and token empty', function
 });
 
 test('.env.example names no Super Admin accounts', function () {
-    expect(envExampleValues()['HR_ADMIN_EMAILS'])->toBe('');
+    // HR_ADMIN_EMAILS went with the HR database (one database, one login); any
+    // admin-account key that comes back must stay empty in the template.
+    $named = array_filter(envExampleValues(), fn (string $value, string $key): bool => preg_match('/ADMIN/', $key) === 1 && $value !== '', ARRAY_FILTER_USE_BOTH);
+
+    expect($named)->toBe([]);
 });
 
 test('git ignores every environment file except the template', function (string $path, bool $ignored) {

@@ -362,3 +362,10 @@ test('the logframe opens on the first outcome with its outputs collapsed', funct
         ->assertSeeHtmlInOrder(['data-test="node-body-'.$output->id.'"', 'data-open="false"'])
         ->assertDontSeeHtml('data-test="node-toggle-'.$impact->id.'"');
 });
+
+test('the Public Relations Manager may reopen a proposal framework through the stand-in permission, a Team Member may not', function () {
+    $proposal = Proposal::factory()->create();
+
+    expect(app(SyncLogframeTask::class)->mayReopen(userWithRole('Public Relations Manager'), $proposal))->toBeTrue()
+        ->and(app(SyncLogframeTask::class)->mayReopen(userWithRole('Team Member'), $proposal))->toBeFalse();
+});

@@ -18,6 +18,9 @@ use Spatie\Permission\Models\Permission;
 */
 
 beforeEach(function () {
+    // The page is hidden and receiving is off by default (config/attendance.php); these tests are about both.
+    config(['attendance.devices_page' => true, 'attendance.device_push' => true]);
+
     $this->device = function (array $attributes = []): array {
         $device = AttendanceDevice::query()->create($attributes + ['serial' => 'SFAA254800375', 'name' => 'Science Zone']);
 

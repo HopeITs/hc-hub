@@ -83,3 +83,17 @@ test('add employee offers nothing to someone who may not convert hires', functio
     Livewire::actingAs($user->fresh())->test('hr::employees.form')
         ->assertDontSeeHtml('data-offers-awaiting-conversion');
 });
+
+test('add employee suggests a username from the English name until HR types one', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo(Permission::findOrCreate('employees.create', 'web'));
+
+    Livewire::actingAs($user->fresh())->test('hr::employees.form')
+        ->set('form.first_name_en', 'Rami')
+        ->assertSet('form.username', 'rami')
+        ->set('form.last_name_en', 'Haddad')
+        ->assertSet('form.username', 'rami.haddad')
+        ->set('form.username', 'rh1')
+        ->set('form.last_name_en', 'Haddadi')
+        ->assertSet('form.username', 'rh1');
+});

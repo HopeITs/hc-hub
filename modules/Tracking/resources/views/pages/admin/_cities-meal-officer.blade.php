@@ -39,7 +39,7 @@
             size="sm"
             tone="secondary"
             class="shrink-0"
-            wire:click="openMealModal('{{ $scope }}', {{ $targetId }})"
+            wire:click="openMealModal(@js($scope), @js($targetId))"
             data-test="assign-meal-officer-{{ $scope }}-{{ $targetId }}"
         >
             {{ $officer === null || $inherited ? __('cities.assign_meal_officer') : __('cities.change_meal_officer') }}

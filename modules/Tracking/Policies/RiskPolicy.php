@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Policies;
 
-use Illuminate\Support\Facades\Gate;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Risk;
@@ -17,8 +16,9 @@ use Modules\Tracking\Support\TrackingDuties;
  * answer for. Deleting stays with risks.delete.
  *
  * Since W-09 (D-61) new risks are picked from the library onto a proposal's
- * logframe: `attach` and `detach` follow whoever may update that proposal
- * (ProposalPolicy::update). The project-based abilities above serve the
+ * logframe: `attach` and `detach` belong to whoever may build the framework
+ * (results.update, the MEAL manager), like the rest of the logframe; a PR
+ * officer only reads them. The project-based abilities above serve the
  * legacy rows only.
  */
 class RiskPolicy
@@ -75,7 +75,7 @@ class RiskPolicy
      */
     public function attach(User $user, Proposal $proposal): bool
     {
-        return Gate::forUser($user)->allows('update', $proposal);
+        return $user->can('results.update');
     }
 
     /**
@@ -83,7 +83,7 @@ class RiskPolicy
      */
     public function detach(User $user, Proposal $proposal): bool
     {
-        return Gate::forUser($user)->allows('update', $proposal);
+        return $user->can('results.update');
     }
 
     /**

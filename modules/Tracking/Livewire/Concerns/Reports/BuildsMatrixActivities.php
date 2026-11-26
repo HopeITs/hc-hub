@@ -6,6 +6,7 @@ namespace Modules\Tracking\Livewire\Concerns\Reports;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
 use Modules\Core\Models\Center;
@@ -14,6 +15,8 @@ use Modules\Tracking\Enums\ActivityStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Support\MealCoverage;
 use Modules\Tracking\Support\Reporting\ExtractionFilter;
 use Modules\Tracking\Support\Reporting\PlaceBridge;
 use stdClass;
@@ -234,5 +237,26 @@ trait BuildsMatrixActivities
         }
 
         return $cells;
+    }
+
+    /**
+     * The projects "my projects" narrows the Activities tab to: the legacy
+     * projects of the report templates at the places the user covers.
+     *
+     * Removed by Y-17, with the project-keyed tab.
+     *
+     * @return list<int>
+     */
+    protected function coveredProjectIds(): array
+    {
+        $employeeId = Auth::user()?->employee_id;
+
+        if ($employeeId === null) {
+            return [];
+        }
+
+        $templates = MealCoverage::scopeCoveredBy(ReportTemplate::query(), (int) $employeeId)->get();
+
+        return array_values(array_unique(array_filter(app(PlaceBridge::class)->legacyProjectIdsFor($templates))));
     }
 }

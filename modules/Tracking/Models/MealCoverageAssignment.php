@@ -13,7 +13,9 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
+use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\MealCoverageScope;
 use Modules\Tracking\Support\MealCoverage;
@@ -32,7 +34,7 @@ use Modules\Tracking\Support\MealCoverage;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
-#[Fillable(['scope_type', 'city_id', 'project_id', 'employee_id', 'assigned_by'])]
+#[Fillable(['scope_type', 'city_id', 'project_id', 'program_id', 'center_id', 'city_wide', 'scope_key', 'employee_id', 'assigned_by'])]
 class MealCoverageAssignment extends Model implements TracksActivity
 {
     /** @use HasFactory<MealCoverageAssignmentFactory> */
@@ -71,6 +73,9 @@ class MealCoverageAssignment extends Model implements TracksActivity
             'scope_type' => MealCoverageScope::class,
             'city_id' => 'integer',
             'project_id' => 'integer',
+            'program_id' => 'integer',
+            'center_id' => 'integer',
+            'city_wide' => 'boolean',
             'employee_id' => 'integer',
             'assigned_by' => 'integer',
         ];
@@ -83,6 +88,15 @@ class MealCoverageAssignment extends Model implements TracksActivity
 
     public function activityLabel(): string
     {
+        if ($this->activityAttribute('scope_type') === MealCoverageScope::Place) {
+            $program = Program::query()->find($this->activityAttribute('program_id'))?->name;
+            $site = $this->activityAttribute('city_wide')
+                ? __('cities.meal_field_work')
+                : Center::query()->find($this->activityAttribute('center_id'))?->name;
+
+            return implode(' · ', array_filter([$program, $site]));
+        }
+
         if ($this->coversProject()) {
             return (string) Project::query()->whereKey($this->activityAttribute('project_id'))->value('name');
         }
@@ -92,6 +106,10 @@ class MealCoverageAssignment extends Model implements TracksActivity
 
     public function activityProgramId(): ?int
     {
+        if ($this->activityAttribute('scope_type') === MealCoverageScope::Place) {
+            return (int) $this->activityAttribute('program_id');
+        }
+
         return $this->coversProject() ? Project::programIdFor($this->activityAttribute('project_id')) : null;
     }
 
@@ -120,12 +138,12 @@ class MealCoverageAssignment extends Model implements TracksActivity
             return null;
         }
 
-        return $this->coversProject() ? 'project_assigned' : 'responsible_changed';
+        return $this->activityAttribute('scope_type') === MealCoverageScope::Place ? 'place_assigned' : 'responsible_changed';
     }
 
     protected function activityCreatedEvent(): string
     {
-        return $this->getMorphClass().($this->coversProject() ? '.project_assigned' : '.assigned');
+        return $this->getMorphClass().($this->activityAttribute('scope_type') === MealCoverageScope::Place ? '.place_assigned' : '.assigned');
     }
 
     /**
@@ -139,7 +157,9 @@ class MealCoverageAssignment extends Model implements TracksActivity
         $employeeId = (int) $this->activityAttribute('employee_id');
         $properties = ['employee_id' => $employeeId, 'employee' => app(EmployeeRecipients::class)->names([$employeeId])[$employeeId] ?? null];
 
-        if ($this->coversProject()) {
+        if ($this->activityAttribute('scope_type') === MealCoverageScope::Place) {
+            $properties['governorate_officer_id'] = MealCoverage::officerOfCity((int) $this->activityAttribute('city_id'));
+        } elseif ($this->coversProject()) {
             $project = Project::query()->select(['id', 'city_id', 'center_id'])->whereKey($this->activityAttribute('project_id'))->first();
             $cityId = $project === null ? null : MealCoverage::cityIdOf($project);
             $properties['governorate_officer_id'] = $cityId === null ? null : MealCoverage::officerOfCity($cityId);

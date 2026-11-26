@@ -11,11 +11,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
+use Modules\Core\Models\Program;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\MealCoverageScope;
 use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 /**
  * Make an employee the MEAL officer of a governorate (HR city) or of one
@@ -25,9 +28,9 @@ use Modules\Tracking\Models\Project;
 class AssignMealCoverage
 {
     /**
-     * @throws ValidationException when the employee is not active in HR or the city/project does not exist
+     * @throws ValidationException when the employee is not active in HR or the target does not exist
      */
-    public function handle(MealCoverageScope $scope, int $targetId, int $employeeId): MealCoverageAssignment
+    public function handle(MealCoverageScope $scope, array|int $target, int $employeeId): MealCoverageAssignment
     {
         Gate::authorize('manage', MealCoverageAssignment::class);
 
@@ -39,58 +42,50 @@ class AssignMealCoverage
             }],
         ])->validate();
 
-        $this->ensureTargetExists($scope, $targetId);
+        $target = is_int($target) ? ['city_id' => $target] : $target;
+        $city = (int) ($target['city_id'] ?? 0);
+        $conditions = ['scope_type' => $scope->value, 'city_id' => $city];
+        $attributes = $conditions + ['scope_key' => 'city:'.$city];
+        if (! City::query()->whereKey($city)->exists()) {
+            throw ValidationException::withMessages(['mealTargetId' => __('cities.city_not_found')]);
+        }
 
-        $column = match ($scope) {
-            MealCoverageScope::City => 'city_id',
-            MealCoverageScope::Project => 'project_id',
-        };
+        if ($scope === MealCoverageScope::Place) {
+            $program = (int) ($target['program_id'] ?? 0);
+            $center = isset($target['center_id']) ? (int) $target['center_id'] : null;
+            $wide = (bool) ($target['city_wide'] ?? false);
+            if (! Program::query()->whereKey($program)->exists() || $wide !== ($center === null)
+                || ($center !== null && ! Center::query()->whereKey($center)->where('city_id', $city)->exists())) {
+                throw ValidationException::withMessages(['mealTargetId' => __('cities.meal_place_invalid')]);
+            }
+            $place = new ReportPlace($city, $program, $center, $wide);
+            $attributes = [...$conditions, 'program_id' => $program, 'center_id' => $center, 'city_wide' => $wide, 'scope_key' => 'place:'.$place->key()];
+            $conditions = ['scope_key' => $attributes['scope_key']];
+        } elseif ($scope !== MealCoverageScope::City) {
+            throw ValidationException::withMessages(['mealTargetId' => __('cities.meal_place_invalid')]);
+        }
 
-        return DB::transaction(function () use ($scope, $column, $targetId, $employeeId): MealCoverageAssignment {
-            $existing = MealCoverageAssignment::query()->where($column, $targetId)->lockForUpdate()->first();
+        return DB::transaction(function () use ($conditions, $attributes, $employeeId): MealCoverageAssignment {
+            $existing = MealCoverageAssignment::query()->where($conditions)->lockForUpdate()->first();
 
             if ($existing === null) {
                 try {
                     return MealCoverageAssignment::query()->create([
-                        'scope_type' => $scope,
-                        $column => $targetId,
+                        ...$attributes,
                         'employee_id' => $employeeId,
                         'assigned_by' => Auth::id(),
                     ]);
                 } catch (UniqueConstraintViolationException) {
                     // Another request created the row after we looked: take it over.
-                    $existing = MealCoverageAssignment::query()->where($column, $targetId)->lockForUpdate()->firstOrFail();
+                    $existing = MealCoverageAssignment::query()->where($conditions)->lockForUpdate()->firstOrFail();
                 }
             }
 
             if ($existing->employee_id !== $employeeId) {
-                $existing->update(['employee_id' => $employeeId, 'assigned_by' => Auth::id()]);
+                $existing->update(['employee_id' => $employeeId, 'assigned_by' => Auth::id(), 'scope_key' => $attributes['scope_key']]);
             }
 
             return $existing;
         });
-    }
-
-    /**
-     * The city must exist in HR (active or not); the project must exist and be
-     * visible to the user.
-     */
-    private function ensureTargetExists(MealCoverageScope $scope, int $targetId): void
-    {
-        if ($scope === MealCoverageScope::City) {
-            if (! City::query()->whereKey($targetId)->exists()) {
-                throw ValidationException::withMessages(['mealTargetId' => __('cities.city_not_found')]);
-            }
-
-            return;
-        }
-
-        $project = Project::query()->select(['id'])->whereKey($targetId)->first();
-
-        if ($project === null) {
-            throw ValidationException::withMessages(['mealTargetId' => __('cities.project_not_found')]);
-        }
-
-        Gate::authorize('view', $project);
     }
 }

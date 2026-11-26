@@ -48,7 +48,7 @@ function proposalWithRowsToFill(ProposalStatus $status = ProposalStatus::Approve
 
 function centerFillPage(Proposal $proposal, ?User $user = null)
 {
-    return Livewire::actingAs($user ?? test()->user)->test('tracking::proposals.show', ['proposal' => $proposal])->set('tab', 'projects');
+    return Livewire::actingAs($user ?? test()->user)->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])->set('tab', 'projects');
 }
 
 test('the Add centers button shows for an approved proposal, a permitted user and a row missing a center', function () {

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Tracking\Enums\MealCoverageScope;
 use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 /**
  * @extends Factory<MealCoverageAssignment>
@@ -50,6 +51,19 @@ class MealCoverageAssignmentFactory extends Factory
             'scope_type' => MealCoverageScope::Project,
             'city_id' => null,
             'project_id' => $projectId ?? Project::factory(),
+        ]);
+    }
+
+    public function forPlace(ReportPlace $place): static
+    {
+        return $this->state([
+            'scope_type' => MealCoverageScope::Place,
+            'city_id' => $place->cityId,
+            'program_id' => $place->programId,
+            'center_id' => $place->centerId,
+            'city_wide' => $place->cityWide,
+            'scope_key' => 'place:'.$place->key(),
+            'project_id' => null,
         ]);
     }
 }

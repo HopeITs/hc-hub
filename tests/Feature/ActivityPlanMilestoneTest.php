@@ -174,3 +174,14 @@ test('the demo seeder gives each approved plan one milestone in every state, onc
         ->and(ActivityPlanMilestone::query()->count())->toBe(3)
         ->and($statuses)->toBe(['missed', 'reached', 'upcoming']);
 });
+
+test('the milestone view is open to MEAL, the General Manager and Super Admin but not a Team Member', function (string $role, bool $allowed) {
+    $plan = ActivityPlan::factory()->approved()->create();
+
+    expect(app(ManagePlanMilestones::class)->mayView(userWithRole($role), $plan))->toBe($allowed);
+})->with([
+    'MEAL' => ['MEAL', true],
+    'General Manager' => ['General Manager', true],
+    'Super Admin' => ['Super Admin', true],
+    'Team Member' => ['Team Member', false],
+]);

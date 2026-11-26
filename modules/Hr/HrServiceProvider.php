@@ -48,6 +48,7 @@ use Modules\Hr\Console\ReportRecruitmentAccessCommand;
 use Modules\Hr\Console\SendAttendanceRemindersCommand;
 use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
 use Modules\Hr\Console\StartProbationReviewsCommand;
+use Modules\Hr\Http\Middleware\DevicePushEnabled;
 use Modules\Hr\Livewire\Chat\Dock as ChatDock;
 use Modules\Hr\Livewire\Chat\HeaderButton as ChatHeaderButton;
 use Modules\Hr\Livewire\Chat\Page as ChatPage;
@@ -310,10 +311,11 @@ class HrServiceProvider extends ServiceProvider
 
         // The time-clock devices (ZKTeco ADMS): no session, no login, no language prefix; they are
         // believed by their registered serial only. routes/device/iclock.php.
-        Route::middleware(['api', 'throttle:iclock'])->group(__DIR__.'/routes/device/iclock.php');
+        // Off for now (config/attendance.php device_push): both answer 404 until it is turned on.
+        Route::middleware(['api', DevicePushEnabled::class, 'throttle:iclock'])->group(__DIR__.'/routes/device/iclock.php');
 
         // The LAN agent that reads a device on its own network: believed by a per-device sync key.
-        Route::middleware(['api', 'throttle:attendance-agent'])->group(__DIR__.'/routes/device/agent.php');
+        Route::middleware(['api', DevicePushEnabled::class, 'throttle:attendance-agent'])->group(__DIR__.'/routes/device/agent.php');
 
         // Pages a guest may open (the careers site): routes/public/*.php.
         $publicFiles = glob(__DIR__.'/routes/public/*.php') ?: [];

@@ -107,6 +107,6 @@ test('the lookup is two queries however many projects match', function () {
     DB::enableQueryLog();
     SimilarProjects::find('Cash Transfer', null, $this->centerId);
 
-    // The projects query plus one constant eager load of their cities (`cities where id in (...)`), not one per project.
+    // The hub has one database, so the cities eager load shows in this log (hc-tracking read them from HR).
     expect(DB::getQueryLog())->toHaveCount(2);
 });

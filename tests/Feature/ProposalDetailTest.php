@@ -152,7 +152,7 @@ test('proposal detail shows targets committed in this proposal', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->set('tab', 'targets')
         ->assertSee('Households assisted');
 });
@@ -313,7 +313,7 @@ test('the promises reading counts targets carrying a report and flags one commit
     ]);
 
     $component = Livewire::actingAs($user)
-        ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->set('tab', 'targets');
 
     $promises = collect($component->instance()->vitals)->firstWhere('key', 'promises');
@@ -663,7 +663,7 @@ test('the indicators and targets tab renders the targets component, no longer un
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->assertSeeText('Indicators & Targets')
         ->set('tab', 'targets')
         ->assertSeeHtml('data-tab-panel="targets"')
@@ -690,7 +690,6 @@ test('the tab labels read in Arabic', function () {
     Livewire::actingAs($user)
         ->test('tracking::proposals.show', ['proposal' => Proposal::factory()->create()])
         ->assertSeeText('الإطار المنطقي')
-        ->assertSeeText('المؤشرات والمستهدفات')
         ->set('tab', 'plan')
         ->assertSeeText('أقسام أخرى')
         ->assertDontSeeHtml('data-under-construction="plan"');

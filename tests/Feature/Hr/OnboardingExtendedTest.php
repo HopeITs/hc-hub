@@ -354,3 +354,20 @@ test('my first days shows a volunteer their own journey, worded for them, withou
     $this->actingAs($account)->get(route('hr.onboarding.my-first-days'))->assertOk();
     Livewire::actingAs(User::factory()->create(['employee_id' => null]))->test('hr::onboarding.my-first-days')->assertForbidden();
 });
+
+test('the migration puts only the order-3 rows of its named items in the exit group, and rollback removes the Mouse it added', function () {
+    ChecklistItem::query()->where('name', 'Mouse')->delete();
+    $returned = ChecklistItem::query()->create(['name' => 'Laptop', 'order' => 3, 'onboarding_group' => 'other']);
+    $unknown = ChecklistItem::query()->create(['name' => 'Parking card', 'order' => 3, 'onboarding_group' => 'other']);
+
+    $migration = require base_path('modules/Hr/database/migrations/2026_11_25_000001_extend_onboarding_journeys.php');
+    $migration->up();
+
+    expect($returned->fresh()->onboarding_group)->toBe('exit')
+        ->and($unknown->fresh()->onboarding_group)->toBe('other')
+        ->and(ChecklistItem::query()->where('name', 'Mouse')->count())->toBe(1);
+
+    $migration->down();
+
+    expect(ChecklistItem::query()->where('name', 'Mouse')->exists())->toBeFalse();
+});

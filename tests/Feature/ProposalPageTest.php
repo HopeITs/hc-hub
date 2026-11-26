@@ -3,6 +3,7 @@
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\ResultType;
@@ -11,6 +12,7 @@ use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalAttentionDismissal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\ProposalStatusNote;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\TransfersTracking;
@@ -308,12 +310,38 @@ test('someone who sees agreements but not transfers gets no tranche money in the
         ->assertDontSee('arrived');
 });
 
-test('places can be edited from the projects section only before the donor approves', function () {
-    proposalPageFor()->call('openSection', 'projects')->assertSeeHtml('data-test="edit-locations"');
+test('the bottom sections leave projects and targets to the card and the framework', function () {
+    $page = proposalPageFor();
 
-    Proposal::query()->whereKey($this->proposal->id)->update(['status' => ProposalStatus::Approved]);
+    expect(array_column($page->instance()->sections, 'key'))->toBe(['money', 'coming', 'plan', 'reports', 'docs', 'history']);
 
-    proposalPageFor()->call('openSection', 'projects')->assertDontSeeHtml('data-test="edit-locations"');
+    $page->call('openSection', 'projects')->call('openSection', 'targets')
+        ->assertSet('openSections', [])
+        ->assertDontSeeHtml('data-section="projects"')
+        ->assertDontSeeHtml('data-section="targets"');
+});
+
+test('an old projects or targets link scrolls to the card or the framework', function () {
+    Livewire::actingAs($this->user)->withQueryParams(['ptab' => 'projects'])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
+        ->assertSet('cardMore', true)
+        ->assertDispatched('pp-flash', target: 'card');
+
+    Livewire::actingAs($this->user)->withQueryParams(['ptab' => 'targets'])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
+        ->assertSet('cardMore', false)
+        ->assertDispatched('pp-flash', target: 'lf');
+});
+
+test('a place without a center shows in needs attention', function () {
+    $city = insertHrCity('Hama', 'حماة');
+    $employee = insertHrEmployee($city);
+    ProposalLocation::factory()->create(['proposal_id' => $this->proposal->id, 'city_id' => $city, 'program_id' => Program::factory()->create(['manager_id' => $employee])->id, 'responsible_employee_id' => $employee]);
+
+    $item = collect(proposalPageFor()->instance()->attentionItems)->firstWhere('key', 'missing-centres');
+
+    expect($item['text'])->toBe('1 place has no center yet')
+        ->and($item['section'])->toBe('card');
 });
 
 test('the reports tally counts donor reports as filed once sent and as owed or late until then', function () {

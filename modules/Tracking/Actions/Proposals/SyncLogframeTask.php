@@ -193,7 +193,7 @@ final class SyncLogframeTask
             return true;
         }
 
-        if ($user->hasRole('Public Relations Manager')) {
+        if ($user->can('reports.reopen-stand-in')) {
             return true;
         }
 

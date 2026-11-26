@@ -25,6 +25,7 @@ beforeEach(function () {
     $this->viewer = User::factory()->role('Public Relations Manager')->create();
 
     $this->program = Program::factory()->create();
+    $this->plan = AnnualPlan::factory()->create(['program_id' => $this->program->id, 'year' => 2026]);
     $this->proposal = Proposal::factory()->create(['name' => 'Water Access Proposal', 'requested_budget' => 987654.32]);
 
     $cityId = insertHrCity('Idlib', 'إدلب');
@@ -77,7 +78,7 @@ function chainTarget(Indicator $indicator, $source, ?Project $project, float $ta
 
 function chainTab(User $user, Proposal $proposal): Testable
 {
-    return Livewire::actingAs($user)->test('proposals.logframe', ['proposalId' => $proposal->id])->set('view', 'chain');
+    return Livewire::actingAs($user)->test('tracking::annual-plans.show', ['annualPlan' => test()->plan]);
 }
 
 /**
@@ -88,15 +89,16 @@ function chainTab(User $user, Proposal $proposal): Testable
  */
 function chainProposalFramework(Proposal $proposal, Project $centerA, Project $centerB): array
 {
-    $impact = chainNode($proposal, ResultType::Impact, statement: 'Families live in safety.');
-    $outcome = chainNode($proposal, ResultType::Outcome, $impact, statement: 'Water is reliably available.');
-    $output = chainNode($proposal, ResultType::Output, $outcome, statement: 'Wells are rehabilitated.');
-    $activity = chainNode($proposal, ResultType::Activity, $output, statement: 'Rehabilitate the village wells.');
-    $crossCutting = chainNode($proposal, ResultType::CrossCutting, statement: 'Gender is mainstreamed.');
+    $programId = test()->program->id;
+    $impact = chainNode(null, ResultType::Impact, programId: $programId, statement: 'Families live in safety.');
+    $outcome = chainNode(null, ResultType::Outcome, $impact, statement: 'Water is reliably available.');
+    $output = chainNode(null, ResultType::Output, $outcome, statement: 'Wells are rehabilitated.');
+    $activity = chainNode(null, ResultType::Activity, $output, statement: 'Rehabilitate the village wells.');
+    $crossCutting = chainNode(null, ResultType::CrossCutting, programId: $programId, statement: 'Gender is mainstreamed.');
 
     $indicator = chainIndicator($output, 'Wells rehabilitated');
-    $targetA = chainTarget($indicator, $proposal, $centerA, 100);
-    $targetB = chainTarget($indicator, $proposal, $centerB, 50);
+    $targetA = chainTarget($indicator, test()->plan, $centerA, 100);
+    $targetB = chainTarget($indicator, test()->plan, $centerB, 50);
 
     return compact('impact', 'outcome', 'output', 'activity', 'crossCutting', 'indicator', 'targetA', 'targetB');
 }
@@ -182,7 +184,7 @@ test('an unknown filter value falls back to all', function (string $property) {
 })->with(['chainIndicator', 'chainCenter', 'chainDonor']);
 
 test('the chain reads a flat number of queries for 3 or 30 nodes', function (string $page) {
-    $plan = AnnualPlan::factory()->create(['program_id' => $this->program->id, 'year' => 2026]);
+    $plan = $this->plan;
     $programImpact = chainNode(null, ResultType::Impact, programId: $this->program->id);
     $proposalImpact = chainNode($this->proposal, ResultType::Impact, programId: $this->program->id);
     $proposalImpact->forceFill(['contributes_to_result_id' => $programImpact->id])->saveQuietly();
@@ -202,7 +204,6 @@ test('the chain reads a flat number of queries for 3 or 30 nodes', function (str
     };
 
     $render = fn (): Testable => match ($page) {
-        'proposal' => chainTab($this->viewer, $this->proposal),
         'program' => Livewire::actingAs($this->viewer)->test('tracking::programs.show', ['program' => $this->program])->set('tab', 'results'),
         'annual plan' => Livewire::actingAs($this->viewer)->test('tracking::annual-plans.show', ['annualPlan' => $plan]),
     };
@@ -225,7 +226,7 @@ test('the chain reads a flat number of queries for 3 or 30 nodes', function (str
 
     expect(count($large))->toBe(count($small))
         ->and(collect($large)->filter(fn (string $sql): bool => str_contains($sql, 'amount') || str_contains($sql, 'budget'))->all())->toBe([]);
-})->with(['proposal', 'program', 'annual plan']);
+})->with(['program', 'annual plan']);
 
 test('proposal and donor names render as text without links for a user without proposals.view', function () {
     $programImpact = chainNode(null, ResultType::Impact, programId: $this->program->id, statement: 'Program impact.');
@@ -278,8 +279,8 @@ test('an activity shows its planned months and the center calendar under a cente
     ActivitySchedule::factory()->create(['result_id' => $chain['activity']->id, 'month' => '2026-04-01', 'weeks' => [1, 2]]);
     ActivitySchedule::factory()->create(['result_id' => $chain['activity']->id, 'project_id' => $this->centerB->id, 'month' => '2026-06-01']);
     $activityIndicator = chainIndicator($chain['activity']);
-    chainTarget($activityIndicator, $this->proposal, $this->centerA, 10);
-    chainTarget($activityIndicator, $this->proposal, $this->centerB, 10);
+    chainTarget($activityIndicator, $this->plan, $this->centerA, 10);
+    chainTarget($activityIndicator, $this->plan, $this->centerB, 10);
 
     chainTab($this->viewer, $this->proposal)
         ->assertSeeHtml('data-chain-schedule-month="2026-03"')
@@ -299,7 +300,7 @@ test('an activity shows each center\'s confirmed status as a text badge, only th
     $chain = chainProposalFramework($this->proposal, $this->centerA, $this->centerB);
     ProjectActivityStatus::factory()->create(['project_id' => $this->centerA->id, 'result_id' => $chain['activity']->id, 'status' => ActivityStatus::Started]);
     ProjectActivityStatus::factory()->create(['project_id' => $this->centerB->id, 'result_id' => $chain['activity']->id, 'status' => ActivityStatus::Completed]);
-    chainTarget(chainIndicator($chain['activity']), $this->proposal, $this->centerA, 10); // the center filter keeps an activity with a target in that center
+    chainTarget(chainIndicator($chain['activity']), $this->plan, $this->centerA, 10); // the center filter keeps an activity with a target in that center
 
     chainTab($this->viewer, $this->proposal)
         ->assertSeeHtml('data-chain-activity-status="'.$this->centerA->id.'"')

@@ -2,12 +2,12 @@
 
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use Modules\Hr\Models\Contract as HrContract;
 use App\Models\UserNotification;
 use App\Notifications\QuickActions;
 use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Contract as HrContract;
 use Modules\Tracking\Enums\AssignmentStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalStatus;

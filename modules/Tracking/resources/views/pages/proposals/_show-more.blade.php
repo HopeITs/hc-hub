@@ -51,17 +51,11 @@
                             @case('coming')
                                 @include('tracking::pages.proposals._show-coming-up')
                                 @break
-                            @case('projects')
-                                @include('tracking::pages.proposals._sec-projects')
-                                @break
                             @case('plan')
                                 @include('tracking::pages.proposals._sec-plan')
                                 @break
                             @case('reports')
                                 @include('tracking::pages.proposals._sec-reports')
-                                @break
-                            @case('targets')
-                                @include('tracking::pages.proposals._tab-targets')
                                 @break
                             @case('docs')
                                 @include('tracking::pages.proposals._sec-docs')
