@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\User;
+use Modules\Hr\Actions\Contracts\SyncContractLeaveBalances;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Support\Employees\HrAccess;
 use Modules\Hr\Support\Employees\HrMedia;
@@ -23,6 +24,9 @@ use Modules\Hr\Support\Employees\HrMedia;
  */
 class SaveEmployee
 {
+    /** The columns a contract's leave balances are priced from. */
+    private const LEAVE_TERMS = ['gender', 'marital_status', 'joined_at'];
+
     /**
      * @param  array<string, mixed>  $data  validated employee columns
      */
@@ -69,6 +73,10 @@ class SaveEmployee
             return $employee;
         });
 
+        if ($employee->wasChanged(self::LEAVE_TERMS)) {
+            $this->syncCurrentContractLeave($employee);
+        }
+
         if ($photo !== null) {
             HrMedia::clear(HrMedia::EMPLOYEE, (int) $employee->id, 'avatar');
             HrMedia::store($photo, HrMedia::EMPLOYEE, (int) $employee->id, 'avatar');
@@ -78,5 +86,19 @@ class SaveEmployee
         Employee::forgetPickerOptions();
 
         return $employee;
+    }
+
+    /**
+     * Re-price the leave balances of the employee's current contract: which
+     * leaves they are owed follows gender and marital status, and the annual
+     * carry-over follows the service start (joined_at).
+     */
+    private function syncCurrentContractLeave(Employee $employee): void
+    {
+        $contract = Employee::query()->find($employee->id)?->latestActiveContract();
+
+        if ($contract !== null) {
+            app(SyncContractLeaveBalances::class)->handle($contract);
+        }
     }
 }

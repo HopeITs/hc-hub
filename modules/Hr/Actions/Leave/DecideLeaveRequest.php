@@ -49,6 +49,8 @@ final class DecideLeaveRequest
     ) {}
 
     /**
+     * @param  string|null  $alternativeEmployeeId  null keeps the request's covering colleague; '' clears it; an id names another (accepting only)
+     *
      * @throws LeaveDecisionAlreadyMade
      * @throws ValidationException
      */
@@ -100,7 +102,11 @@ final class DecideLeaveRequest
                 $this->assertFitsBalance($balance, $hours);
 
                 $previous = $leaveRequest->alternative_employee_id === null ? null : (int) $leaveRequest->alternative_employee_id;
-                $alternative = blank($alternativeEmployeeId) ? null : (int) $alternativeEmployeeId;
+                $alternative = match (true) {
+                    $alternativeEmployeeId === null => $previous,
+                    blank($alternativeEmployeeId) => null,
+                    default => (int) $alternativeEmployeeId,
+                };
                 $this->assertAlternativeOffered($leaveRequest, $alternative);
 
                 // One update, so the activity log keeps the old and the new alternative beside the acceptance.
