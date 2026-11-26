@@ -409,7 +409,9 @@ new #[Layout('layouts::desk'), Title('hr_entitlements.title')] class extends Com
                                 <x-ui.button tone="ghost" size="sm" icon="pencil-square" wire:click="edit({{ $entry->id }})">{{ __('hr_entitlements.edit_action') }}</x-ui.button>
                                 <x-ui.button tone="ghost" size="sm" wire:click="toggleActive({{ $entry->id }})">{{ $entry->is_active ? __('hr_entitlements.deactivate') : __('hr_entitlements.activate') }}</x-ui.button>
                                 @if ($entry->open_count === 0)
-                                    <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="deleteItem({{ $entry->id }})" wire:confirm="{{ __('hr_entitlements.delete_confirm') }}">{{ __('hr_entitlements.delete_action') }}</x-ui.button>
+                                    <x-ui.confirm-action :title="__('hr_entitlements.delete_confirm')" confirm="deleteItem({{ $entry->id }})" :confirm-label="__('hr_entitlements.delete_action')" tone="danger">
+                                        <x-ui.button tone="ghost" size="sm" icon="trash">{{ __('hr_entitlements.delete_action') }}</x-ui.button>
+                                    </x-ui.confirm-action>
                                 @endif
                             </div>
                         </div>

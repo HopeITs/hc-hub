@@ -360,7 +360,9 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.request')] class
                     <x-ui.form-textarea wire:model="decisionComment" :label="__('hr_recruitment.rejection_reason')" rows="3" required dir="auto" />
                     @error('comment')<p class="text-sm text-status-critical">{{ $message }}</p>@enderror
                     <div class="flex flex-wrap gap-2">
-                        <flux:button variant="danger" wire:click="decide('reject')" wire:confirm="{{ __('hr_recruitment.confirm_reject') }}" wire:loading.attr="disabled" wire:target="decide">{{ __('hr_recruitment.reject_action') }}</flux:button>
+                        <x-ui.confirm-action :title="__('hr_recruitment.confirm_reject')" confirm="decide('reject')" :confirm-label="__('hr_recruitment.reject_action')" tone="danger">
+                            <flux:button variant="danger" wire:loading.attr="disabled" wire:target="decide">{{ __('hr_recruitment.reject_action') }}</flux:button>
+                        </x-ui.confirm-action>
                         <x-ui.button tone="ghost" wire:click="cancelChangeRequest">{{ __('hr_recruitment.back_to_decisions') }}</x-ui.button>
                     </div>
                 </div>

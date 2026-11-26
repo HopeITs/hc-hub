@@ -170,7 +170,9 @@ new class extends Component {
                         </p>
                     </div>
                     @can('delete', $note)
-                        <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="remove({{ $note->id }})" wire:confirm="{{ __('notes.confirm_remove') }}" :aria-label="__('notes.remove')" data-test="remove-note" />
+                        <x-ui.confirm-action :title="__('notes.confirm_remove')" confirm="remove({{ $note->id }})" :confirm-label="__('notes.remove')" tone="danger">
+                            <x-ui.button tone="ghost" size="sm" icon="trash" :aria-label="__('notes.remove')" data-test="remove-note" />
+                        </x-ui.confirm-action>
                     @endcan
                 </li>
             @endforeach

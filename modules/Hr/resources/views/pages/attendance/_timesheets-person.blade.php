@@ -211,7 +211,9 @@
                 <x-ui.button size="sm" icon="lock-closed" wire:click="lockMonth({{ $pEmployee->id }})" data-test="attendance-lock">{{ __('hr_attendance.workflow.lock') }}</x-ui.button>
             @endif
             @if ($pCan['reopen'])
-                <x-ui.button size="sm" wire:click="reopenMonth({{ $pEmployee->id }})" wire:confirm="{{ __('hr_attendance.workflow.reopen') }}?" data-test="attendance-reopen">{{ __('hr_attendance.workflow.reopen') }}</x-ui.button>
+                <x-ui.confirm-action :title="__('hr_attendance.workflow.reopen') . '?'" confirm="reopenMonth({{ $pEmployee->id }})" :confirm-label="__('hr_attendance.workflow.reopen')" tone="neutral">
+                    <x-ui.button size="sm" data-test="attendance-reopen">{{ __('hr_attendance.workflow.reopen') }}</x-ui.button>
+                </x-ui.confirm-action>
             @endif
         </div>
     </div>

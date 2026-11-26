@@ -262,7 +262,9 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.check.title')] class extends
                                                     @elseif ($person['leaving'])
                                                         <x-ui.tone-badge tone="neutral">{{ __('hr_mail_lists.leaving_tag') }}</x-ui.tone-badge>
                                                     @endif
-                                                    <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="removeMember({{ $person['id'] }})" wire:confirm="{{ __('hr_mail_lists.remove_confirm') }}" :aria-label="__('hr_mail_lists.remove')" />
+                                                    <x-ui.confirm-action :title="__('hr_mail_lists.remove_confirm')" confirm="removeMember({{ $person['id'] }})" :confirm-label="__('hr_mail_lists.remove')" tone="danger">
+                                                        <x-ui.button tone="ghost" size="sm" icon="trash" :aria-label="__('hr_mail_lists.remove')" />
+                                                    </x-ui.confirm-action>
                                                 </span>
                                             @endif
                                         </li>

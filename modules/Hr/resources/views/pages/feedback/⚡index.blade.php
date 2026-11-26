@@ -158,7 +158,9 @@ new #[Layout('layouts::desk'), Title('hr_communications.titles.feedback')] class
                             </x-ui.data-table.cell>
                             <x-ui.data-table.cell :label="__('hr_communications.feedback.columns.when')">{{ $note->created_at?->diffForHumans() }}</x-ui.data-table.cell>
                             <x-ui.data-table.cell class="@3xl:text-end">
-                                <flux:button size="xs" variant="ghost" icon="trash" wire:click="remove({{ $note->id }})" wire:confirm="{{ __('hr_communications.feedback.remove_confirm') }}" :aria-label="__('common.delete')" />
+                                <x-ui.confirm-action :title="__('hr_communications.feedback.remove_confirm')" confirm="remove({{ $note->id }})" :confirm-label="__('common.delete')" tone="danger">
+                                    <flux:button size="xs" variant="ghost" icon="trash" :aria-label="__('common.delete')" />
+                                </x-ui.confirm-action>
                             </x-ui.data-table.cell>
                         </tr>
                     @endforeach

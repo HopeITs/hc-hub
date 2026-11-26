@@ -417,7 +417,9 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                                         <x-ui.button tone="ghost" size="sm" icon="check" wire:click="confirmRemoval({{ $member['id'] }})" :aria-label="__('hr_mail_lists.leaving_done')" data-test="mail-list-confirm-removal" />
                                     @endif
                                     @if ($canManage)
-                                        <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="removeMember({{ $member['id'] }})" wire:confirm="{{ __('hr_mail_lists.remove_confirm') }}" :aria-label="__('hr_mail_lists.remove')" data-test="mail-list-remove" />
+                                        <x-ui.confirm-action :title="__('hr_mail_lists.remove_confirm')" confirm="removeMember({{ $member['id'] }})" :confirm-label="__('hr_mail_lists.remove')" tone="danger">
+                                            <x-ui.button tone="ghost" size="sm" icon="trash" :aria-label="__('hr_mail_lists.remove')" data-test="mail-list-remove" />
+                                        </x-ui.confirm-action>
                                     @endif
                                 </div>
                             </li>
@@ -430,7 +432,9 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                         <x-ui.form-input type="email" wire:model="newEmail" :label="__('hr_mail_lists.add_member')" :help="__('hr_mail_lists.add_hint')" dir="ltr" />
                         <div class="flex flex-wrap justify-between gap-2">
                             <x-ui.button type="submit" size="sm" icon="plus" data-test="mail-list-add">{{ __('hr_mail_lists.add') }}</x-ui.button>
-                            <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="deleteList({{ $open['list']->id }})" wire:confirm="{{ __('hr_mail_lists.delete_confirm') }}" data-test="mail-list-delete">{{ __('hr_mail_lists.delete_list') }}</x-ui.button>
+                            <x-ui.confirm-action :title="__('hr_mail_lists.delete_confirm')" confirm="deleteList({{ $open['list']->id }})" :confirm-label="__('hr_mail_lists.delete_list')" tone="danger">
+                                <x-ui.button tone="ghost" size="sm" icon="trash" data-test="mail-list-delete">{{ __('hr_mail_lists.delete_list') }}</x-ui.button>
+                            </x-ui.confirm-action>
                         </div>
                     </form>
                 @endif

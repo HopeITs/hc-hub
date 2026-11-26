@@ -37,6 +37,8 @@
         default => throw new InvalidArgumentException("Unknown x-ui.confirm-modal tone [{$tone}]."),
     };
 
+    /* A dialog opened by name has no wire:model to shut it, so its action closes it. */
+    $closeScript = $attributes->has('name') ? "\$el.closest('dialog').close()" : '';
     $markIcon = $icon ?? $fallbackIcon;
     $typedCode = filled($confirmText) ? (string) $confirmText : null;
     $typeLabel = $typedCode === null ? null : str_replace(':code', '<code class="confirm-code">'.e($typedCode).'</code>', e(__('common.type_to_confirm')));
@@ -96,6 +98,6 @@
     </x-slot:footer-meta>
 
     <x-slot:actions>
-        <x-ui.button type="button" :tone="$buttonTone" wire:click="{{ $confirm }}" :data-test="$confirmTest" data-confirm-action :disabled="$typedCode !== null">{{ $confirmLabel }}</x-ui.button>
+        <x-ui.button type="button" :tone="$buttonTone" wire:click="{{ $confirm }}" :data-test="$confirmTest" data-confirm-action :disabled="$typedCode !== null" x-on:click="{{ $closeScript }}">{{ $confirmLabel }}</x-ui.button>
     </x-slot:actions>
 </x-ui.modal>

@@ -365,12 +365,8 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
         @include('tracking::pages.annual-plans._plans-overview')
     </div>
 
-    <flux:modal wire:model="showCreateModal" class="w-full max-w-lg" data-test="new-plan-modal">
-        <form wire:submit="createPlan" class="flex flex-col gap-5">
-            <div>
-                <flux:heading size="lg">{{ __('annual_plans.wf.new_plan') }}</flux:heading>
-                <flux:text class="mt-1">{{ __('annual_plans.wf.new_plan_help') }}</flux:text>
-            </div>
+    <x-ui.modal wire:model="showCreateModal" size="md" :title="__('annual_plans.wf.new_plan')" :description="__('annual_plans.wf.new_plan_help')" submit="createPlan" data-test="new-plan-modal">
+        <div class="flex flex-col gap-5">
             <x-ui.form-select wire:model.live="newProposal" :label="__('annual_plans.wf.fact_proposal')" data-test="new-plan-proposal">
                 <option value="">{{ __('annual_plans.wf.pick_proposal') }}</option>
                 @foreach ($this->proposalOptions as $proposal)
@@ -388,10 +384,9 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
                 <p class="ap-sm ap-muted">{{ __('annual_plans.wf.no_program_to_plan') }}</p>
             @endif
             @error('newProgram') <p class="ap-err">{{ $message }}</p> @enderror
-            <div class="flex justify-end gap-2">
-                <flux:modal.close><flux:button variant="ghost">{{ __('common.cancel') }}</flux:button></flux:modal.close>
-                <flux:button type="submit" variant="primary" data-test="create-plan">{{ __('annual_plans.wf.start_plan') }}</flux:button>
-            </div>
-        </form>
-    </flux:modal>
+        </div>
+        <x-slot:actions>
+            <x-ui.button type="submit" tone="primary" data-test="create-plan">{{ __('annual_plans.wf.start_plan') }}</x-ui.button>
+        </x-slot:actions>
+    </x-ui.modal>
 </x-desk.register>

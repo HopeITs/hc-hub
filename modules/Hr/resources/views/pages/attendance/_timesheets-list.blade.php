@@ -39,14 +39,18 @@
         </p>
         <div class="flex flex-wrap gap-2">
             @if ($summary['ready_to_approve'] > 0)
-                <x-ui.button tone="primary" size="sm" icon="check" wire:click="approveAllReady" wire:confirm="{{ __('hr_attendance.timesheets.confirm-why') }}" data-test="attendance-approve-all">
-                    {{ __('hr_attendance.timesheets.confirm-all', ['count' => $summary['ready_to_approve']]) }}
-                </x-ui.button>
+                <x-ui.confirm-action :title="__('hr_attendance.timesheets.confirm-why')" confirm="approveAllReady" :confirm-label="__('hr_attendance.timesheets.confirm-all', ['count' => $summary['ready_to_approve']])" tone="neutral">
+                    <x-ui.button tone="primary" size="sm" icon="check" data-test="attendance-approve-all">
+                        {{ __('hr_attendance.timesheets.confirm-all', ['count' => $summary['ready_to_approve']]) }}
+                    </x-ui.button>
+                </x-ui.confirm-action>
             @endif
             @if ($summary['ready_to_lock'] > 0)
-                <x-ui.button size="sm" icon="lock-closed" wire:click="lockAllApproved" wire:confirm="{{ __('hr_attendance.workflow.lock-all', ['count' => $summary['ready_to_lock']]) }}?" data-test="attendance-lock-all">
-                    {{ __('hr_attendance.workflow.lock-all', ['count' => $summary['ready_to_lock']]) }}
-                </x-ui.button>
+                <x-ui.confirm-action :title="__('hr_attendance.workflow.lock-all', ['count' => $summary['ready_to_lock']]) . '?'" confirm="lockAllApproved" :confirm-label="__('hr_attendance.workflow.lock-all', ['count' => $summary['ready_to_lock']])" tone="neutral">
+                    <x-ui.button size="sm" icon="lock-closed" data-test="attendance-lock-all">
+                        {{ __('hr_attendance.workflow.lock-all', ['count' => $summary['ready_to_lock']]) }}
+                    </x-ui.button>
+                </x-ui.confirm-action>
             @endif
         </div>
     </div>

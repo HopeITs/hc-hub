@@ -43,7 +43,9 @@
     @endif
     @if ($assumptionId !== null)
         <x-slot:footerMeta>
-            <x-ui.button tone="ghost" size="sm" type="button" class="text-sm font-semibold underline underline-offset-2" wire:click="deleteAssumption" wire:confirm="{{ __('proposals.framework.delete_assumption_confirm') }}" data-test="assumption-delete">{{ __('proposals.framework.delete_assumption') }}</x-ui.button>
+            <x-ui.confirm-action :title="__('proposals.framework.delete_assumption_confirm')" confirm="deleteAssumption" :confirm-label="__('proposals.framework.delete_assumption')" tone="danger">
+                <x-ui.button tone="ghost" size="sm" type="button" class="text-sm font-semibold underline underline-offset-2" data-test="assumption-delete">{{ __('proposals.framework.delete_assumption') }}</x-ui.button>
+            </x-ui.confirm-action>
         </x-slot:footerMeta>
     @endif
     <x-slot:actions>

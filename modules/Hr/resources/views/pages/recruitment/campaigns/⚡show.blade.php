@@ -414,25 +414,19 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.campaign')] clas
         </aside>
     </div>
 
-    <flux:modal wire:model="showConfirm" class="max-w-lg">
-        @if ($confirming !== '')
-            <div class="space-y-4">
-                <flux:heading size="lg">{{ $confirming === 'launch' ? __('hr_recruitment.campaign_ui.page.launch') : __('hr_recruitment.campaign_ui.act.'.$confirming) }}</flux:heading>
-                <p class="text-sm">
-                    @if ($confirming === 'launch')
-                        {{ $state['startsInFuture'] ? __('hr_recruitment.campaign_ui.page.launch_confirm_scheduled', ['date' => $fmt($campaign->starts_at)]) : __('hr_recruitment.campaign_ui.page.launch_confirm_now') }}
-                    @else
-                        {{ __('hr_recruitment.campaign_ui.confirm.'.$confirming) }}
-                    @endif
-                </p>
-                @if (in_array($confirming, ['close', 'disable'], true))
-                    <x-ui.form-textarea wire:model="reason" :label="__('hr_recruitment.campaign_ui.reason')" :help="__('hr_recruitment.campaign_ui.reason_hint')" rows="3" required dir="auto" />
-                @endif
-                <div class="flex justify-end gap-2">
-                    <x-ui.button tone="ghost" wire:click="$set('showConfirm', false)">{{ __('hr_recruitment.campaign_ui.cancel') }}</x-ui.button>
-                    <x-ui.button :tone="in_array($confirming, ['close', 'disable'], true) ? 'inverse' : 'primary'" wire:click="confirmAction" wire:loading.attr="disabled" wire:target="confirmAction">{{ $confirming === 'launch' ? __('hr_recruitment.campaign_ui.page.launch') : __('hr_recruitment.campaign_ui.act.'.$confirming) }}</x-ui.button>
-                </div>
-            </div>
+    @php
+        $confirmingLabel = $confirming === 'launch' ? __('hr_recruitment.campaign_ui.page.launch') : __('hr_recruitment.campaign_ui.act.'.$confirming);
+    @endphp
+    <x-ui.confirm-modal
+        wire:model="showConfirm"
+        :title="$confirmingLabel"
+        :message="$confirming === 'launch' ? ($state['startsInFuture'] ? __('hr_recruitment.campaign_ui.page.launch_confirm_scheduled', ['date' => $fmt($campaign->starts_at)]) : __('hr_recruitment.campaign_ui.page.launch_confirm_now')) : __('hr_recruitment.campaign_ui.confirm.'.$confirming)"
+        confirm="confirmAction"
+        :confirm-label="$confirmingLabel"
+        :tone="in_array($confirming, ['close', 'disable'], true) ? 'danger' : 'neutral'"
+    >
+        @if (in_array($confirming, ['close', 'disable'], true))
+            <x-ui.form-textarea wire:model="reason" :label="__('hr_recruitment.campaign_ui.reason')" :help="__('hr_recruitment.campaign_ui.reason_hint')" rows="3" required dir="auto" />
         @endif
-    </flux:modal>
+    </x-ui.confirm-modal>
 </div>
