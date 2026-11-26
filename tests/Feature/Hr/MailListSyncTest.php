@@ -6,6 +6,8 @@ use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\AttendanceImport;
+use Modules\Hr\Models\AttendancePunch;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\MailList;
@@ -116,6 +118,13 @@ test('only mail-lists.manage opens the check page', function () {
 
 test('the attendance page offers to email the list that stands for a city and a department', function () {
     $employee = ($this->staff)($this->aleppo, 'rami@hcsyria.org');
+    // The page lists only people the uploaded reports hold punches for in the month.
+    AttendancePunch::query()->create([
+        'import_id' => AttendanceImport::query()->firstOrCreate(['file_name' => 'fixture.xls'])->id,
+        'device_no' => (string) $employee->id,
+        'employee_id' => $employee->id,
+        'punched_at' => now()->startOfMonth()->addHours(8),
+    ]);
     $departmentId = $employee->allContracts()->first()->position->department_id;
     MailList::factory()->create(['address' => 'hope.aleppo@hcsyria.org', 'rule_type' => MailList::RULE_CUSTOM, 'rule_city_id' => $this->aleppo->id]);
     MailList::factory()->create(['address' => 'it@hcsyria.org', 'rule_type' => MailList::RULE_CUSTOM, 'rule_department_id' => $departmentId]);

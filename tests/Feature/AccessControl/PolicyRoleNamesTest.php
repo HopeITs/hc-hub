@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\File;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
+use Modules\Tracking\Models\ActivityPlan;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Policies\PlanUpdatePolicy;
 use Modules\Tracking\Policies\StrategicPlanPolicy;
@@ -104,7 +105,10 @@ test('the plan of a program with no manager is approved by the General Manager o
 ]);
 
 test('the General Manager reads plan updates as a summary only, an administrator in full', function (string $role, bool $readsInFull) {
-    expect(PlanUpdatePolicy::canRead(userWithRole($role)))->toBe($readsInFull);
+    $user = userWithRole($role, Employee::factory()->create()->id);
+    $project = Project::factory()->create(['owner_employee_id' => $user->employee_id]);
+
+    expect(PlanUpdatePolicy::canRead($user, ActivityPlan::factory()->create(), $project))->toBe($readsInFull);
 })->with([
     'General Manager' => ['General Manager', false],
     'Super Admin' => ['Super Admin', true],

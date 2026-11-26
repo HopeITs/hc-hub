@@ -49,20 +49,23 @@ class Timesheet
 
     public const NO_RECORD = 'no_record';
 
+    /** A working day still ahead: nothing to decide yet, and it counts for nothing. */
+    public const UPCOMING = 'upcoming';
+
     public const DECIDED_WORKED = 'decided_worked';
 
     public const DECIDED_ABSENT = 'decided_absent';
 
     /** Every kind a day can be, in the order the key shows them. */
-    public const KINDS = [self::WORKED, self::DECIDED_WORKED, self::ONE_PUNCH, self::NO_RECORD, self::LEAVE, self::DECIDED_ABSENT, self::WEEKEND, self::HOLIDAY, self::OUTSIDE];
+    public const KINDS = [self::WORKED, self::DECIDED_WORKED, self::ONE_PUNCH, self::NO_RECORD, self::UPCOMING, self::LEAVE, self::DECIDED_ABSENT, self::WEEKEND, self::HOLIDAY, self::OUTSIDE];
 
     /**
      * @return array{
      *     month: CarbonImmutable,
-     *     placement: array{program_id: ?int, program: ?string, department_id: ?int, department: ?string, center: ?string, position: ?string},
+     *     placement: array{days_off: list<int>, days_off_from: ?string, program_id: ?int, program: ?string, department_id: ?int, department: ?string, center: ?string, position: ?string},
      *     daily_hours: float,
      *     rows: list<array<string, mixed>>,
-     *     totals: array{leave_hours: float, overtime_hours: float, overtime_days: float, working_days: float, worked_days: int, to_decide: int},
+     *     totals: array{leave_hours: float, overtime_hours: float, overtime_days: float, working_days: float, worked_days: int, to_decide: int, leave_pending: int},
      *     balances: list<array<string, mixed>>
      * }
      */
@@ -122,7 +125,8 @@ class Timesheet
 
         $leaves = LeaveRequest::query()
             ->with('leaveBalance.leaveType', 'leaveBalance.contract:id,employee_id')
-            ->where('status', LeaveRequestStatus::Accepted->value)
+            // A leave that is asked for (pending) already answers the day: HR never decides it; the print waits for its answer.
+            ->whereIn('status', [LeaveRequestStatus::Accepted->value, LeaveRequestStatus::Pending->value])
             ->whereHas('leaveBalance.contract', fn ($contract) => $contract->whereIn('employee_id', $ids))
             ->whereDate('start_at', '<=', $last->toDateString())
             ->whereDate('end_at', '>=', $first->toDateString())
@@ -222,10 +226,7 @@ class Timesheet
             $holidayCache[$key] ??= $this->holidaysFor($position?->program_id, $position?->city_id, $first, $last);
 
             // Days picked one by one on the contract: every other day is off (the center's day plus the volunteer's own).
-            $workdays = $contract->workWeekdays();
-            $weekends = $workdays !== null
-                ? array_values(array_diff(range(0, 6), $workdays))
-                : array_map('intval', explode(',', (string) ($position?->center?->weekends ?: config('attendance.default_weekends'))));
+            $weekends = $this->daysOff($contract)['days'];
             $isWeekend = in_array($day->dayOfWeek, $weekends, true);
 
             if ($isWeekend || isset($holidayCache[$key][$date])) {
@@ -239,6 +240,32 @@ class Timesheet
                     $row['overtime_minutes'] = intdiv($workedMinutes, $block) * $block;
                 }
 
+                $rows[] = $row;
+
+                continue;
+            }
+
+            [$leaveHours, $leaveType, $leavePending] = $this->leaveOn($leaves, $day, $daily);
+
+            if ($leaveHours >= $daily) {
+                $row['kind'] = self::LEAVE;
+                $row['leave_type'] = $leaveType;
+                $row['leave_hours'] = $daily;
+                $row['working_days'] = 0.0;
+                $row['leave_pending'] = $leavePending;
+                $rows[] = $row;
+
+                continue;
+            }
+
+            if ($leaveHours > 0) {
+                // An hourly leave inside a working day: the rest of the day is worked.
+                $row['kind'] = self::WORKED;
+                $row['leave_pending'] = $leavePending;
+                $row['leave_type'] = $leaveType;
+                $row['leave_hours'] = $leaveHours;
+                $row['working_days'] = 1 - ($leaveHours / $daily);
+                $row['overtime_minutes'] = $this->overtimeMinutes($workedMinutes, $daily, $overtime);
                 $rows[] = $row;
 
                 continue;
@@ -266,33 +293,13 @@ class Timesheet
                 continue;
             }
 
-            [$leaveHours, $leaveType] = $this->leaveOn($leaves, $day, $daily);
-
-            if ($leaveHours >= $daily) {
-                $row['kind'] = self::LEAVE;
-                $row['leave_type'] = $leaveType;
-                $row['leave_hours'] = $daily;
-                $rows[] = $row;
-
-                continue;
-            }
-
-            if ($leaveHours > 0) {
-                // An hourly leave inside a working day: the rest of the day is worked.
-                $row['kind'] = self::WORKED;
-                $row['leave_type'] = $leaveType;
-                $row['leave_hours'] = $leaveHours;
-                $row['working_days'] = 1 - ($leaveHours / $daily);
-                $row['overtime_minutes'] = $this->overtimeMinutes($workedMinutes, $daily, $overtime);
-                $rows[] = $row;
-
-                continue;
-            }
-
             if ($workedMinutes !== null) {
                 $row['kind'] = self::WORKED;
                 $row['working_days'] = 1.0;
                 $row['overtime_minutes'] = $this->overtimeMinutes($workedMinutes, $daily, $overtime);
+            } elseif ($times === [] && $day->isAfter(CarbonImmutable::today())) {
+                // Not come yet: no one can answer for it, so it waits for nobody.
+                $row['kind'] = self::UPCOMING;
             } else {
                 // One punch, or none: nothing is assumed, it waits for an answer.
                 $row['kind'] = count($times) === 1 ? self::ONE_PUNCH : self::NO_RECORD;
@@ -322,7 +329,7 @@ class Timesheet
 
     /**
      * @param  list<array<string, mixed>>  $rows
-     * @return array{leave_hours: float, overtime_hours: float, overtime_days: float, working_days: float, worked_days: int, to_decide: int}
+     * @return array{leave_hours: float, overtime_hours: float, overtime_days: float, working_days: float, worked_days: int, to_decide: int, leave_pending: int}
      */
     private function totals(array $rows, float $dailyHours): array
     {
@@ -330,9 +337,14 @@ class Timesheet
         $minutes = 0;
         $days = 0.0;
         $toDecide = 0;
+        $leavePending = 0;
         $workedDays = 0;
 
         foreach ($rows as $row) {
+            if (! empty($row['leave_pending'])) {
+                $leavePending++;
+            }
+
             if (! $row['paid_off_day']) {
                 $leave += $row['leave_hours'];
             }
@@ -358,6 +370,8 @@ class Timesheet
             'working_days' => round($days, 2),
             'worked_days' => $workedDays,
             'to_decide' => $toDecide,
+            // Days covered by a leave request nobody has answered yet: never HR's to decide, but the paper waits for it.
+            'leave_pending' => $leavePending,
         ];
     }
 
@@ -386,19 +400,48 @@ class Timesheet
      * Where the person works this month: the project (program), department and center of their
      * latest contract running in the month. Timesheets are grouped by it.
      *
-     * @return array{program_id: ?int, program: ?string, department_id: ?int, department: ?string, center: ?string, position: ?string}
+     * @return array{days_off: list<int>, days_off_from: ?string, program_id: ?int, program: ?string, department_id: ?int, department: ?string, center: ?string, position: ?string}
      */
     private function placement(?Contract $contract): array
     {
         $position = $contract?->position;
+        $off = $contract !== null ? $this->daysOff($contract) : ['days' => [], 'from' => null];
 
         return [
+            // The weekly days off of the latest contract in the month, and where they come from.
+            'days_off' => $off['days'],
+            'days_off_from' => $off['from'],
             'program_id' => $position?->program_id !== null ? (int) $position->program_id : null,
             'program' => $position?->program?->name,
             'department_id' => $position?->department_id !== null ? (int) $position->department_id : null,
             'department' => $position?->department?->name,
             'center' => $position?->center?->name,
             'position' => $position === null ? null : ($position->title_ar ?: $position->title_en),
+        ];
+    }
+
+    /**
+     * A contract's weekly days off (0 = Sunday ... 6 = Saturday), and where they come from: the days
+     * picked on the contract itself (every other day is off), else the center of its position,
+     * else the configured default.
+     *
+     * @return array{days: list<int>, from: 'contract'|'center'|'default'}
+     */
+    private function daysOff(Contract $contract): array
+    {
+        $workdays = $contract->workWeekdays();
+
+        if ($workdays !== null) {
+            return ['days' => array_values(array_diff(range(0, 6), $workdays)), 'from' => 'contract'];
+        }
+
+        // "0" is Sunday, not "nothing set": only a missing or blank value falls back to the default.
+        $center = trim((string) $contract->position?->center?->weekends);
+        $set = $center !== '' && Contract::parseWeekdays($center) !== [];
+
+        return [
+            'days' => Contract::parseWeekdays($set ? $center : (string) config('attendance.default_weekends')),
+            'from' => $set ? 'center' : 'default',
         ];
     }
 
@@ -420,15 +463,16 @@ class Timesheet
     }
 
     /**
-     * Hours of accepted leave on a working day, and its type.
+     * Hours of leave on a working day (accepted or still asked for), its type, and whether any of it is still pending.
      *
      * @param  Collection<int, LeaveRequest>  $leaves
-     * @return array{0: float, 1: ?LeaveType}
+     * @return array{0: float, 1: ?LeaveType, 2: bool}
      */
     private function leaveOn(Collection $leaves, CarbonImmutable $day, float $daily): array
     {
         $hours = 0.0;
         $type = null;
+        $pending = false;
 
         foreach ($leaves as $leave) {
             $start = CarbonImmutable::instance($leave->start_at);
@@ -447,9 +491,10 @@ class Timesheet
             }
 
             $type ??= $leave->leaveBalance?->leaveType;
+            $pending = $pending || (int) $leave->status === LeaveRequestStatus::Pending->value;
         }
 
-        return [min($hours, $daily), $type];
+        return [min($hours, $daily), $type, $pending];
     }
 
     /**

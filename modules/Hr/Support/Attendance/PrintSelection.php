@@ -34,7 +34,8 @@ class PrintSelection
         }
 
         $data = $request->validate([
-            'month' => ['required', 'date_format:Y-m'],
+            // There are no punches in the future: a month to come is never printed.
+            'month' => ['required', 'date_format:Y-m', 'before_or_equal:'.now()->format('Y-m')],
             'city_id' => ['nullable', 'integer'],
             'employees' => ['nullable', 'array'],
             'employees.*' => ['integer'],
@@ -49,7 +50,7 @@ class PrintSelection
         abort_unless($month instanceof CarbonImmutable, 404);
 
         $wanted = array_map('intval', (array) ($data['employees'] ?? []));
-        $employees = $this->roster->employees($user, $month, isset($data['city_id']) ? (int) $data['city_id'] : null)
+        $employees = $this->roster->withPunches($this->roster->employees($user, $month, isset($data['city_id']) ? (int) $data['city_id'] : null), $month)
             ->when($wanted !== [], fn (Collection $all): Collection => $all->whereIn('id', $wanted));
 
         abort_if($employees->isEmpty(), 404);
@@ -71,6 +72,14 @@ class PrintSelection
         }
 
         abort_if($sheets->isEmpty(), 404);
+
+        // The paper is signed: it prints only when every day is answered (nothing waits for HR) and
+        // no leave request of the month is still waiting for its approver.
+        abort_if(
+            $sheets->contains(fn (array $s) => $s['sheet']['totals']['to_decide'] > 0 || $s['sheet']['totals']['leave_pending'] > 0),
+            422,
+            __('hr_attendance.timesheets.print-blocked'),
+        );
 
         // The order of the page: city, then project or department, then name.
         $sheets = $this->grouping->group($sheets, $by)

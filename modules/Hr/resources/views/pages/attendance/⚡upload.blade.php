@@ -101,7 +101,16 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.upload')] class exten
 
         $this->cancel();
         $this->importedId = $import->id;
-        Flux::toast(variant: 'success', text: __('hr_attendance.upload.imported', ['new' => $import->punches_new]));
+        // Say what happened to every punch of the file, so a number is never a mystery.
+        Flux::toast(variant: 'success', text: __('hr_attendance.upload.imported-detail', [
+            'from' => $import->period_start?->format('d/m/Y') ?? '—',
+            'to' => $import->period_end?->format('d/m/Y') ?? '—',
+            'total' => $import->punches_total,
+            'new' => $import->punches_new,
+            'same' => max(0, $import->punches_total - $import->punches_new - $import->punches_locked),
+            'removed' => (int) $import->getAttribute('punches_replaced'),
+            'locked' => $import->punches_locked,
+        ]));
     }
 
     public function cancel(): void
@@ -189,7 +198,9 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.upload')] class exten
 
 <x-desk.register class="@container" heading-id="hr-attendance-upload-heading" :title="__('hr_attendance.upload.title')" data-hr-attendance-upload>
     <x-slot:actions>
-        <x-ui.button tone="action" icon="signal" :href="route('hr.attendance.devices')" wire:navigate data-test="attendance-devices-link">{{ __('hr_attendance.devices.title') }}</x-ui.button>
+        @if (config('attendance.devices_page'))
+            <x-ui.button tone="action" icon="signal" :href="route('hr.attendance.devices')" wire:navigate data-test="attendance-devices-link">{{ __('hr_attendance.devices.title') }}</x-ui.button>
+        @endif
         <x-ui.button tone="action" icon="clock" :href="route('hr.attendance.timesheets')" wire:navigate>{{ __('hr_attendance.upload.then') }}</x-ui.button>
     </x-slot:actions>
 

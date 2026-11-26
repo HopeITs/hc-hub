@@ -84,6 +84,7 @@ test('no page renders the whole employee list into server-side options', functio
         'programs/⚡index.blade.php' => 'only employees who already manage a program',
         'projects/⚡index.blade.php' => 'the city filter, not people',
         'projects/_index-project-modal.blade.php' => 'only the program managers a project owner may be picked from',
+        'checklists/⚡default-deliverables.blade.php' => 'only service-department staff of the governorate picked in the form',
     ];
 
     $offenders = [];

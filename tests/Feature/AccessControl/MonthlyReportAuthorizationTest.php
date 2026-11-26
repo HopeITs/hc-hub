@@ -463,14 +463,14 @@ test('D-84: the responsible of the same proposal at another place, or of a propo
     mrauRow(Activity::withoutRecording(fn (): Proposal => Proposal::factory()->create()), $programId, $outsider, $template->center_id);
     $draft = mrauDraftOf($template);
 
-    foreach ([$elsewhere, $outsider] as $employee) {
-        $user = userWithRole('Public Relations', $employee);
+    $elsewhereUser = userWithRole('Public Relations', $elsewhere);
 
+    foreach ([$elsewhereUser, userWithRole('Public Relations', $outsider)] as $user) {
         expect($user->can('open', [MonthlyReport::class, $template]))->toBeFalse()
             ->and($user->can('update', $draft))->toBeFalse();
     }
 
-    $this->actingAs(userWithRole('Public Relations', $elsewhere));
+    $this->actingAs($elsewhereUser);
 
     expect(fn () => app(OpenMonthlyReport::class)->handle($template, CarbonImmutable::parse('2026-10-01')))
         ->toThrow(AuthorizationException::class);

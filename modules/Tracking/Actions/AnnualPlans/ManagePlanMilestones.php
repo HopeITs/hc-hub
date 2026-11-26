@@ -29,7 +29,7 @@ final class ManagePlanMilestones
     {
         return $user->can('annual-plans.view')
             && ($this->mayManage($user, $plan)
-                || $user->hasAnyRole(['MEAL', 'General Manager', 'Super Admin'])
+                || $user->canAny(['meal-coverage.manage', 'strategies.approve-unmanaged'])
                 || ActivityPlanPolicy::isMealManager($user));
     }
 

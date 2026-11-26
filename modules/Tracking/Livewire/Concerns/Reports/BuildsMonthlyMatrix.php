@@ -21,7 +21,9 @@ use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Livewire\Concerns\FiltersReportPlaces;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\StrategicPillar;
 use Modules\Tracking\Support\MealCoverage;
 use Modules\Tracking\Support\Reporting\ExtractionFilter;
@@ -271,7 +273,7 @@ trait BuildsMonthlyMatrix
     #[Computed]
     public function hasNoAssignedProjects(): bool
     {
-        return $this->mine && $this->coveredProjectIds() === [];
+        return $this->mine && ! $this->hasCoveredPlaces();
     }
 
     /**
@@ -512,17 +514,14 @@ trait BuildsMonthlyMatrix
         $this->year = '';
     }
 
-    /**
-     * The project ids "my projects" narrows the Activities tab to
-     * (contracts §12.3, D-12a).
-     *
-     * @return list<int>
-     */
-    protected function coveredProjectIds(): array
+    protected function hasCoveredPlaces(): bool
     {
         $employeeId = Auth::user()?->employee_id;
 
-        return $employeeId === null ? [] : MealCoverage::projectsCoveredBy((int) $employeeId);
+        return $employeeId !== null && (
+            MealCoverage::scopeCoveredBy(ReportTemplate::query(), (int) $employeeId)->exists()
+            || MealCoverage::scopeCoveredBy(PlanIndicator::query(), (int) $employeeId)->exists()
+        );
     }
 
     /**

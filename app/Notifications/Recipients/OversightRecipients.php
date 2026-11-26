@@ -104,10 +104,9 @@ final class OversightRecipients
      */
     private function projectOfficerUserIds(?int $projectId): array
     {
-        $project = $projectId === null ? null : Project::query()->find($projectId);
-        $officer = $project === null ? null : MealCoverage::responsibleFor($project);
+        $officers = $projectId === null ? [] : MealCoverage::officersForLegacyProject($projectId);
 
-        return $officer === null ? [] : array_values($this->employees->usersFor([$officer]));
+        return array_values($this->employees->usersFor($officers));
     }
 
     /**

@@ -27,6 +27,7 @@ use Modules\Tracking\Models\MonthlyReportLineShare;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\StrategicPillar;
@@ -74,6 +75,13 @@ function mmProposal(Project $project, string $begin = '2026-01-01', string $end 
             'actual_date_end' => $end,
         ]);
         $proposal->projects()->attach($project->id, ['target_beneficiaries' => 100]);
+
+        $row = ProposalLocation::query()->where('proposal_id', $proposal->id)->where('project_id', $project->id)->first()
+            ?? ProposalLocation::factory()->forProject($project)->create(['proposal_id' => $proposal->id]);
+
+        if ($project->center_id !== null && ! $row->centers()->exists()) {
+            $row->centers()->create(['center_id' => $project->center_id]);
+        }
 
         return $proposal;
     });

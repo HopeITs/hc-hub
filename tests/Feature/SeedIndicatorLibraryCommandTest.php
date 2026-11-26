@@ -250,9 +250,10 @@ test('a program code HR duplicates after the check is refused and nothing is wri
     $programId = programWithHrCode('002');
     $indicatorId = insertIndicator(outputUnderOutcome($programId), 'Number of people reached');
     $duplicated = false;
-    // The first program read is the code check; a second program is given the code right after it.
+    // The first programs read is the code check; HR gives the code to a second program right after it.
+    // The hub has one database, so the programs table is read through the default connection.
     DB::listen(function (QueryExecuted $query) use (&$duplicated): void {
-        if (! $duplicated && str_contains($query->sql, 'from `programs`')) {
+        if (! $duplicated && str_contains($query->sql, '`programs`')) {
             $duplicated = true;
             insertHrProgram(code: '002');
         }

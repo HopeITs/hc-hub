@@ -40,7 +40,7 @@ final class RecordFeedback
         $feedback->message = mb_substr(trim($message), 0, self::MaxLength);
         $feedback->route_name = $routeName !== null ? mb_substr($routeName, 0, 255) : null;
         $feedback->locale = app()->getLocale();
-        $feedback->role_name = $user->active_role_id === null ? null : Role::query()->whereKey($user->active_role_id)->value('name');
+        $feedback->role_name = ($user->getAttributes()['active_role_id'] ?? null) === null ? null : Role::query()->whereKey($user->getAttributes()['active_role_id'])->value('name');
         $feedback->save();
 
         return $feedback;

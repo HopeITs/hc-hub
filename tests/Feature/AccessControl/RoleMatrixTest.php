@@ -149,6 +149,8 @@ test('each role holds every view permission plus exactly its approved write perm
         'indicators.record',
         'attendance.view',
         'ai.draft',
+        // Permissions Library: a manager assigns items to direct reports only (grant migration 2026_11_27_000002).
+        'entitlements.assign',
     ]],
 ]);
 

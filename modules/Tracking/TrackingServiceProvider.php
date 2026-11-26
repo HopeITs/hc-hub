@@ -17,11 +17,13 @@ use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Console\Commands\BackfillLocationsFromProjects;
+use Modules\Tracking\Console\Commands\BackfillMealCoveragePlaces;
 use Modules\Tracking\Console\Commands\BackfillMonthlyReports;
 use Modules\Tracking\Console\Commands\BackfillPlanIndicatorRows;
 use Modules\Tracking\Console\Commands\BackfillProjectMembers;
 use Modules\Tracking\Console\Commands\BackfillProposalLocations;
 use Modules\Tracking\Console\Commands\BackfillRiskRows;
+use Modules\Tracking\Console\Commands\BackfillScheduleOverrideRows;
 use Modules\Tracking\Console\Commands\BackfillScheduleRows;
 use Modules\Tracking\Console\Commands\BackfillTaskRows;
 use Modules\Tracking\Console\Commands\EnsureAnnualPlans2026;
@@ -110,11 +112,13 @@ class TrackingServiceProvider extends ServiceProvider
 
         $this->commands([
             BackfillLocationsFromProjects::class,
+            BackfillMealCoveragePlaces::class,
             BackfillMonthlyReports::class,
             BackfillProjectMembers::class,
             BackfillPlanIndicatorRows::class,
             BackfillProposalLocations::class,
             BackfillRiskRows::class,
+            BackfillScheduleOverrideRows::class,
             BackfillScheduleRows::class,
             BackfillTaskRows::class,
             EnsureAnnualPlans2026::class,

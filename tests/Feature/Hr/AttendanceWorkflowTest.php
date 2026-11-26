@@ -139,7 +139,8 @@ test('a manager cannot answer a day of their own month', function () {
 
 test('new punches withdraw an approval, and a locked month takes none', function () {
     $csv = tempnam(sys_get_temp_dir(), 'att').'.csv';
-    file_put_contents($csv, "AC-No,Name,Time\n{$this->report->id},x,07/09/2026 12:00\n");
+    // Saturday 5 September: a day the contract does not cover, so a report for it replaces nothing that counts.
+    file_put_contents($csv, "AC-No,Name,Time\n{$this->report->id},x,05/09/2026 12:00\n");
 
     $this->workflow->approve($this->manager, $this->report, $this->september);
     app(AttendanceImporter::class)->import($csv, 'late.csv', null);
@@ -147,7 +148,7 @@ test('new punches withdraw an approval, and a locked month takes none', function
 
     $this->workflow->approve($this->manager, $this->report, $this->september);
     $this->workflow->lock($this->hr, $this->report, $this->september);
-    file_put_contents($csv, "AC-No,Name,Time\n{$this->report->id},x,08/09/2026 12:00\n");
+    file_put_contents($csv, "AC-No,Name,Time\n{$this->report->id},x,05/09/2026 12:30\n");
     $import = app(AttendanceImporter::class)->import($csv, 'later.csv', null);
 
     expect($import->punches_new)->toBe(0)

@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Schema;
  */
 return new class extends Migration
 {
-    /** Item name => group. Anything else stays "other"; order-3 items are "exit". */
+    /** Item name => group. Anything else stays "other"; the order-3 rows of these names are "exit". */
     private const GROUPS = [
         'Email' => 'electronics',
         'Email Signature' => 'electronics',
@@ -70,8 +70,8 @@ return new class extends Migration
             DB::table('checklist_items')->where('name', $name)->update(['onboarding_group' => $group]);
         }
 
-        // The return items (order 3) belong to the exit, whatever their name.
-        DB::table('checklist_items')->where('order', 3)->update(['onboarding_group' => 'exit']);
+        // The return rows (order 3) of the items named above belong to the exit.
+        DB::table('checklist_items')->where('order', 3)->whereIn('name', array_keys(self::GROUPS))->update(['onboarding_group' => 'exit']);
 
         if (! DB::table('checklist_items')->where('name', 'Mouse')->exists()) {
             DB::table('checklist_items')->insert([
@@ -110,6 +110,8 @@ return new class extends Migration
 
     public function down(): void
     {
+        DB::table('checklist_items')->where('name', 'Mouse')->where('order', 1)->delete();
+
         Schema::dropIfExists('policy_acknowledgements');
 
         if (Schema::hasColumn('policy_documents', 'required_for_onboarding')) {

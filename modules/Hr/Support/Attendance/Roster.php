@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\ContractType;
+use Modules\Hr\Models\AttendancePunch;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Support\Employees\HrAccess;
@@ -55,6 +56,31 @@ class Roster
 
         // Granted attendance.view by hand to a role that is not a team, city or head-office role.
         return self::OWN;
+    }
+
+    /**
+     * Of these people, the ones the uploaded reports hold punches for in the month. A report is one
+     * center's file, so someone whose center's report is not uploaded yet is not on the page, the
+     * print, the PDF or the Excel. The page and every export go through this.
+     *
+     * @param  Collection<int, Employee>  $employees
+     * @return Collection<int, Employee>
+     */
+    public function withPunches(Collection $employees, CarbonImmutable $month): Collection
+    {
+        if ($employees->isEmpty()) {
+            return $employees;
+        }
+
+        $with = AttendancePunch::query()
+            ->whereIn('employee_id', $employees->modelKeys())
+            ->whereBetween('punched_at', [$month->startOfMonth()->startOfDay(), $month->endOfMonth()->endOfDay()])
+            ->distinct()
+            ->pluck('employee_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        return $employees->filter(fn (Employee $e): bool => in_array($e->id, $with, true))->values();
     }
 
     /** @return Collection<int, Employee> */

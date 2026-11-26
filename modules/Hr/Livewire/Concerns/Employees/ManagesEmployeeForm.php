@@ -6,6 +6,7 @@ namespace Modules\Hr\Livewire\Concerns\Employees;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -58,6 +59,9 @@ trait ManagesEmployeeForm
     /** @var array<string, string> */
     public array $form = [];
 
+    /** The username last suggested from the English name; replaced only while HR has not typed their own. */
+    public string $suggestedUsername = '';
+
     public bool $isBoardMember = false;
 
     public string $activeTab = 'information';
@@ -71,6 +75,26 @@ trait ManagesEmployeeForm
 
     /** @var TemporaryUploadedFile|null */
     public $photo = null;
+
+    /**
+     * A new employee's username follows the English first and last name (first.last) until HR
+     * types one of their own.
+     */
+    public function updatedForm(mixed $value, string $key): void
+    {
+        if ($this->employeeId !== null || ! in_array($key, ['first_name_en', 'last_name_en'], true)) {
+            return;
+        }
+
+        $current = (string) ($this->form['username'] ?? '');
+
+        if ($current !== '' && $current !== $this->suggestedUsername) {
+            return;
+        }
+
+        $this->form['username'] = $this->suggestedUsername = Str::of(trim(($this->form['first_name_en'] ?? '').' '.($this->form['last_name_en'] ?? '')))
+            ->ascii()->lower()->replaceMatches('/[^a-z0-9]+/', '.')->trim('.')->value();
+    }
 
     protected function fillEmployeeForm(?Employee $employee): void
     {

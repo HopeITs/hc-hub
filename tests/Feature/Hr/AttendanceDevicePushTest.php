@@ -16,6 +16,9 @@ use Modules\Hr\Support\Attendance\AttendanceImporter;
 */
 
 beforeEach(function () {
+    // Receiving is off by default (config/attendance.php device_push); these tests are about receiving.
+    config(['attendance.device_push' => true]);
+
     $this->device = fn (array $attributes = []): AttendanceDevice => AttendanceDevice::query()->create($attributes + ['serial' => 'SFAA123456', 'name' => 'Hope Center']);
 
     $this->push = fn (string $serial, string $body, ?string $stamp = null) => $this->call(
@@ -23,6 +26,18 @@ beforeEach(function () {
         '/iclock/cdata?SN='.$serial.'&table=ATTLOG'.($stamp ? '&Stamp='.$stamp : ''),
         [], [], [], ['CONTENT_TYPE' => 'text/plain'], $body,
     );
+});
+
+test('nothing is received from devices or the agent while it is turned off', function () {
+    config(['attendance.device_push' => false]);
+
+    $this->get('/iclock/cdata?SN=NEWDEVICE01&options=all')->assertNotFound();
+    ($this->push)('NEWDEVICE01', "7\t2026-09-01 08:00:00\t0\t1\t0\t0\t0\t0\t0\t0\n")->assertNotFound();
+    $this->getJson('/api/attendance/agent/state')->assertNotFound();
+    $this->postJson('/api/attendance/agent/punches', [])->assertNotFound();
+
+    expect(AttendancePunch::query()->count())->toBe(0)
+        ->and(AttendanceDevice::query()->count())->toBe(0);
 });
 
 test('a device that is not registered is refused and remembered', function () {

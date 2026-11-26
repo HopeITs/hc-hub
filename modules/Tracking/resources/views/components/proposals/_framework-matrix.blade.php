@@ -43,7 +43,7 @@
                             @switch($column)
                                 @case('indicators')
                                     @foreach ($node['indicators'] as $indicator)
-                                        <x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-item" wire:click="$dispatch('edit-indicator', { indicatorId: {{ $indicator['id'] }} })" dir="auto">{{ \Illuminate\Support\Str::limit($indicator['name'], 70) }} <span class="pp-small">{{ $indicator['target'] === null ? __('proposals.framework.no_target') : ($indicator['actual'] ?? 0).'/'.$num($indicator['target']) }}</span></x-ui.button>
+                                        <x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-item" @if ($this->canEditIndicators) wire:click="$dispatch('edit-indicator', { indicatorId: {{ $indicator['id'] }} })" @endif dir="auto">{{ \Illuminate\Support\Str::limit($indicator['name'], 70) }} <span class="pp-small">{{ $indicator['target'] === null ? __('proposals.framework.no_target') : ($indicator['actual'] ?? 0).'/'.$num($indicator['target']) }}</span></x-ui.button>
                                     @endforeach
                                     @if ($canEdit)<x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-add" wire:click="$dispatch('add-indicator', { resultId: {{ $id }} })">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif
                                     @break

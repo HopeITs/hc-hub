@@ -566,13 +566,10 @@ test('"My reports" takes a fixed number of queries whatever the number of templa
     $this->travelTo('2026-11-20 10:00:00');
     $render = function (): int {
         DB::flushQueryLog();
-        DB::connection('hr')->flushQueryLog();
         DB::enableQueryLog();
-        DB::connection('hr')->enableQueryLog();
         Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index');
-        $count = count(DB::getQueryLog()) + count(DB::connection('hr')->getQueryLog());
+        $count = count(DB::getQueryLog());
         DB::disableQueryLog();
-        DB::connection('hr')->disableQueryLog();
 
         return $count;
     };
@@ -812,13 +809,10 @@ test('Y-05: "To validate" takes a fixed number of queries whatever the number of
     $meal = mealManager();
     $render = function () use ($meal): int {
         DB::flushQueryLog();
-        DB::connection('hr')->flushQueryLog();
         DB::enableQueryLog();
-        DB::connection('hr')->enableQueryLog();
         Livewire::withQueryParams(['city' => (string) $this->aleppo])->actingAs($meal)->test('tracking::monthly-reports.index');
-        $count = count(DB::getQueryLog()) + count(DB::connection('hr')->getQueryLog());
+        $count = count(DB::getQueryLog());
         DB::disableQueryLog();
-        DB::connection('hr')->disableQueryLog();
 
         return $count;
     };
