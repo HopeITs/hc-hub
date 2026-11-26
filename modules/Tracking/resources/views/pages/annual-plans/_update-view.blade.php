@@ -98,9 +98,9 @@
             <textarea class="ap-inp @error('reason') is-err @enderror" wire:model="reason" placeholder="{{ __('annual_plans.up.reason_placeholder') }}" dir="auto" data-test="reason"></textarea>
             @error('reason') <p class="ap-err">{{ $message }}</p> @enderror
             <div class="ap-row">
-                <button type="button" class="dk-btn dk-primary" wire:click="officerApprove" data-test="officer-approve">{{ __('annual_plans.up.approve') }} ✓</button>
-                <button type="button" class="dk-btn" wire:click="officerReturn" data-test="officer-return">{{ __('annual_plans.up.return_to_pm') }}</button>
-                <button type="button" class="dk-btn" x-on:click="$wire.question = $wire.reason; $wire.askQuestion()" data-test="officer-ask">{{ __('annual_plans.up.ask') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="officerApprove" data-test="officer-approve">{{ __('annual_plans.up.approve') }} ✓</x-ui.button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="officerReturn" data-test="officer-return">{{ __('annual_plans.up.return_to_pm') }}</x-ui.button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" x-on:click="$wire.question = $wire.reason; $wire.askQuestion()" data-test="officer-ask">{{ __('annual_plans.up.ask') }}</x-ui.button>
             </div>
         </section>
     @elseif ($mode === 'meal')
@@ -115,22 +115,22 @@
                 <label><input type="radio" wire:model="returnTo" value="officer"> {{ __('annual_plans.up.role_officer') }}</label>
             </div>
             <div class="ap-row">
-                <button type="button" class="dk-btn dk-primary" wire:click="mealReviewed" data-test="meal-reviewed">{{ __('annual_plans.up.mark_reviewed') }} ✓</button>
-                <button type="button" class="dk-btn" wire:click="mealReturn" data-test="meal-return">{{ __('annual_plans.up.return') }}</button>
-                <button type="button" class="dk-btn" x-on:click="$wire.question = $wire.reason; $wire.askQuestion()" data-test="meal-ask">{{ __('annual_plans.up.ask') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="mealReviewed" data-test="meal-reviewed">{{ __('annual_plans.up.mark_reviewed') }} ✓</x-ui.button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="mealReturn" data-test="meal-return">{{ __('annual_plans.up.return') }}</x-ui.button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" x-on:click="$wire.question = $wire.reason; $wire.askQuestion()" data-test="meal-ask">{{ __('annual_plans.up.ask') }}</x-ui.button>
             </div>
         </section>
     @elseif ($mode === 'program')
         <section class="ap-card" data-decision="program">
             <h2>{{ __('annual_plans.up.mark_seen_title') }}</h2>
             <textarea class="ap-inp" wire:model="pmNote" placeholder="{{ __('annual_plans.up.pm_note_placeholder') }}" dir="auto" data-test="pm-note"></textarea>
-            <div class="ap-row"><button type="button" class="dk-btn dk-primary" wire:click="markSeen" data-test="mark-seen">{{ __('annual_plans.up.mark_seen') }} ✓</button></div>
+            <div class="ap-row"><x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="markSeen" data-test="mark-seen">{{ __('annual_plans.up.mark_seen') }} ✓</x-ui.button></div>
         </section>
     @elseif ($mode === 'answer')
         <section class="ap-card" data-decision="answer">
             <h2>{{ __('annual_plans.up.answer_title') }}</h2>
             <textarea class="ap-inp @error('answer') is-err @enderror" wire:model="answer" dir="auto" data-test="answer"></textarea>
-            <div class="ap-row"><button type="button" class="dk-btn" wire:click="sendAnswer" data-test="send-answer">{{ __('annual_plans.up.send_answer') }}</button></div>
+            <div class="ap-row"><x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="sendAnswer" data-test="send-answer">{{ __('annual_plans.up.send_answer') }}</x-ui.button></div>
         </section>
     @endif
 @endif

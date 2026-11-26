@@ -142,7 +142,7 @@
                             <span @class(['absolute top-0.5 size-4 rounded-full bg-white transition-all', 'end-0.5' => $sound, 'start-0.5' => ! $sound])></span>
                         </span>
                     </button>
-                    <p class="mt-2 px-2 text-[12px] leading-relaxed text-ink-faint">{{ __('hr_chat.ui.sound_hint') }}</p>
+                    <p class="mt-2 px-2 text-xs leading-relaxed text-ink-faint">{{ __('hr_chat.ui.sound_hint') }}</p>
                 </div>
             @else
                 <header class="flex items-center gap-2 border-b border-line px-3 py-2">

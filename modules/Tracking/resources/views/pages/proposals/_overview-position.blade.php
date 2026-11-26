@@ -53,13 +53,7 @@
                         $isEmpty = $stop['count'] === 0;
                     @endphp
                     <li class="relative min-w-0" wire:key="phase-{{ $stop['phase']->value }}">
-                        <button
-                            type="button"
-                            wire:click="togglePhase('{{ $stop['phase']->value }}')"
-                            aria-pressed="{{ $isSelected ? 'true' : 'false' }}"
-                            class="group flex w-full flex-col items-center gap-1.5 rounded-lg px-1 pb-2 text-center transition-colors duration-150 hover:bg-board-head focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:hover:bg-white/5"
-                            data-phase-stop="{{ $stop['phase']->value }}"
-                        >
+                        <x-ui.button tone="ghost" size="sm" type="button" wire:click="togglePhase('{{ $stop['phase']->value }}')" aria-pressed="{{ $isSelected ? 'true' : 'false' }}" class="group flex w-full flex-col items-center gap-1.5 rounded-lg px-1 pb-2 text-center transition-colors duration-150 hover:bg-board-head focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium dark:hover:bg-white/5" data-phase-stop="{{ $stop['phase']->value }}">
                             <span @class([
                                 'relative z-10 size-3.5 rounded-full border-2 transition-transform duration-200 ease-out group-hover:scale-125',
                                 'border-primary bg-primary dark:bg-brand dark:border-brand ring-4 ring-secondary-light' => $isSelected,
@@ -79,7 +73,7 @@
                                     <span class="font-semibold text-status-warn" data-test="phase-held-{{ $stop['phase']->value }}">{{ trans_choice('proposals.count_on_hold', $stop['held'], ['count' => $stop['held']]) }}</span>
                                 @endif
                             </span>
-                        </button>
+                        </x-ui.button>
                     </li>
                 @endforeach
             </ol>

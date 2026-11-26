@@ -24,11 +24,11 @@
         @endphp
         <div class="pp-file" wire:key="sec-file-{{ $media->id }}" data-file="{{ $media->id }}">
             @if ($isStored)
-                <button type="button" class="pp-file-open" wire:click="openPreview({{ $media->id }})" aria-label="{{ __('reports.preview_name', ['name' => $media->original_name]) }}" data-test="preview-file-{{ $media->id }}">
+                <x-ui.button tone="ghost" size="sm" type="button" class="pp-file-open" wire:click="openPreview({{ $media->id }})" aria-label="{{ __('reports.preview_name', ['name' => $media->original_name]) }}" data-test="preview-file-{{ $media->id }}">
                     <span @class(['pp-ext', 'pp-ext-pdf' => $media->type === \App\Enums\FileType::Pdf])>{{ \Illuminate\Support\Str::upper($media->type->value) }}</span>
                     <span class="pp-file-nm" title="{{ $media->original_name }}">{{ $media->original_name }}</span>
                     <span class="pp-small">{{ $media->collection->label() }}</span>
-                </button>
+                </x-ui.button>
             @else
                 <div class="pp-file-open">
                     <span class="pp-ext">{{ \Illuminate\Support\Str::upper($media->type->value) }}</span>
@@ -41,17 +41,17 @@
                     <a href="{{ $this->documentDownloadUrl($media) }}" class="pp-btn pp-btn-ghost pp-btn-sm" aria-label="{{ __('common.download_name', ['name' => $media->original_name]) }}" data-test="download-file-{{ $media->id }}"><flux:icon.arrow-down-tray variant="micro" class="size-4" aria-hidden="true" /></a>
                 @endif
                 @if ($mayUpdate)
-                    <button type="button" class="pp-btn pp-btn-ghost pp-btn-sm" wire:click="openEditFileModal({{ $media->id }})" aria-label="{{ __('common.edit_name', ['name' => $media->original_name]) }}" data-test="edit-file-{{ $media->id }}"><flux:icon.pencil-square variant="micro" class="size-4" aria-hidden="true" /></button>
-                    <button type="button" class="pp-btn pp-btn-ghost pp-btn-sm" wire:click="confirmDeleteFile({{ $media->id }})" aria-label="{{ __('common.delete_name', ['name' => $media->original_name]) }}" data-test="delete-file-{{ $media->id }}"><flux:icon.trash variant="micro" class="size-4" aria-hidden="true" /></button>
+                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="openEditFileModal({{ $media->id }})" aria-label="{{ __('common.edit_name', ['name' => $media->original_name]) }}" data-test="edit-file-{{ $media->id }}"><flux:icon.pencil-square variant="micro" class="size-4" aria-hidden="true" /></x-ui.button>
+                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="confirmDeleteFile({{ $media->id }})" aria-label="{{ __('common.delete_name', ['name' => $media->original_name]) }}" data-test="delete-file-{{ $media->id }}"><flux:icon.trash variant="micro" class="size-4" aria-hidden="true" /></x-ui.button>
                 @endif
             </span>
         </div>
     @endforeach
     @if ($mayUpdate)
-        <button type="button" class="pp-file pp-file-add" wire:click="openCreateFileModal" data-test="upload-proposal-file">
+        <x-ui.button tone="ghost" size="sm" type="button" class="pp-file pp-file-add" wire:click="openCreateFileModal" data-test="upload-proposal-file">
             <flux:icon.plus variant="micro" class="size-5" aria-hidden="true" />
             <span>{{ __('proposals.upload_file') }}</span>
-        </button>
+        </x-ui.button>
     @endif
 </div>
 
@@ -73,7 +73,7 @@
                         <div class="pp-lrow" wire:key="sec-project-file-{{ $media->id }}" data-file="{{ $media->id }}">
                             <span class="pp-lrow-s">
                                 @if ($media->isStored())
-                                    <button type="button" class="pp-file-link" wire:click="openPreview({{ $media->id }})" title="{{ $media->original_name }}"><b>{{ $media->original_name }}</b></button>
+                                    <x-ui.button tone="ghost" size="sm" type="button" class="pp-file-link" wire:click="openPreview({{ $media->id }})" title="{{ $media->original_name }}"><b>{{ $media->original_name }}</b></x-ui.button>
                                 @else
                                     <b>{{ $media->original_name }}</b>
                                 @endif

@@ -34,10 +34,10 @@
         <span class="ap-lbl">{{ __('annual_plans.wf.how_it_runs') }}</span>
         <div class="ap-seg">
             @if ($readOnly)
-                <button type="button" aria-pressed="true" disabled>{{ $single ? __('annual_plans.wf.runs_single') : __('annual_plans.wf.runs_weeks') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" aria-pressed="true" disabled>{{ $single ? __('annual_plans.wf.runs_single') : __('annual_plans.wf.runs_weeks') }}</x-ui.button>
             @else
-                <button type="button" wire:click="setRunsOnSingleWeek(false)" aria-pressed="{{ $single ? 'false' : 'true' }}">{{ __('annual_plans.wf.runs_weeks') }}</button>
-                <button type="button" wire:click="setRunsOnSingleWeek(true)" aria-pressed="{{ $single ? 'true' : 'false' }}" data-test="runs-single">{{ __('annual_plans.wf.runs_single') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" wire:click="setRunsOnSingleWeek(false)" aria-pressed="{{ $single ? 'false' : 'true' }}">{{ __('annual_plans.wf.runs_weeks') }}</x-ui.button>
+                <x-ui.button tone="ghost" size="sm" type="button" wire:click="setRunsOnSingleWeek(true)" aria-pressed="{{ $single ? 'true' : 'false' }}" data-test="runs-single">{{ __('annual_plans.wf.runs_single') }}</x-ui.button>
             @endif
         </div>
     </div>
@@ -98,7 +98,7 @@
                     </label>
                 @endif
                 @if (! $readOnly && count($data['batches']) > 1)
-                    <button type="button" class="dk-btn dk-ghost" wire:click="removeBatch({{ $index }})">{{ __('annual_plans.wf.remove') }}</button>
+                    <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-ghost" wire:click="removeBatch({{ $index }})">{{ __('annual_plans.wf.remove') }}</x-ui.button>
                 @endif
             </div>
             @error('batches.'.$index) <p class="ap-err">{{ $message }}</p> @enderror
@@ -163,13 +163,13 @@
                         <label class="ap-chk" wire:key="copy-{{ $other->id }}"><input type="checkbox" value="{{ $other->id }}" wire:model="copyTargets" data-test="copy-target-{{ $other->id }}"><span dir="auto">{{ $other->activity?->statement }}</span></label>
                     @endforeach
                 </div>
-                <div class="ap-copy-go"><button type="button" class="dk-btn" wire:click="copySettings" data-test="copy-settings">{{ __('annual_plans.wf.copy_button') }}</button></div>
+                <div class="ap-copy-go"><x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="copySettings" data-test="copy-settings">{{ __('annual_plans.wf.copy_button') }}</x-ui.button></div>
             </details>
         @endif
         @error('item') <p class="ap-err">{{ $message }}</p> @enderror
         {{-- Done alone: what each batch needs is already said by the unit hint and, on a miss, by the field's own error. --}}
         <div class="ap-row ap-act-foot">
-            <button type="button" class="dk-btn dk-primary" wire:click="finishItem" data-test="item-done">{{ $plan->items->last()?->id !== $item->id ? __('annual_plans.wf.done_next') : __('annual_plans.wf.done') }}</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="finishItem" data-test="item-done">{{ $plan->items->last()?->id !== $item->id ? __('annual_plans.wf.done_next') : __('annual_plans.wf.done') }}</x-ui.button>
         </div>
     @endunless
 </div>

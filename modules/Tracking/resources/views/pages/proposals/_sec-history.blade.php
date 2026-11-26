@@ -29,9 +29,9 @@
 
 @if ($noteAction !== null && ! $noteAction['disabled'])
     <div class="pp-row-acts">
-        <button type="button" class="pp-btn pp-btn-sm" wire:click="openNegotiationModal" data-test="history-add-note">
+        <x-ui.button tone="ghost" size="sm" type="button" wire:click="openNegotiationModal" data-test="history-add-note">
             <flux:icon.plus variant="micro" class="size-4" aria-hidden="true" />{{ $noteAction['label'] }}
-        </button>
+        </x-ui.button>
     </div>
 @endif
 
@@ -147,14 +147,14 @@
                                 @if ($row['seenAt'] !== null)
                                     <span class="pp-pill pp-pill-ink" data-reviewer-state="seen" title="{{ __('proposals.reviewer_seen_on', ['date' => $row['seenAt']->translatedFormat(__('formats.date'))]) }}">{{ __('proposals.reviewer_seen_on', ['date' => $row['seenAt']->translatedFormat(__('formats.date'))]) }}</span>
                                 @elseif ($row['isMine'] && ! $group['isOpen'])
-                                    <button type="button" class="pp-btn pp-btn-sm pp-btn-primary" wire:click="markReviewed({{ $row['id'] }})" wire:loading.attr="disabled" wire:target="markReviewed" data-mark-seen>{{ __('proposals.mark_as_seen') }}</button>
+                                    <x-ui.button tone="primary" size="sm" type="button" wire:click="markReviewed({{ $row['id'] }})" wire:loading.attr="disabled" wire:target="markReviewed" data-mark-seen>{{ __('proposals.mark_as_seen') }}</x-ui.button>
                                 @else
                                     <span class="pp-pill" data-reviewer-state="unseen">{{ __('proposals.reviewer_not_seen') }}</span>
                                 @endif
                                 @if ($canManageReviewers && $row['isRemovable'])
-                                    <button type="button" class="pp-btn pp-btn-ghost pp-btn-sm" wire:click="confirmRemoveReviewer({{ $row['id'] }})" aria-label="{{ __('proposals.remove_reviewer_name', ['name' => $reviewerName]) }}" data-remove-reviewer="{{ $row['id'] }}">
+                                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="confirmRemoveReviewer({{ $row['id'] }})" aria-label="{{ __('proposals.remove_reviewer_name', ['name' => $reviewerName]) }}" data-remove-reviewer="{{ $row['id'] }}">
                                         <flux:icon.trash variant="micro" class="size-4" aria-hidden="true" />
-                                    </button>
+                                    </x-ui.button>
                                 @endif
                             </span>
                             @if ($row['isMine'] && $group['isOpen'])
@@ -162,9 +162,9 @@
                                     <label class="sr-only" for="reviewer-note-{{ $row['id'] }}">{{ __('proposals.reviewer_note') }}</label>
                                     <textarea id="reviewer-note-{{ $row['id'] }}" wire:model="reviewerNotes.{{ $row['id'] }}" rows="2" maxlength="2000" placeholder="{{ __('proposals.reviewer_note_placeholder') }}"></textarea>
                                     @if ($row['seenAt'] === null)
-                                        <button type="submit" class="pp-btn pp-btn-sm pp-btn-primary" wire:loading.attr="disabled" wire:target="markReviewed" data-mark-seen>{{ __('proposals.mark_as_seen') }}</button>
+                                        <x-ui.button tone="primary" size="sm" type="submit" wire:loading.attr="disabled" wire:target="markReviewed" data-mark-seen>{{ __('proposals.mark_as_seen') }}</x-ui.button>
                                     @else
-                                        <button type="submit" class="pp-btn pp-btn-sm" wire:loading.attr="disabled" wire:target="saveReviewerNote" data-save-review-note>{{ __('proposals.save_note') }}</button>
+                                        <x-ui.button tone="ghost" size="sm" type="submit" wire:loading.attr="disabled" wire:target="saveReviewerNote" data-save-review-note>{{ __('proposals.save_note') }}</x-ui.button>
                                     @endif
                                 </form>
                             @endif
@@ -217,7 +217,7 @@
                 <div class="pp-lrow" wire:key="need-file-{{ $media->id }}" data-file="{{ $media->id }}">
                     <span class="pp-lrow-s">
                         @if ($media->isStored())
-                            <button type="button" class="pp-file-link" wire:click="openPreview({{ $media->id }})" title="{{ $media->original_name }}"><b>{{ $media->original_name }}</b></button>
+                            <x-ui.button tone="ghost" size="sm" type="button" class="pp-file-link" wire:click="openPreview({{ $media->id }})" title="{{ $media->original_name }}"><b>{{ $media->original_name }}</b></x-ui.button>
                         @else
                             <b>{{ $media->original_name }}</b>
                         @endif
@@ -234,9 +234,9 @@
             @endforelse
             @can('uploadNeedAssessment', $proposal)
                 <div>
-                    <button type="button" class="pp-btn pp-btn-sm" wire:click="openNeedAssessmentModal" data-test="add-need-assessment">
+                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="openNeedAssessmentModal" data-test="add-need-assessment">
                         <flux:icon.plus variant="micro" class="size-4" aria-hidden="true" />{{ __('proposals.add_need_assessment') }}
-                    </button>
+                    </x-ui.button>
                 </div>
             @endcan
         </div>
@@ -276,11 +276,11 @@
 
 {{-- The record's activity log, loaded only when asked for. --}}
 <div class="pp-sub" data-record-activity>
-    <button type="button" class="pp-sub-btn" wire:click="$toggle('showActivity')" aria-expanded="{{ $showActivity ? 'true' : 'false' }}" data-test="toggle-activity-log">
+    <x-ui.button tone="ghost" size="sm" type="button" class="pp-sub-btn" wire:click="$toggle('showActivity')" aria-expanded="{{ $showActivity ? 'true' : 'false' }}" data-test="toggle-activity-log">
         <span class="pp-grow">{{ __('activity.title') }}</span>
         <span class="pp-small">{{ $showActivity ? __('activity.hide_log') : __('activity.show_log') }}</span>
         <svg @class(['pp-chev', 'pp-chev-up' => $showActivity]) width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-    </button>
+    </x-ui.button>
     @if ($showActivity)
         <div class="pp-sub-b">
             <livewire:activity.timeline :subjects="['proposal' => [$this->proposal->id]]" :key="'proposal-activity-'.$this->proposal->id" />

@@ -463,7 +463,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
         </div>
 
         <div class="mt-6 flex flex-wrap items-center gap-2 border-t border-dashed border-secondary-soft pt-4 dark:border-line">
-            <button type="button" class="dk-btn dk-sm dk-primary" wire:click="$set('tab', 'status')" data-show-all-details>{{ __('proposals.show_all_details') }}</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-sm dk-primary" wire:click="$set('tab', 'status')" data-show-all-details>{{ __('proposals.show_all_details') }}</x-ui.button>
         </div>
     @else
         @if ($this->pendingChangeRequestId !== null)
@@ -491,7 +491,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
 
         @if ($embedded)
             <div class="mt-8 flex justify-end">
-                <button type="button" class="dk-btn dk-sm" wire:click="$set('compact', true)" data-hide-details>{{ __('proposals.hide_details') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-sm" wire:click="$set('compact', true)" data-hide-details>{{ __('proposals.hide_details') }}</x-ui.button>
             </div>
         @endif
 
@@ -526,7 +526,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
         <section aria-labelledby="record-activity-heading" class="grid gap-3 mt-10" data-record-activity>
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <h2 id="record-activity-heading" class="text-base font-bold">{{ __('activity.title') }}</h2>
-                <button type="button" class="dk-btn dk-sm" wire:click="$toggle('showActivity')" aria-expanded="{{ $showActivity ? 'true' : 'false' }}" data-test="toggle-activity-log">{{ $showActivity ? __('activity.hide_log') : __('activity.show_log') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-sm" wire:click="$toggle('showActivity')" aria-expanded="{{ $showActivity ? 'true' : 'false' }}" data-test="toggle-activity-log">{{ $showActivity ? __('activity.hide_log') : __('activity.show_log') }}</x-ui.button>
             </div>
             @if ($showActivity)
                 <livewire:activity.timeline :subjects="['proposal' => [$this->proposal->id]]" :key="'proposal-activity-'.$this->proposal->id" />

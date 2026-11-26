@@ -63,13 +63,13 @@
                     <section @class(['pp-orow', 'pp-orow-open' => $isOpenRow]) id="bc-{{ $outputId }}" wire:key="orow-{{ $outputId }}"
                         x-on:dragover.prevent="$el.classList.add('pp-over')" x-on:dragleave="if (! $el.contains($event.relatedTarget)) $el.classList.remove('pp-over')"
                         x-on:drop.prevent="$el.classList.remove('pp-over'); dragging && $wire.linkActivity(dragging, {{ $outputId }})" data-test="board-output-{{ $outputId }}">
-                        <button type="button" class="pp-orow-h" wire:click="toggleOutput({{ $outputId }})" aria-expanded="{{ $isOpenRow ? 'true' : 'false' }}">
+                        <x-ui.button tone="ghost" size="sm" type="button" class="pp-orow-h" wire:click="toggleOutput({{ $outputId }})" aria-expanded="{{ $isOpenRow ? 'true' : 'false' }}">
                             <span class="pp-lvl pp-lvl-output">{{ __('proposals.board.output') }}</span>
                             <span class="pp-orow-t" dir="auto">{{ $output['statement'] }}</span>
                             <span class="pp-bcount">{{ count($list) }}</span>
                             @if ($missing > 0)<span class="pp-mini pp-mini-red">{{ trans_choice('proposals.board.n_unfinished', $missing, ['count' => $missing]) }}</span>@endif
                             <svg @class(['pp-chev', 'pp-chev-up' => $isOpenRow]) width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
-                        </button>
+                        </x-ui.button>
                         @if ($isOpenRow)
                             <div class="pp-orow-b">
                                 @forelse ($shown as $activity)
@@ -78,7 +78,7 @@
                                     <div class="pp-bdrop">{{ $list === [] ? __('proposals.board.no_activity_yet') : __('proposals.board.hidden_by_filter') }}</div>
                                 @endforelse
                                 @if ($canCreate)
-                                    <button type="button" class="pp-bcol-add" wire:click="openCreateModal({{ $outputId }})" data-test="board-add-{{ $outputId }}">+ {{ __('proposals.board.add_activity') }}</button>
+                                    <x-ui.button tone="ghost" size="sm" type="button" class="pp-bcol-add" wire:click="openCreateModal({{ $outputId }})" data-test="board-add-{{ $outputId }}">+ {{ __('proposals.board.add_activity') }}</x-ui.button>
                                 @endif
                             </div>
                         @endif

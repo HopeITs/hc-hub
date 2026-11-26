@@ -19,7 +19,7 @@
     <div class="ap-cal" data-dates-calendar>
         <div class="ap-row">
             <h3 class="ap-sp">{{ __('annual_plans.wf.whole_plan') }}</h3>
-            <button type="button" class="dk-btn dk-sm" wire:click="$toggle('showPlanCalendar')" aria-expanded="{{ $showPlanCalendar ? 'true' : 'false' }}" data-test="toggle-plan-calendar">{{ $showPlanCalendar ? __('annual_plans.wf.hide_calendar') : __('annual_plans.wf.show_calendar') }}</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-sm" wire:click="$toggle('showPlanCalendar')" aria-expanded="{{ $showPlanCalendar ? 'true' : 'false' }}" data-test="toggle-plan-calendar">{{ $showPlanCalendar ? __('annual_plans.wf.hide_calendar') : __('annual_plans.wf.show_calendar') }}</x-ui.button>
         </div>
         @if ($showPlanCalendar)
             @include('tracking::pages.annual-plans._plan-gantt')

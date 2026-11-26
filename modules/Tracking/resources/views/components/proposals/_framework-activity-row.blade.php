@@ -60,7 +60,7 @@
                     <button type="button" @class(['pp-lp-o', 'pp-on' => $activity['parent'] === $outId]) wire:click="linkActivity({{ $activity['id'] }}, {{ $outId }})"><span dir="auto">{{ $fw['results'][$outId]['statement'] }}</span></button>
                 @endforeach
                 @if (! $loose)
-                    <button type="button" class="pp-lp-o" wire:click="linkActivity({{ $activity['id'] }}, 0)" data-test="board-unlink-{{ $activity['id'] }}">{{ __('proposals.board.unlink') }}</button>
+                    <x-ui.button tone="ghost" size="sm" type="button" class="pp-lp-o" wire:click="linkActivity({{ $activity['id'] }}, 0)" data-test="board-unlink-{{ $activity['id'] }}">{{ __('proposals.board.unlink') }}</x-ui.button>
                 @endif
                 @if ($outputIds === [])
                     <span class="pp-small">{{ __('proposals.board.no_outputs') }}</span>

@@ -34,7 +34,7 @@
 
     @if ($groups !== [])
         <div class="ap-row">
-            <button type="button" class="dk-btn" wire:click="selectAllActivities" data-test="select-all-activities">{{ __('annual_plans.wf.select_all') }}</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="selectAllActivities" data-test="select-all-activities">{{ __('annual_plans.wf.select_all') }}</x-ui.button>
             <span class="ap-faint ap-sm ap-sp">{{ trans_choice('annual_plans.wf.selected', count($picked), ['count' => count($picked)]) }}</span>
             @if ($picksUnsaved ?? false)
                 <span class="ap-sm" data-picks-unsaved>{{ __('annual_plans.wf.activities_unsaved') }}</span>
@@ -81,13 +81,13 @@
                 :options="collect(\Modules\Tracking\Enums\Period::cases())->map(fn (\Modules\Tracking\Enums\Period $period): array => ['value' => $period->value, 'label' => $period->label()])->all()"
             />
             <div class="ap-row">
-                <button type="button" class="dk-btn" wire:click="$set('addingActivity', false)">{{ __('annual_plans.wf.cancel') }}</button>
-                <button type="button" class="dk-btn dk-primary" wire:click="addActivity" wire:loading.attr="disabled" wire:target="addActivity" data-test="save-new-activity">{{ __('annual_plans.wf.add_activity') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="$set('addingActivity', false)">{{ __('annual_plans.wf.cancel') }}</x-ui.button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="addActivity" wire:loading.attr="disabled" wire:target="addActivity" data-test="save-new-activity">{{ __('annual_plans.wf.add_activity') }}</x-ui.button>
             </div>
         </div>
     @elseif ($parentOptions !== [])
         <div class="ap-row">
-            <button type="button" class="dk-btn" wire:click="$set('addingActivity', true)" data-test="add-activity">+ {{ __('annual_plans.wf.add_activity') }}</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="$set('addingActivity', true)" data-test="add-activity">+ {{ __('annual_plans.wf.add_activity') }}</x-ui.button>
             <span class="ap-faint ap-sm">{{ __('annual_plans.wf.missing_activity') }}</span>
         </div>
     @endif

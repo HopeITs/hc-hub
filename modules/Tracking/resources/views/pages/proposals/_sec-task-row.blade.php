@@ -39,10 +39,10 @@
     </span>
     <span class="pp-lrow-r">
         @if ($editable)
-            <button type="button" class="pp-status {{ $taskStatusClass[$task->status->value] }}" wire:click="openPlanTaskForm({{ $task->id }})" aria-label="{{ __('department_tasks.edit_task') }}: {{ $task->status->label() }}" data-test="edit-plan-task-{{ $task->id }}">{{ $task->status->label() }}</button>
-            <button type="button" class="pp-btn pp-btn-ghost pp-btn-sm" wire:click="openAssignModal({{ $task->id }})" aria-label="{{ __('department_tasks.assign_person') }}" data-test="assign-plan-task-{{ $task->id }}">
+            <x-ui.button tone="ghost" size="sm" type="button" class="pp-status {{ $taskStatusClass[$task->status->value] }}" wire:click="openPlanTaskForm({{ $task->id }})" aria-label="{{ __('department_tasks.edit_task') }}: {{ $task->status->label() }}" data-test="edit-plan-task-{{ $task->id }}">{{ $task->status->label() }}</x-ui.button>
+            <x-ui.button tone="ghost" size="sm" type="button" wire:click="openAssignModal({{ $task->id }})" aria-label="{{ __('department_tasks.assign_person') }}" data-test="assign-plan-task-{{ $task->id }}">
                 <flux:icon.user-plus variant="micro" class="size-4" aria-hidden="true" />
-            </button>
+            </x-ui.button>
         @else
             <span class="pp-status {{ $taskStatusClass[$task->status->value] }}">{{ $task->status->label() }}</span>
         @endif

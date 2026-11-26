@@ -62,9 +62,9 @@
                 @endforelse
                 @if ($canPlanTasks)
                     <div>
-                        <button type="button" class="pp-btn pp-btn-sm" wire:click="openPlanTaskForm(null, '{{ $group['kind'] }}')" data-test="add-plan-task-{{ $group['key'] }}">
+                        <x-ui.button tone="ghost" size="sm" type="button" wire:click="openPlanTaskForm(null, '{{ $group['kind'] }}')" data-test="add-plan-task-{{ $group['key'] }}">
                             <flux:icon.plus variant="micro" class="size-4" aria-hidden="true" />{{ $group['add'] }}
-                        </button>
+                        </x-ui.button>
                     </div>
                 @endif
             </div>

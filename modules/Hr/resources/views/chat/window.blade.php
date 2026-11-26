@@ -177,7 +177,7 @@
                                                aria-label="{{ __('hr_chat.ui.download', ['name' => $attachment->original_name]) }}" data-testid="chat-file">
                                                 <svg class="size-6 shrink-0 {{ $mine ? 'text-white' : 'text-brand-text' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
                                                 <span class="min-w-0 flex-1">
-                                                    <span class="block truncate text-[12px] font-semibold" dir="auto">{{ $attachment->original_name }}</span>
+                                                    <span class="block truncate text-xs font-semibold" dir="auto">{{ $attachment->original_name }}</span>
                                                     <span class="block text-xs {{ $mine ? 'text-white/75' : 'text-ink-faint' }}">{{ \Illuminate\Support\Number::fileSize($attachment->size, precision: 1) }}</span>
                                                 </span>
                                             </a>
@@ -245,7 +245,7 @@
                                             </span>
                                         </template>
                                         <span class="min-w-0 flex-1">
-                                            <span class="block truncate text-[12px] font-semibold text-ink" dir="auto" x-text="item.name"></span>
+                                            <span class="block truncate text-xs font-semibold text-ink" dir="auto" x-text="item.name"></span>
                                             <span class="block text-xs text-ink-faint" x-text="item.sizeLabel"></span>
                                         </span>
                                         <button type="button" x-on:click="removeFile(index)" x-show="! uploading"
@@ -289,7 +289,7 @@
                         </div>
                     </form>
                 @else
-                    <p class="border-t border-line bg-surface-1 px-3 py-2.5 text-center text-[12px] text-ink-faint">{{ __('hr_chat.ui.cannot_reply') }}</p>
+                    <p class="border-t border-line bg-surface-1 px-3 py-2.5 text-center text-xs text-ink-faint">{{ __('hr_chat.ui.cannot_reply') }}</p>
                 @endif
             </section>
         @endif

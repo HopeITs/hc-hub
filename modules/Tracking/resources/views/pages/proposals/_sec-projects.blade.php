@@ -58,7 +58,7 @@
             <div class="pp-row-acts">
                 <a href="{{ route('projects.show', $project) }}" wire:navigate class="pp-btn pp-btn-sm" data-test="open-project-{{ $project->id }}">{{ __('proposals.sections.open_project') }}</a>
                 @if ($mayUpdate)
-                    <button type="button" class="pp-btn pp-btn-sm" wire:click="confirmUnlinkProject({{ $project->id }})" aria-label="{{ __('proposals.unlink_project_name', ['name' => $project->name]) }}" data-test="unlink-project-{{ $project->id }}">{{ __('proposals.sections.unlink') }}</button>
+                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="confirmUnlinkProject({{ $project->id }})" aria-label="{{ __('proposals.unlink_project_name', ['name' => $project->name]) }}" data-test="unlink-project-{{ $project->id }}">{{ __('proposals.sections.unlink') }}</x-ui.button>
                 @endif
             </div>
         </div>
@@ -125,13 +125,13 @@
 
         <div class="pp-row-acts">
             @if ($this->canFillCenters)
-                <button type="button" class="pp-btn pp-btn-sm" wire:click="openCenterFill" data-test="add-centers">
+                <x-ui.button tone="ghost" size="sm" type="button" wire:click="openCenterFill" data-test="add-centers">
                     <flux:icon.plus variant="micro" class="size-4" aria-hidden="true" />{{ __('proposals.add_centers') }}
-                </button>
+                </x-ui.button>
             @endif
             {{-- Same rule as "Edit details" in the head: after donor approval places change through a change request. --}}
             @if ($mayUpdate && ! $this->proposal->status->isApprovedByDonor())
-                <button type="button" class="pp-btn pp-btn-sm" wire:click="openEditModal({{ $this->proposalId }})" data-test="edit-locations">{{ __('proposals.sections.edit_locations') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" wire:click="openEditModal({{ $this->proposalId }})" data-test="edit-locations">{{ __('proposals.sections.edit_locations') }}</x-ui.button>
             @endif
         </div>
     </div>

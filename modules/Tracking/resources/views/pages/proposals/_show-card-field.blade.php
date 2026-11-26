@@ -22,9 +22,9 @@
             @else
                 <input id="pp-f-{{ $field }}" type="{{ $inputType }}" wire:model="fieldValue" x-init="$el.focus(); $el.type === 'text' && $el.setSelectionRange($el.value.length, $el.value.length)" x-on:keydown.enter.prevent="$wire.saveField()" x-on:keydown.escape.prevent="$wire.cancelField()" x-on:blur="setTimeout(() => { if (document.activeElement?.closest('.pp-field') === null && $wire.editingField === '{{ $field }}') { $wire.saveField() } }, 120)" @if ($inputType === 'text') maxlength="255" @endif data-test="card-input-{{ $field }}">
             @endif
-            <button type="button" class="pp-field-ok" wire:click="saveField" aria-label="{{ __('common.save') }}">
+            <x-ui.button tone="ghost" size="sm" type="button" class="pp-field-ok" wire:click="saveField" aria-label="{{ __('common.save') }}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
-            </button>
+            </x-ui.button>
         </div>
         @error('fieldValue')
             <p class="pp-err" role="alert" data-test="card-error-{{ $field }}">{{ $message }}</p>

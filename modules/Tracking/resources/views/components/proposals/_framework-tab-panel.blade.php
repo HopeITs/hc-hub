@@ -22,8 +22,8 @@
         <span class="pp-ot-meta">{{ __('proposals.framework.tab_of', ['type' => $current['type']->label(), 'n' => $position + 1, 'total' => count($tabIds)]) }}</span>
         @if ($canEdit)
             <span class="pp-ot-acts">
-                <button type="button" class="pp-btn pp-btn-ghost" wire:click="openEditModal({{ $panelId }})" aria-label="{{ __('proposals.framework.edit_item', ['item' => $current['statement']]) }}">{!! $pen !!}</button>
-                <button type="button" class="pp-btn pp-btn-ghost" wire:click="confirmDelete({{ $panelId }})" aria-label="{{ __('proposals.framework.delete_item', ['item' => $current['statement']]) }}">{!! $bin !!}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" wire:click="openEditModal({{ $panelId }})" aria-label="{{ __('proposals.framework.edit_item', ['item' => $current['statement']]) }}">{!! $pen !!}</x-ui.button>
+                <x-ui.button tone="ghost" size="sm" type="button" wire:click="confirmDelete({{ $panelId }})" aria-label="{{ __('proposals.framework.delete_item', ['item' => $current['statement']]) }}">{!! $bin !!}</x-ui.button>
             </span>
         @endif
     </div>
@@ -66,7 +66,7 @@
             <b>{{ __('proposals.framework.sum_'.$childLabel.'s') }}</b>
             <span class="pp-ot-meta">{{ count($children) }}</span>
             @if ($canEdit)
-                <button type="button" class="pp-link pp-ot-add" wire:click="openCreateModal({{ $panelId }})" data-test="add-child-result-{{ $panelId }}">+ {{ __('proposals.framework.add_child_'.$childLabel) }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="pp-link pp-ot-add" wire:click="openCreateModal({{ $panelId }})" data-test="add-child-result-{{ $panelId }}">+ {{ __('proposals.framework.add_child_'.$childLabel) }}</x-ui.button>
             @endif
         </div>
 
@@ -91,8 +91,8 @@
                             </span>
                             @if ($canEdit)
                                 <span class="pp-ot-acts" x-on:click.stop>
-                                    <button type="button" class="pp-btn pp-btn-ghost" wire:click="openEditModal({{ $childId }})" aria-label="{{ __('proposals.framework.edit_item', ['item' => $child['statement']]) }}">{!! $pen !!}</button>
-                                    <button type="button" class="pp-btn pp-btn-ghost" wire:click="confirmDelete({{ $childId }})" aria-label="{{ __('proposals.framework.delete_item', ['item' => $child['statement']]) }}">{!! $bin !!}</button>
+                                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="openEditModal({{ $childId }})" aria-label="{{ __('proposals.framework.edit_item', ['item' => $child['statement']]) }}">{!! $pen !!}</x-ui.button>
+                                    <x-ui.button tone="ghost" size="sm" type="button" wire:click="confirmDelete({{ $childId }})" aria-label="{{ __('proposals.framework.delete_item', ['item' => $child['statement']]) }}">{!! $bin !!}</x-ui.button>
                                 </span>
                             @endif
                             <svg class="pp-ot-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
@@ -108,12 +108,12 @@
 
     <nav class="pp-ot-nav" aria-label="{{ __('proposals.framework.tabs_label') }}">
         @if ($position > 0)
-            <button type="button" class="pp-link" x-on:click="go({{ $tabIds[$position - 1] }})" data-test="tab-prev"><span class="pp-flip">‹</span> {{ __('proposals.framework.tab_n', ['type' => $fw['results'][$tabIds[$position - 1]]['type']->label(), 'n' => $position]) }}</button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="pp-link" x-on:click="go({{ $tabIds[$position - 1] }})" data-test="tab-prev"><span class="pp-flip">‹</span> {{ __('proposals.framework.tab_n', ['type' => $fw['results'][$tabIds[$position - 1]]['type']->label(), 'n' => $position]) }}</x-ui.button>
         @else
             <span></span>
         @endif
         @if ($position < count($tabIds) - 1)
-            <button type="button" class="pp-link" x-on:click="go({{ $tabIds[$position + 1] }})" data-test="tab-next">{{ __('proposals.framework.tab_n', ['type' => $fw['results'][$tabIds[$position + 1]]['type']->label(), 'n' => $position + 2]) }} <span class="pp-flip">›</span></button>
+            <x-ui.button tone="ghost" size="sm" type="button" class="pp-link" x-on:click="go({{ $tabIds[$position + 1] }})" data-test="tab-next">{{ __('proposals.framework.tab_n', ['type' => $fw['results'][$tabIds[$position + 1]]['type']->label(), 'n' => $position + 2]) }} <span class="pp-flip">›</span></x-ui.button>
         @endif
     </nav>
 </div>

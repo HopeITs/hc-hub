@@ -43,9 +43,9 @@
                             @switch($column)
                                 @case('indicators')
                                     @foreach ($node['indicators'] as $indicator)
-                                        <button type="button" class="pp-mx-item" wire:click="$dispatch('edit-indicator', { indicatorId: {{ $indicator['id'] }} })" dir="auto">{{ \Illuminate\Support\Str::limit($indicator['name'], 70) }} <span class="pp-small">{{ $indicator['target'] === null ? __('proposals.framework.no_target') : ($indicator['actual'] ?? 0).'/'.$num($indicator['target']) }}</span></button>
+                                        <x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-item" wire:click="$dispatch('edit-indicator', { indicatorId: {{ $indicator['id'] }} })" dir="auto">{{ \Illuminate\Support\Str::limit($indicator['name'], 70) }} <span class="pp-small">{{ $indicator['target'] === null ? __('proposals.framework.no_target') : ($indicator['actual'] ?? 0).'/'.$num($indicator['target']) }}</span></x-ui.button>
                                     @endforeach
-                                    @if ($canEdit)<button type="button" class="pp-mx-add" wire:click="$dispatch('add-indicator', { resultId: {{ $id }} })">+ {{ __('proposals.framework.add') }}</button>@endif
+                                    @if ($canEdit)<x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-add" wire:click="$dispatch('add-indicator', { resultId: {{ $id }} })">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif
                                     @break
                                 @case('targets')
                                     @forelse ($node['indicators'] as $indicator)
@@ -53,7 +53,7 @@
                                             $centreLine = $indicator['centres'] === [] ? __('proposals.framework.no_centre_targets') : collect($indicator['centres'])->map(fn (array $c): string => $c['name'].' '.$num($c['target']))->implode(' · ');
                                         @endphp
                                         @if ($canEditTargets)
-                                            <button type="button" class="pp-mx-item" wire:click="openCentreTargets({{ $indicator['id'] }})" title="{{ __('proposals.framework.edit_targets') }}: {{ $indicator['name'] }}" data-test="edit-centre-targets-{{ $indicator['id'] }}">{{ $centreLine }}</button>
+                                            <x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-item" wire:click="openCentreTargets({{ $indicator['id'] }})" title="{{ __('proposals.framework.edit_targets') }}: {{ $indicator['name'] }}" data-test="edit-centre-targets-{{ $indicator['id'] }}">{{ $centreLine }}</x-ui.button>
                                         @else
                                             <span class="pp-mx-item">{{ $centreLine }}</span>
                                         @endif
@@ -66,7 +66,7 @@
                                         @foreach ($node['activities'] as $activityId)
                                             <span class="pp-mx-item" dir="auto">{{ \Illuminate\Support\Str::limit($fw['activities'][$activityId]['name'], 70) }} <span @class(['pp-spill', 'pp-st-'.$fw['activities'][$activityId]['status']])>{{ __('proposals.framework.status_'.$fw['activities'][$activityId]['status']) }}</span></span>
                                         @endforeach
-                                        @if ($canEdit)<button type="button" class="pp-mx-add" wire:click="openCreateModal({{ $id }})">+ {{ __('proposals.framework.add') }}</button>@endif
+                                        @if ($canEdit)<x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-add" wire:click="openCreateModal({{ $id }})">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif
                                     @else
                                         <span class="pp-small">—</span>
                                     @endif
@@ -75,13 +75,13 @@
                                     @foreach ($node['risks'] as $risk)
                                         <span class="pp-mx-item" dir="auto">{{ \Illuminate\Support\Str::limit($risk['name'], 70) }} @if ($risk['happened'])<span class="pp-mini pp-mini-red">{{ __('proposals.framework.happened') }}</span>@endif</span>
                                     @endforeach
-                                    @if ($this->canManageRisks)<button type="button" class="pp-mx-add" wire:click="openRisks({{ $id }})">+ {{ __('proposals.framework.add') }}</button>@endif
+                                    @if ($this->canManageRisks)<x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-add" wire:click="openRisks({{ $id }})">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif
                                     @break
                                 @case('assumptions')
                                     @foreach ($node['assumptions'] as $assumption)
                                         <button type="button" class="pp-mx-item" @if ($canEdit) wire:click="openAssumption({{ $assumption['id'] }})" @endif dir="auto">{{ \Illuminate\Support\Str::limit($assumption['statement'], 70) }} @if ($assumption['status'] !== \Modules\Tracking\Enums\AssumptionStatus::Holds)<span class="pp-mini pp-mini-red">{{ $assumption['status']->label() }}</span>@endif</button>
                                     @endforeach
-                                    @if ($canEdit)<button type="button" class="pp-mx-add" wire:click="openAssumption(null, {{ $id }})">+ {{ __('proposals.framework.add') }}</button>@endif
+                                    @if ($canEdit)<x-ui.button tone="ghost" size="sm" type="button" class="pp-mx-add" wire:click="openAssumption(null, {{ $id }})">+ {{ __('proposals.framework.add') }}</x-ui.button>@endif
                                     @break
                             @endswitch
                         </td>

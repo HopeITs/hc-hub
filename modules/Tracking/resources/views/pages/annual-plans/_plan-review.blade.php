@@ -31,7 +31,7 @@
                 <span class="ap-sm ap-muted">{{ $followUp->trigger->label() }}</span>
                 <span class="ap-sm" dir="auto">→ {{ $followUp->description }}</span>
                 <span class="ap-sp"></span>
-                <button type="button" class="dk-btn dk-ghost" wire:click="confirmRemoveFollowUp({{ $followUp->id }})">{{ __('annual_plans.wf.remove') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-ghost" wire:click="confirmRemoveFollowUp({{ $followUp->id }})">{{ __('annual_plans.wf.remove') }}</x-ui.button>
             </div>
         @endforeach
         {{-- The three fields stay behind their own button, the way a missing activity is added on step 2. --}}
@@ -62,13 +62,13 @@
                 </label>
                 @error('followUpText') <p class="ap-err">{{ $message }}</p> @enderror
                 <div class="ap-row">
-                    <button type="button" class="dk-btn" wire:click="$set('addingFollowUp', false)">{{ __('annual_plans.wf.cancel') }}</button>
-                    <button type="button" class="dk-btn dk-primary" wire:click="addFollowUp" wire:loading.attr="disabled" wire:target="addFollowUp" data-test="add-follow-up">{{ __('annual_plans.wf.add_task') }}</button>
+                    <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="$set('addingFollowUp', false)">{{ __('annual_plans.wf.cancel') }}</x-ui.button>
+                    <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="addFollowUp" wire:loading.attr="disabled" wire:target="addFollowUp" data-test="add-follow-up">{{ __('annual_plans.wf.add_task') }}</x-ui.button>
                 </div>
             </div>
         @else
             <div class="ap-row">
-                <button type="button" class="dk-btn" wire:click="$set('addingFollowUp', true)" data-test="open-follow-up">+ {{ __('annual_plans.wf.add_task') }}</button>
+                <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="$set('addingFollowUp', true)" data-test="open-follow-up">+ {{ __('annual_plans.wf.add_task') }}</x-ui.button>
             </div>
         @endif
     </div>
@@ -81,9 +81,9 @@
 </section>
 
 <div class="ap-foot">
-    <button type="button" class="dk-btn" wire:click="sendBackPlan" data-test="send-back">↩︎ {{ __('annual_plans.wf.send_back_button') }}</button>
+    <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn" wire:click="sendBackPlan" data-test="send-back">↩︎ {{ __('annual_plans.wf.send_back_button') }}</x-ui.button>
     <span class="ap-sp"></span>
-    <button type="button" class="dk-btn dk-primary" wire:click="$set('confirmingApproval', true)" data-test="approve-plan">{{ __('annual_plans.wf.approve_button') }} ✓</button>
+    <x-ui.button tone="ghost" size="sm" type="button" class="dk-btn dk-primary" wire:click="$set('confirmingApproval', true)" data-test="approve-plan">{{ __('annual_plans.wf.approve_button') }} ✓</x-ui.button>
 </div>
 
 {{-- The app's own confirmation, never the browser's (user report 2026-11-12). --}}

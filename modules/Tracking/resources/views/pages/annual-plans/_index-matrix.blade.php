@@ -7,16 +7,10 @@
                 </div>
 
                 @if ($activeYear !== null)
-                    <button
-                        type="button"
-                        x-on:click="gapsOnly = ! gapsOnly"
-                        x-bind:aria-pressed="gapsOnly ? 'true' : 'false'"
-                        class="inline-flex min-h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 type-meta font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium"
-                        x-bind:class="gapsOnly ? 'border-primary bg-primary dark:bg-ink dark:text-surface-0 dark:border-ink text-white' : 'border-board-line text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink'"
-                    >
+                    <x-ui.button tone="ghost" size="sm" type="button" x-on:click="gapsOnly = ! gapsOnly" x-bind:aria-pressed="gapsOnly ? 'true' : 'false'" class="inline-flex min-h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-md border px-2.5 type-meta font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium" x-bind:class="gapsOnly ? 'border-primary bg-primary dark:bg-ink dark:text-surface-0 dark:border-ink text-white' : 'border-board-line text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink'">
                         <flux:icon.funnel variant="micro" class="size-3.5" aria-hidden="true" />
                         {{ __('annual_plans.gaps_in_year', ['year' => $activeYear]) }}
-                    </button>
+                    </x-ui.button>
                 @endif
             </div>
             {{-- How to read a cell, stated before the grid rather than after it. --}}
@@ -98,18 +92,13 @@
                                     @endphp
                                     <li wire:key="mobile-cell-{{ $program->id }}-{{ $year }}">
                                         @if ($plan === null)
-                                            @can('create', Modules\Tracking\Models\AnnualPlan::class)<button
-                                                type="button"
-                                                wire:click="openCreateModal({{ $program->id }}, {{ $year }})"
-                                                class="flex w-full min-h-11 touch-manipulation items-center justify-between gap-3 rounded-md border border-dashed border-board-line px-3 py-2 text-start transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium"
-                                                aria-label="{{ __('annual_plans.add_a_plan_for_program_in_year', ['program' => $program->name, 'year' => $year]) }}"
-                                            >
+                                            @can('create', Modules\Tracking\Models\AnnualPlan::class)<x-ui.button tone="ghost" size="sm" type="button" wire:click="openCreateModal({{ $program->id }}, {{ $year }})" class="flex w-full min-h-11 touch-manipulation items-center justify-between gap-3 rounded-md border border-dashed border-board-line px-3 py-2 text-start transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium" aria-label="{{ __('annual_plans.add_a_plan_for_program_in_year', ['program' => $program->name, 'year' => $year]) }}">
                                                 <span class="type-meta font-bold tabular-nums text-secondary-medium dark:text-ink-faint">{{ $year }}</span>
                                                 <span class="inline-flex items-center gap-1 type-meta text-secondary-medium dark:text-ink-muted">
                                                     <flux:icon.plus class="size-3.5" />
                                                     {{ __('annual_plans.add_plan') }}
                                                 </span>
-                                            </button>@endcan
+                                            </x-ui.button>@endcan
                                         @else
                                             <div class="flex items-stretch gap-1.5">
                                             <a
@@ -322,22 +311,12 @@
 
                                             {{-- Siblings of the link, not children: a cell is a link first, so its controls sit over it and only surface on hover or keyboard focus. --}}
                                             <div class="absolute start-2.5 top-2.5 flex gap-0.5 opacity-0 transition-opacity group-hover/cell:opacity-100 group-focus-within/cell:opacity-100 motion-reduce:transition-none">
-                                                @can('update', $plan)<button
-                                                    type="button"
-                                                    wire:click="openEditModal({{ $plan->id }})"
-                                                    class="grid size-5 place-items-center rounded border border-secondary-soft bg-board text-secondary-medium transition-colors hover:border-primary hover:text-primary dark:hover:text-brand-text focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-secondary-medium dark:border-line dark:text-ink-muted"
-                                                    aria-label="{{ __('annual_plans.edit_the_plan_for_program_in_year', ['program' => $program->name, 'year' => $year]) }}"
-                                                >
+                                                @can('update', $plan)<x-ui.button tone="ghost" size="sm" type="button" wire:click="openEditModal({{ $plan->id }})" class="grid size-5 place-items-center rounded border border-secondary-soft bg-board text-secondary-medium transition-colors hover:border-primary hover:text-primary dark:hover:text-brand-text focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-secondary-medium dark:border-line dark:text-ink-muted" aria-label="{{ __('annual_plans.edit_the_plan_for_program_in_year', ['program' => $program->name, 'year' => $year]) }}">
                                                     <flux:icon.pencil-square class="size-3" />
-                                                </button>@endcan
-                                                @can('delete', $plan)<button
-                                                    type="button"
-                                                    wire:click="confirmDelete({{ $plan->id }})"
-                                                    class="grid size-5 place-items-center rounded border border-secondary-soft bg-board text-secondary-medium transition-colors hover:border-primary hover:text-primary dark:hover:text-brand-text focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-secondary-medium dark:border-line dark:text-ink-muted"
-                                                    aria-label="{{ __('annual_plans.delete_the_plan_for_program_in_year', ['program' => $program->name, 'year' => $year]) }}"
-                                                >
+                                                </x-ui.button>@endcan
+                                                @can('delete', $plan)<x-ui.button tone="ghost" size="sm" type="button" wire:click="confirmDelete({{ $plan->id }})" class="grid size-5 place-items-center rounded border border-secondary-soft bg-board text-secondary-medium transition-colors hover:border-primary hover:text-primary dark:hover:text-brand-text focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-secondary-medium dark:border-line dark:text-ink-muted" aria-label="{{ __('annual_plans.delete_the_plan_for_program_in_year', ['program' => $program->name, 'year' => $year]) }}">
                                                     <flux:icon.trash class="size-3" />
-                                                </button>@endcan
+                                                </x-ui.button>@endcan
                                             </div>
                                         @endif
                                     </div>
