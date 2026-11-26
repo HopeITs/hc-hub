@@ -31,13 +31,13 @@
     >
         @if ($showHoldModal)
             @if ($holdStale || $errors->has('holdGate'))
-                <div class="mb-4 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="hold-gate-alert">
+                <x-ui.alert tone="danger" class="mb-4" data-test="hold-gate-alert">
                     <ul class="list-disc ps-5">
                         @foreach ($errors->get('holdGate') as $holdGateMessage)
                             <li>{{ $holdGateMessage }}</li>
                         @endforeach
                     </ul>
-                </div>
+                </x-ui.alert>
             @endif
 
             <div class="grid gap-4">
@@ -69,13 +69,13 @@
     >
         @if ($showOffHoldModal)
             @if ($holdStale || $errors->has('holdGate'))
-                <div class="mb-4 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="off-hold-gate-alert">
+                <x-ui.alert tone="danger" class="mb-4" data-test="off-hold-gate-alert">
                     <ul class="list-disc ps-5">
                         @foreach ($errors->get('holdGate') as $offHoldGateMessage)
                             <li>{{ $offHoldGateMessage }}</li>
                         @endforeach
                     </ul>
-                </div>
+                </x-ui.alert>
             @endif
 
             <x-ui.form-textarea wire:model="offHoldNote" :label="__('proposals.off_hold_note')" rows="3" data-test="off-hold-note" />

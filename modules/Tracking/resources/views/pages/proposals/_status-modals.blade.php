@@ -38,13 +38,13 @@
             @endif
 
             @if ($errors->has('statusGate'))
-                <div class="mb-4 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="status-gate-alert">
+                <x-ui.alert tone="danger" class="mb-4" data-test="status-gate-alert">
                     <ul class="list-disc ps-5">
                         @foreach ($errors->get('statusGate') as $gateMessage)
                             <li>{{ $gateMessage }}</li>
                         @endforeach
                     </ul>
-                </div>
+                </x-ui.alert>
             @endif
 
             @if ($this->statusTargets === [])

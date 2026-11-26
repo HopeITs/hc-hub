@@ -16,14 +16,16 @@
     >
         @if ($showApproveModal)
             @if ($errors->has('approveGate'))
-                <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="approve-gate-alert">
-                    <ul class="min-w-0 flex-1 list-disc ps-5 font-semibold">
+                <x-ui.alert tone="danger" class="mb-4" data-test="approve-gate-alert">
+                    <ul class="list-disc ps-5 font-semibold">
                         @foreach ($errors->get('approveGate') as $gateMessage)
                             <li>{{ $gateMessage }}</li>
                         @endforeach
                     </ul>
-                    <x-ui.button type="button" size="sm" icon="arrow-path" wire:click="reloadApproveModal" wire:loading.attr="disabled" wire:target="reloadApproveModal" data-test="approve-reload-button">{{ __('proposals.reload') }}</x-ui.button>
-                </div>
+                    <x-slot:action>
+                        <x-ui.button type="button" size="sm" icon="arrow-path" wire:click="reloadApproveModal" wire:loading.attr="disabled" wire:target="reloadApproveModal" data-test="approve-reload-button">{{ __('proposals.reload') }}</x-ui.button>
+                    </x-slot:action>
+                </x-ui.alert>
             @endif
 
             <div class="grid grid-cols-2 gap-x-4 gap-y-4">

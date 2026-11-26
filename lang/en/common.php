@@ -138,6 +138,7 @@ return [
     'zoom_out' => 'Zoom out',
     'delete' => 'Delete',
     'close' => 'Close',
+    'dismiss' => 'Dismiss',
     'hr_unavailable' => 'Could not load HR data',
     'no_active_position' => 'No active position',
     'back' => 'Back',
