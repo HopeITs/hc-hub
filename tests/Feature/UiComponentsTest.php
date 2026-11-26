@@ -14,15 +14,14 @@ use Modules\Tracking\Enums\RagStatus;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Enums\TaskStatus;
 
-test('the ui input carries the shared control classes', function () {
+test('the ui input is the shared form input box', function () {
     // Rendered outside a request, so share the empty error bag the web middleware normally provides.
     View::share('errors', new ViewErrorBag);
 
     $html = Blade::render('<x-ui.input name="search" label="Search" />');
 
-    expect($html)->toContain('border-secondary-light!')
-        ->and($html)->toContain('bg-white!')
-        ->and($html)->toContain('dark:bg-surface-2!');
+    expect($html)->toContain('form-box')
+        ->and($html)->toContain('form-box-input');
 });
 
 test('the enum badge labels a case and tones it as active', function () {

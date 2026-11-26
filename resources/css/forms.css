@@ -54,8 +54,47 @@
         background-color: var(--color-white);
     }
 
+    /* Invalid: a 2px border, so the state never rests on colour alone (the error line carries an icon). */
     .form-box[data-invalid] {
+        border-width: 2px;
         border-color: var(--color-primary);
+        padding-inline: calc(0.875rem - 0.5px);
+    }
+
+    /* Compact (desktop toolbars and popover search): 38px, 44px on touch via the token. */
+    .form-box[data-size='sm'] {
+        min-height: var(--control-h-compact);
+    }
+
+    .form-box[data-size='sm'] .form-box-input {
+        height: calc(var(--control-h-compact) - 2 * var(--border-control));
+    }
+
+    .form-box-input[type='search']::-webkit-search-cancel-button {
+        appearance: none;
+    }
+
+    .form-clear {
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        min-height: 2rem;
+        border-radius: var(--radius-control);
+        color: var(--color-secondary-medium);
+    }
+
+    .form-clear:hover {
+        color: var(--color-secondary-dark);
+    }
+
+    .dark .form-clear {
+        color: var(--color-ink-muted);
+    }
+
+    .dark .form-clear:hover {
+        color: var(--color-ink);
     }
 
     .form-box-multiline {

@@ -5,12 +5,13 @@
     'help' => null,
     'error' => null,
     'compact' => false,
+    'hideLabel' => false,
 ])
 
 {{-- The label, help line and error line every x-ui.form-* field shares, so no two field types can drift apart. --}}
 {{-- `compact` (chip fields): the label is read by screen readers only and the help/error lines are left to the form's own summary. --}}
 <div {{ $attributes->class('min-w-0') }} data-form-field>
-    <label id="{{ $for }}-label" for="{{ $for }}" @class(['form-label' => ! $compact, 'sr-only' => $compact])>
+    <label id="{{ $for }}-label" for="{{ $for }}" @class(['form-label' => ! $compact && ! $hideLabel, 'sr-only' => $compact || $hideLabel])>
         {{ $label }}
         @if ($required)
             <span class="form-required" aria-hidden="true">*</span>
