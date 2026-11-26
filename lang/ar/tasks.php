@@ -268,6 +268,7 @@ return [
         'return_reason_placeholder' => 'ما الناقص أو الخطأ',
         'return_confirm' => 'إرجاع إلى «:status»',
         'returned_banner' => 'أُرجعت للتعديل',
+        'delivery' => 'التسليم',
     ],
     'related' => [
         'proposal' => 'مقترح',

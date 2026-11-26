@@ -6,6 +6,7 @@ use Modules\Tracking\Enums\TaskStatus;
 use App\Livewire\Concerns\PreviewsFiles;
 use Modules\Tracking\Livewire\Concerns\Tasks\ManagesSubtasks;
 use Modules\Tracking\Livewire\Concerns\Tasks\ManagesTaskAttachments;
+use Modules\Tracking\Livewire\Concerns\Tasks\ManagesTaskDelivery;
 use Modules\Tracking\Livewire\Concerns\Tasks\MovesTask;
 use Modules\Hr\Models\Employee;
 use Modules\Core\Models\Program;
@@ -34,6 +35,7 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
 {
     use ManagesSubtasks;
     use ManagesTaskAttachments;
+    use ManagesTaskDelivery;
     use MovesTask;
     use PreviewsFiles;
     use WithFileUploads;
@@ -130,6 +132,8 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
                 'created_by',
                 'kind',
                 'department_id',
+                'delivery_state',
+                'media_kinds',
                 'reportable_type',
                 'reportable_id',
                 'activity_plan_milestone_id',
@@ -558,7 +562,9 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
 
     @include('tracking::pages.tasks._show-status-panel')
 
-    @if (filled($this->task->returned_reason) && $this->task->status !== TaskStatus::Done)
+    @include('tracking::pages.tasks._show-delivery')
+
+    @if (filled($this->task->returned_reason) && $this->task->status !== TaskStatus::Done && $this->task->delivery_state !== \Modules\Tracking\Enums\DeliveryState::Returned)
         <div class="flex items-start gap-3 rounded-panel border border-primary/40 bg-white p-3 dark:bg-surface-1" role="note" data-test="task-returned-reason">
             <flux:icon name="arrow-uturn-left" variant="micro" class="mt-0.5 size-4 shrink-0 text-primary" />
             <div class="min-w-0 text-sm">
@@ -616,6 +622,8 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
     @endif
 
     @include('tracking::pages.tasks._show-modals')
+
+    @include('tracking::pages.tasks._show-delivery-modals')
 
     @if ($this->moveDestinations !== null)
         @include('tracking::pages.tasks._show-move-modal')

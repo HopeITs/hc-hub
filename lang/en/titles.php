@@ -43,7 +43,6 @@ return [
     'notifications' => 'Notifications',
     'my_reviews' => 'My Reviews',
     'notification_settings' => 'Notification Settings',
-    'department_tasks' => 'Department Tasks',
     'donor_report' => 'Donor Report',
     'donor_report_builder' => 'Donor report builder',
     'donor_reports' => 'Donor reports',

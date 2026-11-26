@@ -35,7 +35,7 @@ class TaskPolicy
     }
 
     /**
-     * Determine whether the user can open the department-tasks queue: the
+     * Determine whether the user can see the department queue (the deliverables panel): the
      * module permission, plus the department-manager rule (W-14, D-65). The
      * desk Tasks panel's `department` scope asks the same question through
      * User::canSeeDepartmentTasks().

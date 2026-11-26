@@ -77,7 +77,6 @@ test('the tour on funding pages includes finance table filter and totals steps',
  */
 dataset('page tours', [
     'indicator library' => ['indicator-library.index', 'MEAL', [], ['Indicator Library', 'Find an entry', 'Grouped by level', 'An indicator'], 'مكتبة المؤشرات', 'data-library-entry'],
-    'department tasks' => ['department-tasks.index', 'Team Member', [], ['Department Tasks', 'The requests'], 'مهام الأقسام', 'data-tour="department-tasks-list"'],
     'report template queue' => ['report-templates.index', 'MEAL', [], ['Templates to confirm', 'The queue'], 'قوالب بانتظار التأكيد', 'data-report-template-queue'],
     'sectors' => ['admin.sectors.index', 'MEAL', [], ['Sectors', 'Add a sector'], 'القطاعات', 'data-tour="sectors-create"'],
     'supervision' => ['admin.users.index', 'General Manager', ['tab' => 'supervision'], ['Supervision'], 'دليل المستخدمين', 'data-supervision-tab'],
@@ -98,7 +97,7 @@ function tourPage(object $test, string $route, string $role, array $query, strin
     LibraryIndicator::factory()->create();
     $proposal = Proposal::factory()->create();
 
-    /* A department manager (W-14, D-65), so department-tasks opens like the rest. */
+    /* A department manager (W-14, D-65), so every page in the list opens. */
     $user = userWithRole($role, insertHrDepartmentManager());
     $user->forceFill(['locale' => $locale])->save();
 

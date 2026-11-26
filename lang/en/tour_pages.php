@@ -115,10 +115,6 @@ return [
             'group' => ['title' => 'Grouped by level', 'body' => 'Entries sit under the level of the logical framework they measure.'],
             'entry' => ['title' => 'An indicator', 'body' => 'Open one to read its definition, how it is calculated and where its data comes from.'],
         ],
-        'department_tasks_index' => [
-            'intro' => ['title' => 'Department Tasks', 'body' => 'Deliverables that other departments owe the programs, such as media requests. Filter by department, kind or delivery state.'],
-            'list' => ['title' => 'The requests', 'body' => 'Each request shows who delivers it, when it is due and where it stands: requested, delivered, accepted or returned.'],
-        ],
         'report_templates_index' => [
             'intro' => ['title' => 'Templates to confirm', 'body' => 'The monthly report templates waiting for you: new projects to activate, and active projects that received lines from a new proposal.'],
             'queue' => ['title' => 'The queue', 'body' => 'Each row shows the project, how many lines wait and from which proposals. Open it to check and confirm the lines on the project page.'],

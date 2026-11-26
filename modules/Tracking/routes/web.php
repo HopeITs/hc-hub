@@ -18,7 +18,6 @@ use Modules\Tracking\Http\Controllers\TaskFileDownloadController;
 use Modules\Tracking\Http\Controllers\TaskFilePreviewController;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\RiskLibrary;
-use Modules\Tracking\Models\Task;
 
 /*
 | Tracking pages. Loaded by TrackingServiceProvider inside the `web` group;
@@ -125,10 +124,6 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
     Route::livewire('tasks', 'tracking::tasks.index')
         ->can('tasks.view')
         ->name('tasks.index');
-
-    Route::livewire('department-tasks', 'tracking::department-tasks.index')
-        ->can('viewDepartmentQueue', Task::class)
-        ->name('department-tasks.index');
 
     Route::livewire('tasks/{task}', 'tracking::tasks.show')
         ->can('tasks.view')

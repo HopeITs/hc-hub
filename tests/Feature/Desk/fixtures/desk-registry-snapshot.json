@@ -177,14 +177,6 @@
             "module": "tasks"
         },
         {
-            "route": "department-tasks.index",
-            "label": "Department Tasks",
-            "icon": "board",
-            "hero": "nav-building",
-            "group": "workspace",
-            "module": null
-        },
-        {
             "route": "calendar.index",
             "label": "Calendar",
             "icon": "cal",
@@ -1230,12 +1222,6 @@
             "icon": "grid"
         },
         "g-tasks": {
-            "kind": "buttons",
-            "rows": 1,
-            "min_rows": 1,
-            "icon": "grid"
-        },
-        "g-department-tasks": {
             "kind": "buttons",
             "rows": 1,
             "min_rows": 1,
@@ -18507,14 +18493,6 @@
                             "module": "tasks"
                         },
                         {
-                            "route": "department-tasks.index",
-                            "label": "Department Tasks",
-                            "icon": "board",
-                            "hero": "nav-building",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
                             "route": "calendar.index",
                             "label": "Calendar",
                             "icon": "cal",
@@ -19191,14 +19169,6 @@
                     "module": "tasks"
                 },
                 {
-                    "route": "department-tasks.index",
-                    "label": "Department Tasks",
-                    "icon": "board",
-                    "hero": "nav-building",
-                    "group": "workspace",
-                    "module": null
-                },
-                {
                     "route": "calendar.index",
                     "label": "Calendar",
                     "icon": "cal",
@@ -19622,7 +19592,6 @@
                 "transfers.index",
                 "admin.accounts.index",
                 "tasks.index",
-                "department-tasks.index",
                 "calendar.index",
                 "notifications.index",
                 "admin.users.index",
@@ -19835,7 +19804,7 @@
                         "description": "Media and finance work requested by projects, with its delivery state.",
                         "icon": "board",
                         "size": "M",
-                        "register": "department-tasks.index",
+                        "register": "tasks.index",
                         "kind": "panel"
                     },
                     "myteam": {
@@ -20585,15 +20554,6 @@
                         "register": "tasks.index",
                         "kind": "page"
                     },
-                    "g-department-tasks": {
-                        "id": "g-department-tasks",
-                        "title": "Department Tasks",
-                        "description": "A button that opens Department Tasks.",
-                        "icon": "nav-building",
-                        "size": "S",
-                        "register": "department-tasks.index",
-                        "kind": "page"
-                    },
                     "g-calendar": {
                         "id": "g-calendar",
                         "title": "Calendar",
@@ -21266,7 +21226,6 @@
                     "transfers.index": "transfers",
                     "admin.accounts.index": "p-admin-accounts",
                     "tasks.index": "tasks",
-                    "department-tasks.index": "deliverables",
                     "calendar.index": "coming",
                     "notifications.index": "g-notifications",
                     "admin.users.index": "p-admin-users",
@@ -22203,15 +22162,6 @@
                     "icon": "nav-square-check-big",
                     "route": "tasks.index",
                     "href": "http://hc-hub.test/tasks"
-                },
-                "g-department-tasks": {
-                    "id": "g-department-tasks",
-                    "key": "department-tasks",
-                    "kind": "page",
-                    "label": "Department Tasks",
-                    "icon": "nav-building",
-                    "route": "department-tasks.index",
-                    "href": "http://hc-hub.test/department-tasks"
                 },
                 "g-calendar": {
                     "id": "g-calendar",

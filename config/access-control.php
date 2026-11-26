@@ -337,7 +337,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Reading a whole department's tasks — the desk Tasks panel's `department`
-    | scope and the department-tasks page — belongs to department managers,
+    | scope and the media-delivery moves on a task — belongs to department managers,
     | which D-65 defines as an HR job level rather than a role or a permission.
     | App\Support\EmployeeProfile::isDepartmentManager() is the one definition;
     | it matches this name against job_levels.name_en or name_ar on a

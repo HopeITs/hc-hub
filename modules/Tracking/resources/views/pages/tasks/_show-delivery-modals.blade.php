@@ -1,25 +1,20 @@
-{{--
-    The Department Tasks dialogs: hand over a media deliverable (fields follow
-    the kinds it asks for), accept it, or return it with a reason. Included by
-    ⚡index.blade.php.
---}}
+{{-- The delivery dialogs on ⚡show.blade.php: hand over the media deliverable (the fields follow the kinds it asks for), accept it, or return it with a reason. Opened from _show-delivery. --}}
+@use('Modules\Tracking\Enums\DeliverableKind')
 @php
-    $deliveringTask = $deliveringTaskId === null ? null : $this->allDepartmentTasks->firstWhere('id', $deliveringTaskId);
-    $reviewingTask = $reviewingTaskId === null ? null : $this->allDepartmentTasks->firstWhere('id', $reviewingTaskId);
-    $reviewingName = (string) $reviewingTask?->title;
-    $deliveryKinds = $deliveringTask?->media_kinds?->all() ?? [];
-    $wantsLink = collect($deliveryKinds)->contains(fn ($kind): bool => in_array($kind, [\Modules\Tracking\Enums\DeliverableKind::Video, \Modules\Tracking\Enums\DeliverableKind::Photos, \Modules\Tracking\Enums\DeliverableKind::File], true));
-    $wantsFiles = collect($deliveryKinds)->contains(fn ($kind): bool => in_array($kind, [\Modules\Tracking\Enums\DeliverableKind::Photos, \Modules\Tracking\Enums\DeliverableKind::File], true));
-    $wantsText = in_array(\Modules\Tracking\Enums\DeliverableKind::Text, $deliveryKinds, true);
-    $onlyPhotos = $wantsFiles && ! in_array(\Modules\Tracking\Enums\DeliverableKind::File, $deliveryKinds, true);
-    $accept = $onlyPhotos ? '.jpg,.jpeg,.png' : collect(\App\Enums\FileType::values())->map(fn ($extension) => '.'.$extension)->implode(',');
+    $reviewingName = $reviewingTaskId === null ? '' : (string) $this->task->title;
+    $deliveryKinds = $showDeliveryModal ? ($this->task->media_kinds?->all() ?? []) : [];
+    $wantsLink = collect($deliveryKinds)->contains(fn ($kind): bool => in_array($kind, [DeliverableKind::Video, DeliverableKind::Photos, DeliverableKind::File], true));
+    $wantsFiles = collect($deliveryKinds)->contains(fn ($kind): bool => in_array($kind, [DeliverableKind::Photos, DeliverableKind::File], true));
+    $wantsText = in_array(DeliverableKind::Text, $deliveryKinds, true);
+    $onlyPhotos = $wantsFiles && ! in_array(DeliverableKind::File, $deliveryKinds, true);
+    $acceptedExtensions = $onlyPhotos ? '.jpg,.jpeg,.png' : collect(\App\Enums\FileType::values())->map(fn ($extension) => '.'.$extension)->implode(',');
 @endphp
 
     <x-ui.modal
         wire:model="showDeliveryModal"
         size="md"
-        :title="__('department_tasks.deliver_title', ['name' => (string) $deliveringTask?->title])"
-        :description="$deliveringTask !== null ? __('department_tasks.deliver_description', ['kinds' => collect($deliveryKinds)->map->label()->implode(__('common.list_separator'))]) : null"
+        :title="__('department_tasks.deliver_title', ['name' => $showDeliveryModal ? (string) $this->task->title : ''])"
+        :description="$showDeliveryModal ? __('department_tasks.deliver_description', ['kinds' => collect($deliveryKinds)->map->label()->implode(__('common.list_separator'))]) : null"
         submit="deliver"
         close="closeDeliveryModal"
         required-note
@@ -33,7 +28,7 @@
                 <x-ui.form-input wire:model="deliveredOn" :label="__('department_tasks.delivered_on')" type="date" :max="today()->toDateString()" required />
 
                 @if ($wantsLink)
-                    <x-ui.form-input wire:model="deliveredLink" :label="__('department_tasks.delivered_link')" type="url" placeholder="https://" maxlength="2048" :help="in_array(\Modules\Tracking\Enums\DeliverableKind::Video, $deliveryKinds, true) ? __('department_tasks.video_link_help') : null" />
+                    <x-ui.form-input wire:model="deliveredLink" :label="__('department_tasks.delivered_link')" type="url" placeholder="https://" maxlength="2048" :help="in_array(DeliverableKind::Video, $deliveryKinds, true) ? __('department_tasks.video_link_help') : null" />
                 @endif
 
                 @if ($wantsFiles)
@@ -42,7 +37,7 @@
                             wire:model="deliveryFiles.{{ $slot }}"
                             wire:key="delivery-file-{{ $slot }}"
                             :label="$slot === 0 ? __('department_tasks.delivered_files') : __('department_tasks.another_file')"
-                            :accept="$accept"
+                            :accept="$acceptedExtensions"
                             :types="$onlyPhotos ? 'JPG, PNG' : null"
                             max-size="5 MB"
                         />

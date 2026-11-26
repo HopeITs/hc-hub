@@ -268,6 +268,7 @@ return [
         'return_reason_placeholder' => 'What is missing or wrong',
         'return_confirm' => 'Return to :status',
         'returned_banner' => 'Returned for changes',
+        'delivery' => 'Delivery',
     ],
     'related' => [
         'proposal' => 'Proposal',

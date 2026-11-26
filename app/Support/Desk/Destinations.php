@@ -12,7 +12,6 @@ use Modules\Core\Models\User;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\RiskLibrary;
-use Modules\Tracking\Models\Task;
 
 /**
  * Every page the Tracking Desk can open, with the rule that decides who may.
@@ -347,7 +346,6 @@ final class Destinations
             $page('admin.accounts.index', 'common.accounts', 'coins', 'nav-landmark', 'funding_finance', $can('accounts.view'), 'accounts'),
 
             $page('tasks.index', 'common.tasks', 'check', 'nav-square-check-big', 'workspace', $can('tasks.view'), 'tasks'),
-            $page('department-tasks.index', 'titles.department_tasks', 'board', 'nav-building', 'workspace', fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)),
             $page('calendar.index', 'common.calendar', 'cal', 'nav-calendar', 'workspace', $can('calendar.view')),
             $page('notifications.index', 'desk.notifications', 'bell', 'nav-bell', 'overview', $everyone),
 

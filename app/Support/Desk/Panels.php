@@ -81,7 +81,6 @@ final class Panels
         'proposals.index' => 'pipeline',
         'transfers.index' => 'transfers',
         'tasks.index' => 'tasks',
-        'department-tasks.index' => 'deliverables',
         'calendar.index' => 'coming',
     ];
 
@@ -159,7 +158,6 @@ final class Panels
         'transfers' => [['transfers', 'L'], ['money', 'L'], ['deliverables', 'L']],
         'admin.accounts.index' => [['transfers', 'L'], ['money', 'L']],
         'tasks' => [['tasks', 'L'], ['coming', 'L'], ['waiting', 'L'], ['deliverables', 'L']],
-        'department-tasks' => [['deliverables', 'L'], ['tasks', 'L'], ['myteam', 'L']],
         'calendar' => [['coming', 'L'], ['tasks', 'L']],
         'notifications' => [['needs', 'L'], ['coming', 'L']],
         'activity' => [['needs', 'L'], ['coming', 'L']],
@@ -1012,8 +1010,8 @@ final class Panels
             'reviews' => ['icon' => 'search', 'size' => 'M', 'register' => 'reviews.index', 'allows' => $this->hasReviews(...)],
             'tasks' => ['icon' => 'check', 'size' => 'L', 'register' => 'tasks.index', 'allows' => $can('tasks.view')],
             'plan-milestones' => ['icon' => 'flag', 'size' => 'L', 'register' => null, 'allows' => fn (User $user): bool => $user->can('annual-plans.view') && ($user->managedProgramIds() !== [] || TrackingDuties::for($user)->ownedProjectIds() !== [])],
-            /* The Department Tasks surface in panel form, so it follows the page's rule (W-14, D-65). */
-            'deliverables' => ['icon' => 'board', 'size' => 'M', 'register' => 'department-tasks.index', 'allows' => fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)],
+            /* Department work waits in the Tasks register; the panel shows it by the department-queue rule (W-14, D-65). */
+            'deliverables' => ['icon' => 'board', 'size' => 'M', 'register' => 'tasks.index', 'allows' => fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)],
             'myteam' => ['icon' => 'users', 'size' => 'M', 'register' => null, 'allows' => fn (User $user): bool => $user->employee_id !== null || $user->isAdministrator()],
             'targets' => ['icon' => 'chart', 'size' => 'L', 'register' => 'targets.index', 'allows' => $can('targets.view')],
             'duties' => ['icon' => 'file', 'size' => 'M', 'register' => 'donor-reports.index', 'allows' => fn (User $user): bool => $user->can('reports.aggregate') || $user->can('funding-agreements.update') || TrackingDuties::for($user)->hasReportingDuties()],

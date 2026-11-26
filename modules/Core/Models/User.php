@@ -490,7 +490,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
 
     /**
      * Whether this user may read their whole HR department's tasks — the desk
-     * Tasks panel's `department` scope and the department-tasks page (W-14).
+     * Tasks panel's `department` scope and the deliverables panel (W-14).
      *
      * D-65 makes this an HR job level, not a role or a permission: only a
      * department manager qualifies, so a Managers or General Manager role

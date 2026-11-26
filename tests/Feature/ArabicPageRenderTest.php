@@ -8,13 +8,12 @@
  */
 dataset('translated pages', [
     'indicator library' => ['indicator-library.index', 'MEAL', 'titles.indicator_library', 'enums.indicator_measure.percentage'],
-    'department tasks' => ['department-tasks.index', 'Team Member', 'department_tasks.page_title', 'enums.delivery_state.requested'],
     'city directory' => ['admin.cities.index', 'General Manager', 'titles.city_directory', 'cities.cities_covered'],
     'sectors' => ['admin.sectors.index', 'MEAL', 'titles.sectors', 'sectors.add_sector'],
 ]);
 
 test('a new page renders right to left in arabic with an arabic title and label', function (string $route, string $role, string $titleKey, string $labelKey) {
-    /* A department manager (W-14, D-65), so department-tasks opens like the rest. */
+    /* A department manager (W-14, D-65), so every page in the list opens. */
     $user = userWithRole($role, insertHrDepartmentManager());
     $user->forceFill(['locale' => 'ar'])->save();
 

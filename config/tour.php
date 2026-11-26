@@ -93,9 +93,6 @@ return [
             ['id' => 'group', 'targets' => ['[data-library-group]']],
             ['id' => 'entry', 'targets' => ['[data-library-entry]']],
         ],
-        'department-tasks.index' => [
-            ['id' => 'list', 'targets' => ['[data-tour="department-tasks-list"]']],
-        ],
         'report-templates.index' => [
             ['id' => 'queue', 'targets' => ['[data-report-template-queue]']],
         ],

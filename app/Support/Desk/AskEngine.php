@@ -94,7 +94,6 @@ final class AskEngine
         'monthly-reports.index' => ['monthly', 'شهريه', 'شهري'],
         'donor-reports.compose' => ['builder', 'compose', 'donor', 'منشئ'],
         'donor-reports.index' => ['duties', 'obligations', 'deadlines', 'التزامات', 'واجبات'],
-        'department-tasks.index' => ['department', 'team', 'deliverables', 'قسم', 'الفريق'],
         'calendar.index' => ['calendar', 'schedule', 'agenda', 'تقويم', 'رزنامه'],
         'notifications.index' => ['notifications', 'inbox', 'alerts', 'messages', 'اشعارات', 'تنبيهات'],
         'admin.users.index' => ['users', 'people', 'staff', 'employees', 'roles', 'permissions', 'access', 'مستخدمين', 'موظفين', 'صلاحيات', 'ادوار'],

@@ -142,7 +142,7 @@ test('a roleless user\'s task visibility is unchanged', function () {
     expect(Task::query()->pluck('id')->all())->toEqualCanonicalizing([$mediaTask->id, $financialTask->id, $legacyTask->id]);
 });
 
-test('a grade-5 department manager is offered the department scope and the department tasks page', function () {
+test('a grade-5 department manager is offered the department scope and the department queue', function () {
     $media = insertHrDepartment('Media');
     $manager = userWithRole('Media Team', insertHrDepartmentManager($media));
     $task = departmentVisibilityColleagueTask($media, departmentVisibilityEmployee($media));
@@ -154,10 +154,10 @@ test('a grade-5 department manager is offered the department scope and the depar
         ->call('applyFilters', ['scope' => 'department'])
         ->assertSee($task->title);
 
-    $this->actingAs($manager)->get(route('department-tasks.index'))->assertOk();
+    expect($manager->can('viewDepartmentQueue', Task::class))->toBeTrue();
 });
 
-test('a Managers role holder without the job level gets neither the scope nor the page (D-65)', function () {
+test('a Managers role holder without the job level gets neither the scope nor the queue (D-65)', function () {
     $media = insertHrDepartment('Media');
     $roleHolder = userWithRole('Managers', departmentVisibilityEmployee($media));
 
@@ -166,7 +166,7 @@ test('a Managers role holder without the job level gets neither the scope nor th
     Livewire::actingAs($roleHolder)->test('desk.panels.tasks', ['size' => 'L'])
         ->assertDontSee(__('desk.scope_department'));
 
-    $this->actingAs($roleHolder)->get(route('department-tasks.index'))->assertForbidden();
+    expect($roleHolder->can('viewDepartmentQueue', Task::class))->toBeFalse();
 });
 
 test('a department scope sent by hand falls back to mine, by either path', function () {
@@ -199,7 +199,7 @@ test('another job level is not the manager level', function () {
     expect($officer->canSeeDepartmentTasks())->toBeFalse();
 });
 
-test('the deliverables panel follows the page: offered to a department manager only', function () {
+test('the deliverables panel follows the department queue rule: offered to a department manager only', function () {
     $media = insertHrDepartment('Media');
     $manager = userWithRole('Financial', insertHrDepartmentManager($media));
     $officer = userWithRole('Financial', departmentVisibilityEmployee($media));
@@ -214,7 +214,7 @@ test('an administrator keeps the department scope without an HR job level', func
 
     expect($admin->canSeeDepartmentTasks())->toBeTrue();
 
-    $this->actingAs($admin)->get(route('department-tasks.index'))->assertOk();
+    expect($admin->can('viewDepartmentQueue', Task::class))->toBeTrue();
 });
 
 test('constrain() and allows() agree for every task and user', function () {
