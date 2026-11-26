@@ -7,8 +7,9 @@ One prompt per task in `2026-11-20-ui-ux-improvement.md` (called **the plan** be
 ```
 Read CLAUDE.md, then .ai/rules/index.md and every rule file whose glob covers a path in your scope.
 Read docs/superpowers/plans/2026-11-20-ui-ux-improvement.md for context (your task id is in it).
-Design standard: C:/Users/Rit/.claude/skills/hc-ui-ux/references/hope-center-sizes.md,
-hope-center-brand.md and rtl-arabic.md. For Blade/Flux/Tailwind work, load the matching project skill
+Design standard: load the hc-ui-ux skill and read its references/hope-center-sizes.md,
+hope-center-brand.md and rtl-arabic.md (if the skill is not installed, say so under "open risks"
+and follow decisions D1–D6 below). For Blade/Flux/Tailwind work, load the matching project skill
 (fluxui-development, tailwindcss-development, livewire-development). Before writing tests, read the
 testing-best-practices skill.
 
