@@ -25,6 +25,7 @@ use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\PlanUpdate;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Task;
 
@@ -45,6 +46,8 @@ beforeEach(function () {
     $aleppo = insertHrCity('Aleppo', 'حلب');
     $this->centre = Project::factory()->create(['program_id' => $this->program->id, 'city_id' => $aleppo, 'user_id' => $this->ownerEmployee]);
     DB::table('project_proposal')->insert(['project_id' => $this->centre->id, 'proposal_id' => $this->proposal->id]);
+    // MEAL coverage resolves through the proposal's location row at the centre's place.
+    ProposalLocation::factory()->forProject($this->centre)->cityWide()->create(['proposal_id' => $this->proposal->id]);
     MealCoverageAssignment::query()->create(['scope_type' => MealCoverageScope::City->value, 'city_id' => $aleppo, 'employee_id' => $this->officerEmployee]);
 
     $this->plan = ActivityPlan::factory()->approved()->create(['proposal_id' => $this->proposal->id, 'program_id' => $this->program->id, 'approved_by' => $this->mealManager->id]);

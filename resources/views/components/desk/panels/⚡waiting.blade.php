@@ -51,8 +51,8 @@ new class extends Component {
             ]);
 
         $reports = DeskWork::waitingReports($user)
-            ->select(['id', 'slug', 'project_id', 'period', 'submitted_at'])
-            ->with('project')
+            ->select(['id', 'slug', 'project_id', 'report_template_id', 'period', 'submitted_at'])
+            ->with(['project', 'template'])
             ->get()
             ->map(fn (MonthlyReport $report): array => [
                 'key' => 'monthly-report-'.$report->id,

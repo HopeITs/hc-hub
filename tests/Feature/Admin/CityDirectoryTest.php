@@ -327,6 +327,7 @@ test('meal coverage adds a flat number of queries however many cities and projec
         $cover();
     }
 
+    $render(); // new programs expire the remembered program names; this render reads them once
     expect($render())->toBe($few);
 });
 
@@ -374,7 +375,7 @@ test('projects whose city HR does not list are counted apart and shown, not lost
 
 test('a project with no governorate HR knows says so instead of inheriting', function () {
     $aleppo = insertHrCity('Aleppo');
-    Schema::withoutForeignKeyConstraints(fn () => Project::factory()->create(['city_id' => $aleppo + 100, 'name' => 'Orphan Centre']));
+    Schema::withoutForeignKeyConstraints(fn () => cityCoverageTemplate($aleppo + 100, 'Orphan Centre'));
 
     Livewire::actingAs(User::factory()->role('MEAL')->create())
         ->test('tracking::admin.cities')

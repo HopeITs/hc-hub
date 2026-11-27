@@ -164,9 +164,11 @@ test('an officer from another governorate assigned to the project validates it',
     $aleppoOfficer = governorateOfficer($this->aleppo);
     $idlibEmployee = insertHrEmployee(firstNameEn: 'Lina', lastNameEn: 'Idlib');
     Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forCity(insertHrCity('Idlib'))->create(['employee_id' => $idlibEmployee]));
-    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forProject($this->project->id)->create(['employee_id' => $idlibEmployee]));
     $projectOfficer = userWithRole('MEAL', $idlibEmployee);
     $submitted = monthlyReportIn($this->project, MonthlyReportStatus::Submitted, $this->owner);
+    // Coverage is by place now, and a place with no center must be city-wide to be a place at all (D-82).
+    $submitted->template->forceFill(['city_wide' => true])->save();
+    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forPlace($submitted->template->place())->create(['employee_id' => $idlibEmployee]));
 
     expect($projectOfficer->can('validate', $submitted))->toBeTrue()
         ->and($aleppoOfficer->can('validate', $submitted))->toBeFalse();

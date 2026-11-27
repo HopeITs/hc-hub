@@ -45,10 +45,11 @@ test('the MEAL manager opens the proposal with the Funding tab', function () {
     $this->get(route('proposals.show', $proposal))->assertOk();
 
     // Stage 3 of the redesign: the tabs became folded sections ("money" is the
-    // old Funding tab) and the logical framework sits on the proposal card.
+    // old Funding tab) and the logical framework sits on the proposal card; projects and
+    // targets render only in the embedded view (the project Story).
     $page = Livewire::actingAs($mealManager)->test('tracking::proposals.show', ['proposal' => $proposal]);
 
-    expect(array_column($page->instance()->sections, 'key'))->toContain('money', 'projects', 'targets', 'plan', 'reports', 'docs');
+    expect(array_column($page->instance()->sections, 'key'))->toContain('money', 'plan', 'reports', 'docs');
     $page->assertSeeHtml('data-test="proposal-logframe"');
 });
 

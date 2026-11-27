@@ -393,7 +393,7 @@ test('each filter narrows the rows and an unknown id is ignored', function () {
     mmTarget(mmProposal($second, '2025-01-01', '2025-12-31', name: 'Old'), $second, LibraryIndicator::factory()->create());
 
     $employeeId = insertHrEmployee();
-    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forProject($second->id)->create(['employee_id' => $employeeId]));
+    Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forCity((int) $second->city_id)->create(['employee_id' => $employeeId]));
     $viewer = userWithRole('MEAL', $employeeId);
 
     $codes = fn (array $filters): array => collect(Livewire::actingAs($viewer)->withQueryParams($filters)->test('tracking::reports.monthly-matrix')->instance()->matrix['rows'])->pluck('code')->sort()->values()->all();

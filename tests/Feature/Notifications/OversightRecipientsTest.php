@@ -6,6 +6,8 @@ use App\Notifications\Recipients\OversightRecipients;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -26,7 +28,10 @@ function projectWithOfficer(int $employeeId): Project
 {
     return Activity::withoutRecording(function () use ($employeeId): Project {
         $project = Project::factory()->create();
-        MealCoverageAssignment::factory()->forProject($project->id)->create(['employee_id' => $employeeId]);
+        $row = ProposalLocation::factory()->forProject($project)->cityWide()->create();
+        MealCoverageAssignment::factory()
+            ->forPlace(new ReportPlace($row->city_id, (int) $row->program_id, null, true))
+            ->create(['employee_id' => $employeeId]);
 
         return $project;
     });

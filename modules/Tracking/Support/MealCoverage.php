@@ -24,24 +24,59 @@ final class MealCoverage
 {
     public static function responsibleForPlace(ReportPlace $place): ?int
     {
-        $placeOfficer = $place->isUnset() ? null : MealCoverageAssignment::query()
-            ->where('scope_key', 'place:'.$place->key())
-            ->value('employee_id');
-        $candidates = array_values(array_filter([
-            $placeOfficer === null ? null : (int) $placeOfficer,
-            self::officerOfCity($place->cityId),
-            self::mealManagerEmployeeId(),
-        ], fn (?int $id): bool => $id !== null));
+        return self::responsibleForPlaces([$place])[$place->key()];
+    }
 
-        $active = self::activeEmployeeIds($candidates);
-
-        foreach ($candidates as $id) {
-            if (in_array($id, $active, true)) {
-                return $id;
-            }
+    /**
+     * The responsible officer of every given place, keyed by place key, in a
+     * fixed number of queries (place rows, governorate rows, the manager slot
+     * and one HR lookup) however many places there are.
+     *
+     * @param  iterable<ReportPlace>  $places
+     * @return array<string, int|null>
+     */
+    public static function responsibleForPlaces(iterable $places): array
+    {
+        $byKey = [];
+        foreach ($places as $place) {
+            $byKey[$place->key()] = $place;
         }
 
-        return null;
+        if ($byKey === []) {
+            return [];
+        }
+
+        $placeOfficers = MealCoverageAssignment::query()
+            ->whereIn('scope_key', array_map(fn (string $key): string => 'place:'.$key, array_keys($byKey)))
+            ->pluck('employee_id', 'scope_key');
+        $cityOfficers = MealCoverageAssignment::query()
+            ->where('scope_type', MealCoverageScope::City)
+            ->whereIn('city_id', array_values(array_unique(array_map(fn (ReportPlace $place): int => $place->cityId, $byKey))))
+            ->pluck('employee_id', 'city_id');
+        $manager = self::mealManagerEmployeeId();
+
+        $candidates = [];
+        foreach ($byKey as $key => $place) {
+            $placeOfficer = $place->isUnset() ? null : $placeOfficers->get('place:'.$key);
+            $cityOfficer = $cityOfficers->get($place->cityId);
+            $candidates[$key] = array_values(array_filter([
+                $placeOfficer === null ? null : (int) $placeOfficer,
+                $cityOfficer === null ? null : (int) $cityOfficer,
+                $manager,
+            ], fn (?int $id): bool => $id !== null));
+        }
+
+        $active = self::activeEmployeeIds(array_merge(...array_values($candidates)));
+
+        return array_map(function (array $ids) use ($active): ?int {
+            foreach ($ids as $id) {
+                if (in_array($id, $active, true)) {
+                    return $id;
+                }
+            }
+
+            return null;
+        }, $candidates);
     }
 
     /** @return list<int> */

@@ -133,8 +133,9 @@ new class extends Component {
         }
 
         $responsibles = app(MonthlyReportPreparers::class)->responsiblesByTemplate($templates);
+        $byPlace = MealCoverage::responsibleForPlaces($templates->map(fn ($template) => $template->place()));
         $officers = $templates->mapWithKeys(fn ($template): array => [
-            $template->id => MealCoverage::responsibleForPlace($template->place()),
+            $template->id => $byPlace[$template->place()->key()] ?? null,
         ])->all();
         $owners = array_map(fn (array $ids): ?int => $ids[0] ?? null, $responsibles);
         $names = Employee::query()->whereKey(array_values(array_unique(array_filter([...array_values($owners), ...array_values($officers)]))))->get(Employee::NameColumns)

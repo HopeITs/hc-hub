@@ -17,8 +17,10 @@ use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\ProjectActivityStatus;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
+use Modules\Tracking\Support\ResultsChain;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -277,23 +279,53 @@ test('an activity shows its planned months and the center calendar under a cente
     $chain = chainProposalFramework($this->proposal, $this->centerA, $this->centerB);
     ActivitySchedule::factory()->create(['result_id' => $chain['activity']->id, 'month' => '2026-03-01']);
     ActivitySchedule::factory()->create(['result_id' => $chain['activity']->id, 'month' => '2026-04-01', 'weeks' => [1, 2]]);
-    ActivitySchedule::factory()->create(['result_id' => $chain['activity']->id, 'project_id' => $this->centerB->id, 'month' => '2026-06-01']);
     $activityIndicator = chainIndicator($chain['activity']);
     chainTarget($activityIndicator, $this->plan, $this->centerA, 10);
     chainTarget($activityIndicator, $this->plan, $this->centerB, 10);
 
+    // The annual plan reads the program framework, which has no location rows: the program calendar stays under a center filter.
     chainTab($this->viewer, $this->proposal)
         ->assertSeeHtml('data-chain-schedule-month="2026-03"')
         ->assertSeeHtml('data-chain-schedule-month="2026-04"')
         ->assertSee(trans_choice('results_framework.chain_weeks', 2, ['weeks' => '1, 2']))
-        ->assertDontSeeHtml('data-chain-schedule-month="2026-06"')
-        ->set('chainCenter', (string) $this->centerB->id)
-        ->assertSeeHtml('data-chain-schedule-month="2026-06"')
-        ->assertDontSeeHtml('data-chain-schedule-month="2026-03"');
-
-    chainTab($this->viewer, $this->proposal)
         ->set('chainCenter', (string) $this->centerA->id)
         ->assertSeeHtml('data-chain-schedule-month="2026-03"');
+});
+
+test('a proposal activity takes the calendar of the location row carrying the filtered center, else the proposal calendar', function () {
+    $impact = chainNode($this->proposal, ResultType::Impact, statement: 'Families live in safety.');
+    $outcome = chainNode($this->proposal, ResultType::Outcome, $impact);
+    $output = chainNode($this->proposal, ResultType::Output, $outcome);
+    $activity = chainNode($this->proposal, ResultType::Activity, $output, statement: 'Rehabilitate the village wells.');
+    ActivitySchedule::factory()->create(['result_id' => $activity->id, 'month' => '2026-03-01']);
+    $centerRow = ProposalLocation::factory()->forProject($this->centerB)->create(['proposal_id' => $this->proposal->id]);
+    ActivitySchedule::factory()->forLocation($centerRow)->create(['result_id' => $activity->id, 'month' => '2026-06-01']);
+    $indicator = chainIndicator($activity);
+    chainTarget($indicator, $this->proposal, $this->centerA, 10);
+    chainTarget($indicator, $this->proposal, $this->centerB, 10);
+
+    $monthsUnder = function (string $center) use ($activity): array {
+        $tree = ResultsChain::forProposal($this->proposal, ['indicator' => '', 'center' => $center, 'donor' => ''])['tree'];
+        $find = function (array $nodes) use (&$find, $activity): ?array {
+            foreach ($nodes as $candidate) {
+                if ($candidate['result']->id === $activity->id) {
+                    return $candidate;
+                }
+
+                if (($found = $find($candidate['children'])) !== null) {
+                    return $found;
+                }
+            }
+
+            return null;
+        };
+
+        return array_keys($find($tree)['schedule']);
+    };
+
+    expect($monthsUnder(''))->toBe(['2026-03'])
+        ->and($monthsUnder((string) $this->centerB->id))->toBe(['2026-06'])
+        ->and($monthsUnder((string) $this->centerA->id))->toBe(['2026-03']);
 });
 
 test('an activity shows each center\'s confirmed status as a text badge, only the selected center under a filter', function () {
