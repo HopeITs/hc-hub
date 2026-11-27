@@ -546,8 +546,8 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
 
                     @if ($prefs['quiet_hours'])
                         <div class="flex flex-wrap items-end gap-3">
-                            <div class="w-36"><flux:input type="time" wire:model.blur="prefs.quiet_start" :label="__('notification_settings.schedule.start')" data-test="pref-quiet_start" /></div>
-                            <div class="w-36"><flux:input type="time" wire:model.blur="prefs.quiet_end" :label="__('notification_settings.schedule.end')" data-test="pref-quiet_end" /></div>
+                            <div class="w-36"><flux:input type="time" wire:model.live.blur="prefs.quiet_start" :label="__('notification_settings.schedule.start')" data-test="pref-quiet_start" /></div>
+                            <div class="w-36"><flux:input type="time" wire:model.live.blur="prefs.quiet_end" :label="__('notification_settings.schedule.end')" data-test="pref-quiet_end" /></div>
                             <label class="{{ $chip }}" title="{{ __('notification_settings.schedule.urgent_help') }}">
                                 <input type="checkbox" wire:model.live="prefs.urgent_bypass" class="size-4 accent-primary" data-test="pref-urgent_bypass" />
                                 {{ __('notification_settings.schedule.urgent_label') }}

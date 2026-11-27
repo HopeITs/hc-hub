@@ -80,7 +80,7 @@
     </x-ui.form-select>
 
     @if ($prefs['frequency'] === 'daily')
-        <flux:input type="time" wire:model.blur="prefs.digest_time" :label="__('notification_settings.general.digest_time')" :disabled="$paused" data-test="pref-digest_time" />
+        <flux:input type="time" wire:model.live.blur="prefs.digest_time" :label="__('notification_settings.general.digest_time')" :disabled="$paused" data-test="pref-digest_time" />
     @endif
 </div>
 @error('prefs.frequency') <p class="text-sm text-status-critical">{{ $message }}</p> @enderror
