@@ -640,7 +640,7 @@ new #[Layout('layouts::desk'), Title('titles.risks')] class extends Component {
                 @php $places = $this->placeLabelsFor($this->risks); @endphp
                 @foreach ($this->risks as $risk)
                     <article class="flex flex-col gap-2 rounded-lg border border-secondary-soft p-3.5 dark:border-line" wire:key="risk-{{ $risk->id }}">
-                        <div class="flex items-start justify-between gap-3">
+                        <div class="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
                             <div
                                 class="inline-flex shrink-0 overflow-hidden rounded-full border border-secondary-light dark:border-field-line"
                                 role="radiogroup"
@@ -686,7 +686,7 @@ new #[Layout('layouts::desk'), Title('titles.risks')] class extends Component {
                                     {{ __('common.materialised') }}
                                 </button>
                             </div>
-                            <div class="flex shrink-0 items-center gap-1.5">
+                            <div class="ms-auto flex shrink-0 items-center gap-1.5">
                                 @can('update', $risk)<x-ui.button tone="ghost" size="icon" icon="pencil-square" class="size-11! @sm/directory:" wire:click="openEditModal({{ $risk->id }})" :aria-label="__('common.edit_name', ['name' => $risk->name])" />@endcan
                                 @can('delete', $risk)<x-ui.button tone="ghost" size="icon" icon="trash" class="size-11! @sm/directory:" wire:click="confirmDelete({{ $risk->id }})" :aria-label="__('common.delete_name', ['name' => $risk->name])" />@endcan
                             </div>
