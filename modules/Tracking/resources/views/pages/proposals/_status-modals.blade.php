@@ -31,10 +31,12 @@
             @endphp
 
             @if ($statusStale)
-                <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="status-stale-alert">
-                    <p class="min-w-0 flex-1 font-semibold">{{ __('proposals.stale_status_explained') }}</p>
-                    <x-ui.button type="button" size="sm" icon="arrow-path" wire:click="reloadStatusModal" wire:loading.attr="disabled" wire:target="reloadStatusModal" data-test="status-reload-button">{{ __('proposals.reload') }}</x-ui.button>
-                </div>
+                <x-ui.alert tone="danger" class="mb-4" data-test="status-stale-alert">
+                    <p class="font-semibold">{{ __('proposals.stale_status_explained') }}</p>
+                    <x-slot:action>
+                        <x-ui.button type="button" size="sm" icon="arrow-path" wire:click="reloadStatusModal" wire:loading.attr="disabled" wire:target="reloadStatusModal" data-test="status-reload-button">{{ __('proposals.reload') }}</x-ui.button>
+                    </x-slot:action>
+                </x-ui.alert>
             @endif
 
             @if ($errors->has('statusGate'))
@@ -107,9 +109,9 @@
     >
         @if ($showCorrectModal)
             @if ($statusStale)
-                <div class="mb-4 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="correct-stale-alert">
+                <x-ui.alert tone="danger" class="mb-4" data-test="correct-stale-alert">
                     <p class="font-semibold">{{ __('proposals.stale_status_explained') }}</p>
-                </div>
+                </x-ui.alert>
             @endif
 
             <div class="grid gap-4">

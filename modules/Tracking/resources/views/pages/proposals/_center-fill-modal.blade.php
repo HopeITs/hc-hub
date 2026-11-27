@@ -27,14 +27,14 @@
                 x-init="$nextTick(() => setTimeout(() => $el.querySelector('[data-center-fill-row][data-fillable] [data-form-field] :is(button, select, input):not([disabled])')?.focus(), 60))"
             >
                 @if ($errors->any())
-                    <div class="rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="center-fill-errors">
+                    <x-ui.alert tone="danger" data-test="center-fill-errors">
                         @if ($firstFailingIndex !== null)
                             <p class="font-semibold">{{ __('proposals.form_error_summary_row', ['number' => $firstFailingIndex + 1]) }}</p>
                             <p>{{ $errors->first("locations.{$firstFailingIndex}.center_ids") }}</p>
                         @else
                             <p class="font-semibold">{{ $errors->first('locations') !== '' ? $errors->first('locations') : $errors->first() }}</p>
                         @endif
-                    </div>
+                    </x-ui.alert>
                 @endif
 
                 <ol class="grid gap-3" data-center-fill-rows>

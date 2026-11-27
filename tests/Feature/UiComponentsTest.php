@@ -977,6 +977,20 @@ test('the alert offers a dismiss button only when asked', function () {
     expect($html)->toContain('data-ui-alert-dismiss')->and($html)->toContain('role="status"');
 });
 
+test('the migrated page banners render through the alert component', function (string $file, string $hook) {
+    $source = file_get_contents(base_path($file));
+
+    expect($source)->toMatch('/<x-ui\.alert[^>]*'.preg_quote($hook, '/').'/');
+})->with([
+    'admin delete error' => ['resources/views/pages/admin/_users-modals.blade.php', 'users.unable_to_delete_user'],
+    'centre fill errors' => ['modules/Tracking/resources/views/pages/proposals/_center-fill-modal.blade.php', 'center-fill-errors'],
+    'status stale alert' => ['modules/Tracking/resources/views/pages/proposals/_status-modals.blade.php', 'status-stale-alert'],
+    'correct stale alert' => ['modules/Tracking/resources/views/pages/proposals/_status-modals.blade.php', 'correct-stale-alert'],
+    'donor report no data' => ['modules/Tracking/resources/views/components/donor-reports/snapshot.blade.php', 'data-no-validated-data'],
+    'donor report completeness' => ['modules/Tracking/resources/views/components/donor-reports/snapshot.blade.php', 'data-completeness-warning'],
+    'agreement proposal warning' => ['modules/Tracking/resources/views/components/funding/agreement-modal.blade.php', 'data-agreement-proposal-warning'],
+]);
+
 test('the skeleton renders each variant with a screen-reader loading label', function (string $variant) {
     $html = Blade::render('<x-ui.skeleton :variant="$variant" :count="2" />', ['variant' => $variant]);
 

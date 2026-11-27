@@ -139,7 +139,7 @@
         confirm-test="confirm-remove-reviewer"
     >
         @error('removeReviewer')
-            <p class="rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert">{{ $message }}</p>
+            <x-ui.alert tone="danger">{{ $message }}</x-ui.alert>
         @enderror
     </x-ui.confirm-modal>
 

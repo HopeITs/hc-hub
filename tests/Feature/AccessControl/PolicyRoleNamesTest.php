@@ -79,9 +79,9 @@ test('a project with no responsible officer is covered by whoever holds the stan
     $custom = User::factory()->role('Monitoring Lead')->create(['employee_id' => Employee::factory()->create()->id]);
     Role::findByName('Monitoring Lead', 'web')->givePermissionTo('meal-coverage.stand-in');
 
-    expect(PlanUpdatePolicy::isOfficer($meal, $project))->toBeTrue()
-        ->and(PlanUpdatePolicy::isOfficer($custom->fresh(), $project))->toBeTrue()
-        ->and(PlanUpdatePolicy::isOfficer($manager, $project))->toBeFalse();
+    expect(PlanUpdatePolicy::isOfficer($meal, $project, null))->toBeTrue()
+        ->and(PlanUpdatePolicy::isOfficer($custom->fresh(), $project, null))->toBeTrue()
+        ->and(PlanUpdatePolicy::isOfficer($manager, $project, null))->toBeFalse();
 });
 
 test('a MEAL role that lost the stand-in permission no longer covers an unassigned project', function () {
@@ -89,7 +89,7 @@ test('a MEAL role that lost the stand-in permission no longer covers an unassign
     $meal = userWithRole('MEAL', Employee::factory()->create()->id);
     Role::findByName('MEAL', 'web')->revokePermissionTo('meal-coverage.stand-in');
 
-    expect(PlanUpdatePolicy::isOfficer($meal->fresh(), $project))->toBeFalse();
+    expect(PlanUpdatePolicy::isOfficer($meal->fresh(), $project, null))->toBeFalse();
 });
 
 test('the plan of a program with no manager is approved by the General Manager only', function (string $role, bool $approves) {

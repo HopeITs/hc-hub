@@ -162,10 +162,7 @@
         </x-ui.form-section>
 
         @if ($warning !== null)
-            <div class="mb-3 flex items-start gap-2.5 rounded-lg border border-status-warn/40 bg-status-warn/10 p-3 text-sm text-secondary-dark dark:text-ink" role="status" data-agreement-proposal-warning>
-                <flux:icon.exclamation-triangle class="mt-0.5 size-4 shrink-0 text-status-warn" />
-                <p>{{ $warning }}</p>
-            </div>
+            <x-ui.alert tone="warning" class="mb-3" data-agreement-proposal-warning>{{ $warning }}</x-ui.alert>
         @endif
 
         @if ($editing && $confirmingDelete)

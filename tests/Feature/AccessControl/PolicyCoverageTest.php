@@ -6,6 +6,8 @@ use App\Models\AiRequest;
 use App\Models\KnownDevice;
 use App\Models\Media;
 use App\Models\NotificationMute;
+use App\Models\NotificationOutboxEntry;
+use App\Models\NotificationPreference;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\TrustedDevice;
@@ -17,15 +19,22 @@ use Modules\Core\Models\Center as HrCenter;
 use Modules\Core\Models\City as HrCity;
 use Modules\Hr\Models\ApplicationFormVersion;
 use Modules\Hr\Models\AttendanceDayDecision;
+use Modules\Hr\Models\AttendanceDevice;
 use Modules\Hr\Models\AttendanceDeviceLink;
+use Modules\Hr\Models\AttendanceDeviceSighting;
 use Modules\Hr\Models\AttendanceImport;
 use Modules\Hr\Models\AttendanceMonth;
 use Modules\Hr\Models\AttendancePunch;
+use Modules\Hr\Models\ChatAttachment;
+use Modules\Hr\Models\ChatMessage;
+use Modules\Hr\Models\ChatParticipant;
 use Modules\Hr\Models\ContractAmendmentPayTier;
 use Modules\Hr\Models\ContractPayTier;
 use Modules\Hr\Models\Course;
 use Modules\Hr\Models\Education;
+use Modules\Hr\Models\EmployeeEntitlement;
 use Modules\Hr\Models\EmployeeNote;
+use Modules\Hr\Models\Entitlement;
 use Modules\Hr\Models\Evaluation;
 use Modules\Hr\Models\Experience;
 use Modules\Hr\Models\HolidayProject;
@@ -38,7 +47,9 @@ use Modules\Hr\Models\NewsExternalPublication;
 use Modules\Hr\Models\NewsTag;
 use Modules\Hr\Models\OffboardingJourney;
 use Modules\Hr\Models\OnboardingJourney;
+use Modules\Hr\Models\PolicyAcknowledgement;
 use Modules\Hr\Models\PolicyDocument;
+use Modules\Hr\Models\PositionEntitlement;
 use Modules\Hr\Models\ProfileChangeRequest;
 use Modules\Hr\Models\RecruitmentApplicationAnswer;
 use Modules\Hr\Models\RecruitmentApplicationDecision;
@@ -75,6 +86,7 @@ use Modules\Tracking\Models\ActivityPlanFollowUp;
 use Modules\Tracking\Models\ActivityPlanItem;
 use Modules\Tracking\Models\ActivityPlanItemCity;
 use Modules\Tracking\Models\ActivityPlanMilestone;
+use Modules\Tracking\Models\Assumption;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\FundingAgreementInstallment;
 use Modules\Tracking\Models\Indicator;
@@ -92,6 +104,7 @@ use Modules\Tracking\Models\PlanUpdateNumber;
 use Modules\Tracking\Models\PlanUpdateQuestion;
 use Modules\Tracking\Models\PlanUpdateWeek;
 use Modules\Tracking\Models\ProjectActivityStatus;
+use Modules\Tracking\Models\ProposalAttentionDismissal;
 use Modules\Tracking\Models\ProposalChangeRequest;
 use Modules\Tracking\Models\ProposalChangeRequestReview;
 use Modules\Tracking\Models\ProposalLocationCenter;
@@ -141,14 +154,21 @@ function modelsGuardedWithoutPolicy(): array
         HrCity::class => ['cities', 'cities.* permissions on the admin cities page.'],
         ApplicationFormVersion::class => ['recruitment-forms', 'A version of its application form: written only by RecruitmentApplicationFormService under ApplicationFormPolicy (create, manage).'],
         AttendanceDayDecision::class => ['attendance', 'Part of its attendance month: written only from the timesheets page after the Roster and attendance.manage check (mayDecide).'],
+        AttendanceDevice::class => ['attendance', 'Registered, blocked and assigned only on the devices page under attendance.manage; the device endpoints (DevicePush) only stamp when a known device was last heard from.'],
+        AttendanceDeviceSighting::class => ['attendance', 'An unknown serial that called in: recorded only by DevicePush, cleared or turned into a device only on the devices page under attendance.manage.'],
         AttendanceDeviceLink::class => ['attendance', 'Written only by AttendanceImporter from the upload page under attendance.manage.'],
         AttendanceImport::class => ['attendance', 'Written only by AttendanceImporter from the upload page under attendance.manage.'],
         AttendanceMonth::class => ['attendance', 'Moved only by the MonthWorkflow abilities (attendance.view-own for the employee\'s own month, Roster and attendance.manage for others).'],
         AttendancePunch::class => ['attendance', 'Part of its attendance import: written only by AttendanceImporter under attendance.manage.'],
+        ChatAttachment::class => [null, 'Part of its chat message: written only by ChatService under ChatConversationPolicy::send, downloaded through ChatFileController under ChatConversationPolicy::view.'],
+        ChatMessage::class => [null, 'Part of its conversation: written only by ChatService and ChatGroupService under ChatConversationPolicy (send, view, deleteOthersMessages).'],
+        ChatParticipant::class => [null, 'Part of its conversation: written only by ChatService and ChatGroupService under ChatConversationPolicy (addMembers, removeMembers, addAdmins).'],
         ContractAmendmentPayTier::class => ['contracts', 'Part of its amendment: written only by ContractAmendmentService under ContractPolicy (amend, decideAmendment).'],
         ContractPayTier::class => ['contracts', 'Part of its contract (ContractPolicy): rewritten only by ContractAmendmentService when an amendment is applied.'],
         Course::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here; files go through EmployeeFileController.'],
         Education::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here; files go through EmployeeFileController.'],
+        EmployeeEntitlement::class => ['entitlements', 'A person\'s items: written only by Modules\Hr\Support\Entitlements\Entitlements, from the employee items page under canAssign (entitlements.assign) and from its position hooks and backfill command.'],
+        Entitlement::class => ['entitlements', 'The items library: written only on the entitlements page under canManageLibrary (entitlements.manage-library, HR or administrators).'],
         EmployeeNote::class => [null, 'The old notes table: copied in by hub:import-hr and read once by App\Support\Notes\CopyEmployeeNotes; never written here.'],
         Evaluation::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here.'],
         Experience::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here; files go through EmployeeFileController.'],
@@ -162,7 +182,9 @@ function modelsGuardedWithoutPolicy(): array
         NewsTag::class => ['news', 'Part of its news item: written only by SaveNews under NewsPolicy.'],
         OffboardingJourney::class => ['employees', 'Part of its employee: written only from the journeys page under EmployeePolicy::update and by the scheduled journey commands.'],
         OnboardingJourney::class => ['employees', 'Part of its employee: written only from the journeys page under EmployeePolicy::update and by the scheduled journey commands.'],
-        PolicyDocument::class => [null, 'Copied in by hub:import-hr; nothing here reads or writes it.'],
+        PolicyAcknowledgement::class => [null, 'The signed-in employee\'s own acknowledgement: written only by PolicyAcknowledgements::acknowledge, which the onboarding policies page calls for the signed-in user\'s own employee.'],
+        PolicyDocument::class => ['employees', 'Copied in by hub:import-hr; only its onboarding flags are set, on the required-policies page under employees.update for HR and administrators.'],
+        PositionEntitlement::class => ['entitlements', 'A default of the items library: written only on the entitlements page under canManageLibrary (and canLinkJobLevels for a job-level default).'],
         ProfileChangeRequest::class => ['employees', 'Part of its employee: copied in by hub:import-hr, listed only in the work inbox under employees.update, never written here.'],
         RecruitmentApplicationAnswer::class => ['recruitment-applicants', 'Part of its application: written only by PublicRecruitmentApplicationService through the public link, read under RecruitmentApplicationPolicy.'],
         RecruitmentApplicationDecision::class => ['recruitment-applicants', 'Part of its application: written only by RecruitmentApplicationStatusService under RecruitmentApplicationPolicy (changeStatus, bulkReject).'],
@@ -193,6 +215,7 @@ function modelsGuardedWithoutPolicy(): array
         RecruitmentWorkflowStep::class => ['recruitment-requests', 'The approval template: copied in by hub:import-hr and read by RecruitmentWorkflowInstanceService; never edited from a page.'],
         Relative::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here.'],
         RenewalJourney::class => ['employees', 'Part of its contract: written only from the journeys page under ContractPolicy::manageAutoRenew and by the scheduled journey commands.'],
+        Assumption::class => ['results', 'Part of its proposal\'s logframe: written only by SaveAssumption under results.create and results.update.'],
         Indicator::class => ['indicators', 'indicators.* permissions on the indicators page.'],
         IndicatorProgress::class => ['indicators', 'Readings are recorded under indicators.* permissions.'],
         KnownDevice::class => [null, 'The signed-in user\'s own sign-in devices only.'],
@@ -205,6 +228,8 @@ function modelsGuardedWithoutPolicy(): array
         MonthlyReportLineShare::class => ['reports', 'Part of its monthly report line (MonthlyReportPolicy::update, fillMealLines); loaded through the line.'],
         MonthlyReportReopenRequest::class => ['reports', 'Raised and decided under MonthlyReportPolicy::requestReopen and decideReopen; never deleted.'],
         NotificationMute::class => [null, 'The signed-in user\'s own notification preferences only.'],
+        NotificationOutboxEntry::class => [null, 'The push and email delivery queue: written only by OutboxWriter, OutboxDispatcher and DeliverNotificationOutbox, pruned by PrunePushData; no page reads or writes it.'],
+        NotificationPreference::class => [null, 'The signed-in user\'s own notification settings only: always loaded through NotificationPreference::for(auth()->user()).'],
         Permission::class => ['access-management', 'access-management.* permissions and UserPolicy::grantPermission.'],
         PlanUpdateFile::class => ['annual-plans', 'Part of its monthly update (PlanUpdatePolicy); written only by ManagePlanUpdateFiles, opened through plan-updates.files.download.'],
         PlanUpdateNumber::class => ['annual-plans', 'Part of its monthly update (PlanUpdatePolicy::canFill); written only by SavePlanUpdate.'],
@@ -212,6 +237,7 @@ function modelsGuardedWithoutPolicy(): array
         PlanUpdateWeek::class => ['annual-plans', 'Part of its monthly update (PlanUpdatePolicy::canFill); written only by SavePlanUpdate.'],
         PlanIndicator::class => ['targets', 'targets.* permissions on the targets page.'],
         ProjectActivityStatus::class => ['reports', 'Written only when a monthly report is validated or reopened (MonthlyReportPolicy::validate, decideReopen).'],
+        ProposalAttentionDismissal::class => ['proposals', 'The signed-in user\'s own hidden attention items on a proposal: written only by ReadsProposalAttention under ProposalPolicy::view, always for auth()->id().'],
         ProposalStatusNote::class => ['proposals', 'Written only through a proposal status change (ProposalPolicy::update).'],
         ProposalChangeRequest::class => ['proposals', 'Written only by the change-request actions under ProposalPolicy::requestChange, decideChange and withdrawChange (Y-09, D-89a).'],
         ProposalChangeRequestReview::class => ['proposals', 'Part of its change request; written only by RequestProposalChange and ReviewProposalChange under ProposalPolicy::reviewChange (Y-09).'],

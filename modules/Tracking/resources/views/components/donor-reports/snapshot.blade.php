@@ -58,21 +58,13 @@
 <div {{ $attributes->class('grid min-w-0 grid-cols-1 gap-6') }} data-donor-report-snapshot>
     {{-- Completeness first: what the figures below leave out. --}}
     @if (! $completeness['has_validated_data'])
-        <div class="rounded-xl border border-status-warn/40 bg-status-warn-soft p-4 text-sm {{ $ink }}" role="status" data-no-validated-data>
-            <p class="flex items-center gap-2 font-semibold">
-                <flux:icon.information-circle variant="mini" class="size-5 shrink-0" />
-                {{ __('donor_reports.no_validated_data') }}
-            </p>
-        </div>
+        <x-ui.alert tone="info" :title="__('donor_reports.no_validated_data')" data-no-validated-data />
+
     @endif
 
     @if ($completeness['missing'] !== [] || $completeness['missing_denominator'] !== [])
-        <div class="rounded-xl border border-status-critical bg-status-critical-soft p-4 text-sm {{ $ink }}" role="alert" data-completeness-warning data-tour="donor-report-completeness">
-            <p class="flex items-center gap-2 font-semibold text-status-critical">
-                <flux:icon.exclamation-triangle variant="mini" class="size-5 shrink-0" />
-                {{ __('donor_reports.incomplete_title') }}
-            </p>
-            <p class="mt-1 {{ $muted }}">{{ __('donor_reports.incomplete_help') }}</p>
+        <x-ui.alert tone="danger" :title="__('donor_reports.incomplete_title')" data-completeness-warning data-tour="donor-report-completeness">
+            <p class="{{ $muted }}">{{ __('donor_reports.incomplete_help') }}</p>
             @if ($completeness['missing'] !== [])
                 <ul class="mt-3 grid gap-1 sm:grid-cols-2">
                     @foreach ($completeness['missing'] as $gap)
@@ -87,7 +79,7 @@
             @if ($completeness['missing_denominator'] !== [])
                 <p class="mt-2 text-xs" data-missing-denominator>{{ trans_choice('donor_reports.missing_denominator', count($completeness['missing_denominator']), ['count' => count($completeness['missing_denominator'])]) }}</p>
             @endif
-        </div>
+        </x-ui.alert>
     @endif
 
     {{-- Header from system data. --}}

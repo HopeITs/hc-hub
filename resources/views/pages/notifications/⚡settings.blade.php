@@ -10,6 +10,7 @@ use App\Notifications\Delivery\ReceivableModules;
 use App\Notifications\Delivery\WebPushSender;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -181,6 +182,7 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
     public function renameDevice(int $id, string $name): bool
     {
         $device = $this->device($id);
+        Gate::authorize('update', $device);
         $name = trim($name);
 
         $validator = Validator::make(['name' => $name], ['name' => ['nullable', 'string', 'max:80']], [], ['name' => __('notification_settings.fields.device_name')]);
@@ -201,13 +203,19 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
 
     public function setDeviceEnabled(int $id, bool $on): void
     {
-        $this->device($id)->update(['enabled' => $on]);
+        $device = $this->device($id);
+        Gate::authorize('update', $device);
+
+        $device->update(['enabled' => $on]);
         $this->deviceSaved();
     }
 
     public function setDeviceUrgentOnly(int $id, bool $on): void
     {
-        $this->device($id)->update(['urgent_only' => $on]);
+        $device = $this->device($id);
+        Gate::authorize('update', $device);
+
+        $device->update(['urgent_only' => $on]);
         $this->deviceSaved();
     }
 
@@ -232,7 +240,10 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
             return;
         }
 
-        $this->device($id)->delete();
+        $device = $this->device($id);
+        Gate::authorize('delete', $device);
+
+        $device->delete();
         $this->deviceSaved();
 
         $this->dispatch('push-device-removed', id: $id);
