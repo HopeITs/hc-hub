@@ -7,6 +7,7 @@ return [
     'toggle_group' => 'تبديل المجموعة',
     'e_g_macbook_pro_iphone' => 'مثال: MacBook Pro أو iPhone',
     'give_this_passkey_a_name_to_help_you_identify_it_later' => 'أعطِ مفتاح المرور هذا اسمًا لتتعرف عليه لاحقًا.',
+    'more_actions' => 'المزيد',
     'no_records' => 'لا توجد سجلات بعد',
     'not_set' => 'غير محدد',
     'or_continue_with_email' => 'أو تابع باستخدام البريد الإلكتروني',

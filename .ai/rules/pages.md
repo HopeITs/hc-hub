@@ -53,3 +53,6 @@ Every record (strategy, program, annual plan, donor, agreement, milestone, task,
 
 ## A funding register's size must cover its table's natural width
 `x-funding.register :size` sets the container width at which the table stops scrolling inside itself (sm 56rem … 2xl 104rem). The Desk register frame is `overflow: clip` (a hidden box would trap the sticky heading row), so a size smaller than the table's real width cuts its last column off instead of scrolling. Pick the size from the column count: the donors register needs `lg` with transfers and `xl` with the year columns.
+
+## Header actions: 1 primary + 2 secondary, the rest in the More menu
+A page or detail header shows at most 1 primary and 2 secondary buttons. Everything else goes into x-ui.action-menu (on x-ui.detail-header: the `menu` slot, with destructive items in the `menuDanger` slot). Destructive items always come last, after a divider, as <flux:menu.item variant="danger">. The menu is a flux dropdown, so arrows, Esc and focus-return to the trigger come built in. Do not hand-roll a "More" dropdown with raw <button>.

@@ -43,10 +43,24 @@
                 <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-secondary-medium dark:text-ink-muted">{{ $meta }}</div>
             @endisset
         </div>
-        @isset($actions)
-            {{-- Actions sit at the end, also when a narrow screen drops them under the title. --}}
-            <div data-detail-header-actions class="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:ms-auto [&>.flex]:justify-end">{{ $actions }}</div>
-        @endisset
+        @if (isset($actions) || isset($menu))
+            {{-- Actions sit at the end, also when a narrow screen drops them under the title.
+                 Rule: at most 1 primary + 2 secondary buttons in `actions`; the rest go in `menu`
+                 (x-ui.action-menu items, destructive ones in the `menuDanger` slot). --}}
+            <div data-detail-header-actions class="flex min-w-0 flex-wrap items-center justify-end gap-2 sm:ms-auto [&>.flex]:justify-end">
+                @isset($actions)
+                    {{ $actions }}
+                @endisset
+                @isset($menu)
+                    <x-ui.action-menu>
+                        {{ $menu }}
+                        @isset($menuDanger)
+                            <x-slot:danger>{{ $menuDanger }}</x-slot:danger>
+                        @endisset
+                    </x-ui.action-menu>
+                @endisset
+            </div>
+        @endif
     </div>
 
     @isset($summary)
