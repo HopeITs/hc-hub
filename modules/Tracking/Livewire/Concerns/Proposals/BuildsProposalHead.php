@@ -113,11 +113,6 @@ trait BuildsProposalHead
                 $add('final', __('proposals.record_final_report_acceptance'), 'openAcceptanceModal', ! $this->canRecordFinalReportAcceptance, __('proposals.page.why_final_recorded'));
             }
 
-            // Older grants were approved without their actual dates; donor reports need them (SetGrantDates).
-            if ($proposal->status->isApprovedByDonor() && $proposal->lacksGrantDates()) {
-                $add('grant-dates', __('proposals.set_grant_dates'), 'openGrantDatesModal');
-            }
-
             $add('note', __('proposals.add_negotiation_note'), 'openNegotiationModal', $proposal->status !== ProposalStatus::Submitted, __('proposals.page.why_note_submitted'));
         }
 
