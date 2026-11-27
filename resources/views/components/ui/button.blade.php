@@ -1,4 +1,4 @@
-@props(['tone' => 'neutral', 'size' => 'md', 'label' => null])
+@props(['tone' => 'neutral', 'size' => 'md', 'label' => null, 'tooltip' => true])
 
 @php
     // One button (docs/redesign-plan/02-shared-components.md): tones primary / neutral / danger / ghost,
@@ -31,10 +31,22 @@
         throw new InvalidArgumentException('An icon-only x-ui.button needs a label or aria-label.');
     }
 
+    // An icon-only button shows its label as a tooltip (hover and keyboard focus) so no page wires one;
+    // :tooltip="false" opts out where the caller already wraps it, a string replaces the label.
+    $tooltipText = $size === 'icon' && $tooltip !== false ? (is_string($tooltip) ? $tooltip : $ariaLabel) : null;
+
     $fluxVariant = $tone === 'primary' ? 'primary' : 'filled';
     $fluxSize = $size === 'sm' ? 'sm' : null;
 @endphp
 
-<flux:button :variant="$fluxVariant" :size="$fluxSize" data-ui-button :data-tone="$tone" :data-size="$size" :aria-label="$ariaLabel" {{ $attributes->except('aria-label')->class($toneClasses) }}>
-    {{ $slot }}
-</flux:button>
+@if ($tooltipText !== null)
+    <x-ui.tooltip :content="$tooltipText">
+        <flux:button :variant="$fluxVariant" :size="$fluxSize" data-ui-button :data-tone="$tone" :data-size="$size" :aria-label="$ariaLabel" {{ $attributes->except('aria-label')->class($toneClasses) }}>
+            {{ $slot }}
+        </flux:button>
+    </x-ui.tooltip>
+@else
+    <flux:button :variant="$fluxVariant" :size="$fluxSize" data-ui-button :data-tone="$tone" :data-size="$size" :aria-label="$ariaLabel" {{ $attributes->except('aria-label')->class($toneClasses) }}>
+        {{ $slot }}
+    </flux:button>
+@endif

@@ -1043,3 +1043,33 @@ test('the skeleton loading recipe is wired into the thirteen list pages', functi
     'modules/Hr/resources/views/pages/recruitment/interviews/⚡index.blade.php',
     'modules/Hr/resources/views/pages/recruitment/requests/⚡index.blade.php',
 ]);
+
+test('an icon-only button shows its label as a tooltip without per-page code', function () {
+    $html = Blade::render('<x-ui.button size="icon" icon="trash" label="Delete row" />');
+
+    expect($html)->toContain('data-flux-tooltip')
+        ->and($html)->toContain('Delete row')
+        ->and($html)->toContain('aria-label="Delete row"');
+});
+
+test('an icon-only button can opt out of the tooltip or replace its text', function () {
+    $off = Blade::render('<x-ui.button size="icon" icon="trash" label="Delete row" :tooltip="false" />');
+    $custom = Blade::render('<x-ui.button size="icon" icon="trash" label="Delete row" tooltip="Remove" />');
+
+    expect($off)->not->toContain('data-flux-tooltip')
+        ->and($custom)->toContain('data-flux-tooltip')
+        ->and($custom)->toContain('Remove');
+});
+
+test('a labelled button gets no tooltip', function () {
+    $html = Blade::render('<x-ui.button>Save</x-ui.button>');
+
+    expect($html)->not->toContain('data-flux-tooltip');
+});
+
+test('the tooltip component wraps its trigger in a flux tooltip', function () {
+    $html = Blade::render('<x-ui.tooltip content="Help text"><button>?</button></x-ui.tooltip>');
+
+    expect($html)->toContain('data-flux-tooltip')
+        ->and($html)->toContain('Help text');
+});
